@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portfolio — Cognitive AI Architecture (ResonantiA)</title>
   <style>
-    :root { --bg: #0f0f12; --fg: #e4e4e7; --muted: #a1a1aa; --accent: #a78bfa; --card: #18181b; }
+    :root { --bg: #0f0f12; --fg: #e4e4e7; --muted: #a1a1aa; --accent: #a78bfa; --card: #18181b; --user: #3b82f6; --exec: #065f46; --result: #1e3a5f; }
     * { box-sizing: border-box; }
     body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--fg); line-height: 1.6; margin: 0; padding: 2rem; max-width: 720px; margin-left: auto; margin-right: auto; }
     h1 { font-size: 1.5rem; margin-top: 0; color: var(--accent); }
@@ -17,6 +17,35 @@
     ul { color: var(--muted); padding-left: 1.25rem; }
     .tag { font-size: 0.75rem; color: var(--accent); background: rgba(167,139,250,0.15); padding: 0.15rem 0.5rem; border-radius: 4px; }
     footer { margin-top: 3rem; font-size: 0.85rem; color: var(--muted); }
+
+    /* Demo chooser */
+    .demo-intro { margin: 2rem 0 1rem; color: var(--muted); font-size: 0.95rem; }
+    .demo-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1rem 0 2rem; }
+    .demo-card { background: var(--card); border: 1px solid rgba(167,139,250,0.3); border-radius: 8px; padding: 1.25rem; cursor: pointer; transition: border-color 0.2s, transform 0.15s; }
+    .demo-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .demo-card.selected { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(167,139,250,0.2); }
+    .demo-card h3 { margin: 0 0 0.35rem; font-size: 1rem; color: var(--accent); }
+    .demo-card p { margin: 0; font-size: 0.8rem; color: var(--muted); line-height: 1.4; }
+
+    /* Chat thread */
+    .chat-thread { display: none; margin-top: 1.5rem; }
+    .chat-thread.visible { display: block; }
+    .chat-thread .narrative { font-size: 0.9rem; color: var(--muted); margin-bottom: 1rem; font-style: italic; }
+    .msg { margin: 1rem 0; padding: 0.75rem 1rem; border-radius: 8px; max-width: 95%; }
+    .msg.user { background: rgba(59,130,246,0.15); border-left: 3px solid var(--user); margin-left: 0; }
+    .msg.assistant { background: var(--card); border-left: 3px solid var(--accent); margin-left: 1rem; }
+    .msg .role { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 0.35rem; }
+    .msg .body { color: var(--fg); }
+    .msg .body pre { font-size: 0.75rem; overflow-x: auto; margin: 0.5rem 0; padding: 0.75rem; background: #0a0a0c; border-radius: 4px; }
+    .block { margin: 0.75rem 0; padding: 0.6rem 0.75rem; border-radius: 6px; font-size: 0.85rem; }
+    .block.exec { background: rgba(6,95,70,0.25); border-left: 3px solid #059669; }
+    .block.result { background: rgba(30,58,95,0.25); border-left: 3px solid #2563eb; }
+    .block .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 0.25rem; }
+    .play-btn { margin-top: 1rem; padding: 0.5rem 1rem; background: var(--accent); color: var(--bg); border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    .play-btn:hover { filter: brightness(1.1); }
+    .play-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .back-link { display: inline-block; margin-bottom: 1rem; color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+    .back-link:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -24,7 +53,67 @@
   <p><span class="tag">ResonantiA</span> Sanitized showcase. No secrets, no internal paths.</p>
 
   <h2>What This Is</h2>
-  <p>A production-grade cognitive AI system: 350+ Python modules, 80+ workflow blueprints, and a knowledge layer with thousands of primed concepts. It performs multi-source research, causal inference, agent-based modeling, predictive modeling, and semantic compression — the kind of architecture enterprises build with a team. Built and maintained solo.</p>
+  <p>A production-grade cognitive AI system: 350+ Python modules, 80+ workflow blueprints, and a knowledge layer with thousands of primed concepts. Multi-source research, causal inference, agent-based modeling, predictive modeling, and semantic compression — the kind of architecture enterprises build with a team. Built and maintained solo.</p>
+
+  <h2>Try a demo</h2>
+  <p class="demo-intro">Pick a scenario. Each is a real-world use case: problem → execution → result. Hit <strong>Play</strong> to step through the curated chat.</p>
+  <div class="demo-cards">
+    <div class="demo-card" data-demo="a" role="button" tabindex="0">
+      <h3>A. One source of truth</h3>
+      <p>Data team gets different answers from the same dataset. Get to a single, vetted answer with citations.</p>
+    </div>
+    <div class="demo-card" data-demo="b" role="button" tabindex="0">
+      <h3>B. Policy in 18 months</h3>
+      <p>Simulate how a new policy plays out over time with causal links and agent behavior.</p>
+    </div>
+    <div class="demo-card" data-demo="c" role="button" tabindex="0">
+      <h3>C. Doc → RAG in minutes</h3>
+      <p>Turn a 200-page internal doc into compressed, retrievable knowledge for an LLM.</p>
+    </div>
+  </div>
+
+  <div id="demo-a" class="chat-thread">
+    <a href="#" class="back-link" data-back="demo">← Back to choices</a>
+    <p class="narrative">Scenario: The data team keeps disagreeing. Sales says churn is up; product says it’s flat. You need one vetted answer with sources.</p>
+    <div class="msg user"><div class="role">You</div><div class="body">“What’s our actual monthly churn rate right now, and why do the dashboards disagree?”</div></div>
+    <div class="msg assistant"><div class="role">ArchE</div><div class="body">I’ll treat this as a multi-source truth check. I’ll pull the same metric from: (1) data warehouse export, (2) CRM cohort report, (3) billing cancellation events. Then I’ll align definitions, flag conflicts, and return one number with confidence and citations.</div></div>
+    <div class="msg assistant"><div class="role">ArchE</div><div class="body">
+      <div class="block exec"><span class="label">Execution</span> search_web + interact_with_database (simulated); VettingAgent on conflicting claims; confidence scores per source.</div>
+    </div></div>
+    <div class="msg assistant"><div class="role">ArchE</div><div class="body">
+      <div class="block result"><span class="label">Result</span> <strong>Churn rate: 4.2%</strong> (90% confidence). Source: billing events (cancellations / active subs). Discrepancy: CRM uses “last activity” not “cancel date”; sales dashboard uses a 30d trailing window. Recommendation: adopt billing as source of record and document the definition in the data dictionary.</div>
+    </div></div>
+    <button class="play-btn" data-play="demo-a">Play this scenario</button>
+  </div>
+
+  <div id="demo-b" class="chat-thread">
+    <a href="#" class="back-link" data-back="demo">← Back to choices</a>
+    <p class="narrative">Scenario: Leadership wants to see how a new remote-work policy might affect retention and productivity over 18 months — before committing.</p>
+    <p class="narrative">You need causal assumptions (policy → behavior) and emergent outcomes (attrition, satisfaction) over time.</p>
+    <div class="msg user"><div class="role">You</div><div class="body">“Simulate the next 18 months if we go full remote-with-visits. I care about retention and perceived productivity.”</div></div>
+    <div class="msg assistant"><div class="role">ArchE</div><div class="body">I’ll use causal inference on historical data to estimate lagged effects (policy change → satisfaction, turnover), then feed those into an agent-based model. Agents = employees with attributes (tenure, role, preference). We’ll run baseline vs policy and compare trajectories.</div></div>
+    <div class="msg assistant"><div class="role">ArchE</div><div class="body">
+      <div class="block exec"><span class="label">Execution</span> CausalInferenceTool (treatment = policy rollout, outcome = quit_rate, confounders = tenure, role); AgentBasedModelingTool (18-month steps, rules from causal coefficients); CFP comparison of baseline vs policy trajectory.</div>
+    </div></div>
+    <div class="msg assistant"><div class="role">ArchE</div><div class="body">
+      <div class="block result"><span class="label">Result</span> Policy scenario: voluntary attrition +0.8 pts by month 18; “productivity” self-report up in first 6 months then flat. CFP divergence peaks mid-year (adjustment). Caveat: model assumes historical relationships hold; recommend a 6-month pilot and recalibrate.</div>
+    </div></div>
+    <button class="play-btn" data-play="demo-b">Play this scenario</button>
+  </div>
+
+  <div id="demo-c" class="chat-thread">
+    <a href="#" class="back-link" data-back="demo">← Back to choices</a>
+    <p class="narrative">Scenario: You have a 200-page internal playbook. The team wants to query it via chat without sending the whole doc every time. You need it compressed and retrievable.</p>
+    <div class="msg user"><div class="role">You</div><div class="body">“Turn our 200-page playbook into something we can query in chat — small context, fast answers.”</div></div>
+    <div class="msg assistant"><div class="role">ArchE</div><div class="body">I’ll run the playbook through the Zepto pipeline: chunk by section, compress to sparse symbolic representations (SPRs), and build a small index. At query time we retrieve the relevant SPRs, decompress to natural language, and feed only that slice into the LLM. You get precise answers without sending 200 pages.</div></div>
+    <div class="msg assistant"><div class="role">ArchE</div><div class="body">
+      <div class="block exec"><span class="label">Execution</span> Zepto compression (semantic → symbol codex); chunking by heading; embedding + similarity lookup; decompress top-k SPRs to natural language for LLM context.</div>
+    </div></div>
+    <div class="msg assistant"><div class="role">ArchE</div><div class="body">
+      <div class="block result"><span class="label">Result</span> Playbook reduced to ~800 SPRs; typical query uses 2–4 decompressed chunks (~2–3k tokens) instead of full doc. Latency &lt;1s for retrieval + decompress. One real example: “What’s the escalation path for tier-2?” → returns only the escalation section with correct contacts.</div>
+    </div></div>
+    <button class="play-btn" data-play="demo-c">Play this scenario</button>
+  </div>
 
   <h2>Scale</h2>
   <table>
@@ -57,5 +146,57 @@
   <p>You get someone who has built the full stack: orchestration, tools, knowledge, and workflows. The 7M+ IAR entries show production use. Architecture is modular and explainable — easier to extend and maintain.</p>
 
   <footer>Portfolio for Upwork / Toptal / Fiverr Pro. Contact via platform profile. Repo private; this page is the sanitized showcase.</footer>
+
+  <script>
+(function() {
+  var cards = document.querySelectorAll('.demo-card');
+  var threads = document.querySelectorAll('.chat-thread');
+  var demoIntro = document.querySelector('.demo-intro');
+  var demoCardsEl = document.querySelector('.demo-cards');
+
+  function showChoices() {
+    threads.forEach(function(t) { t.classList.remove('visible'); });
+    demoIntro.style.display = 'block';
+    demoCardsEl.style.display = 'grid';
+    cards.forEach(function(c) { c.classList.remove('selected'); });
+  }
+
+  function showThread(id) {
+    demoIntro.style.display = 'none';
+    demoCardsEl.style.display = 'none';
+    threads.forEach(function(t) {
+      t.classList.toggle('visible', t.id === id);
+    });
+    cards.forEach(function(c) { c.classList.toggle('selected', c.getAttribute('data-demo') === id.replace('demo-','')); });
+  }
+
+  cards.forEach(function(card) {
+    card.addEventListener('click', function() { showThread('demo-' + card.getAttribute('data-demo')); });
+    card.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { showThread('demo-' + card.getAttribute('data-demo')); } });
+  });
+
+  document.querySelectorAll('.back-link').forEach(function(link) {
+    link.addEventListener('click', function(e) { e.preventDefault(); showChoices(); });
+  });
+
+  document.querySelectorAll('.play-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var threadId = btn.getAttribute('data-play');
+      var thread = document.getElementById(threadId);
+      var messages = thread.querySelectorAll('.msg, .narrative');
+      var idx = 0;
+      messages.forEach(function(m) { m.style.opacity = '0.25'; m.style.transition = 'opacity 0.4s'; });
+      btn.disabled = true;
+      function next() {
+        if (idx >= messages.length) { btn.disabled = false; btn.textContent = 'Replay'; return; }
+        messages[idx].style.opacity = '1';
+        idx++;
+        setTimeout(next, 1400);
+      }
+      next();
+    });
+  });
+})();
+  </script>
 </body>
 </html>
