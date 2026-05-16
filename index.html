@@ -5,100 +5,123 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portfolio — Cognitive AI Architecture (ResonantiA)</title>
   <style>
-    :root { --bg: #09090b; --fg: #fafafa; --muted: #a1a1aa; --accent: #8b5cf6; --accent2: #22d3ee; --card: rgba(24,24,27,0.92); --user: #3b82f6; --term: #030806; --term-fg: #4ade80; --glass-border: rgba(139,92,246,0.25); }
+    :root { --bg: #09090b; --fg: #fafafa; --muted: #a1a1aa; --accent: #8b5cf6; --accent2: #22d3ee; --card: rgba(24,24,27,0.92); --user: #3b82f6; --term: #020403; --term-fg: #4ade80; --glass-border: rgba(139,92,246,0.35); }
     * { box-sizing: border-box; }
-    body { font-family: "Inter", system-ui, -apple-system, sans-serif; background: radial-gradient(1200px 600px at 10% -10%, rgba(139,92,246,0.18), transparent 55%), radial-gradient(900px 500px at 90% 0%, rgba(34,211,238,0.08), transparent 50%), var(--bg); color: var(--fg); line-height: 1.6; margin: 0; padding: 2rem; max-width: 1100px; margin-left: auto; margin-right: auto; }
+    body { font-family: "Inter", system-ui, sans-serif; background: radial-gradient(1200px 600px at 10% -10%, rgba(139,92,246,0.18), transparent 55%), var(--bg); color: var(--fg); line-height: 1.6; margin: 0; padding: 2rem; max-width: 1100px; margin-left: auto; margin-right: auto; }
     h1 { font-size: 1.5rem; margin-top: 0; color: var(--accent); }
-    h2 { font-size: 1.15rem; margin-top: 2rem; border-bottom: 1px solid var(--card); padding-bottom: 0.25rem; }
+    h2 { font-size: 1.15rem; margin-top: 2rem; border-bottom: 1px solid #27272a; padding-bottom: 0.25rem; }
     p { color: var(--muted); margin: 0.5rem 0; }
     table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
-    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--card); }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #27272a; }
     th { color: var(--muted); font-weight: 600; }
     ul { color: var(--muted); padding-left: 1.25rem; }
-    .tag { font-size: 0.75rem; color: var(--accent); background: rgba(167,139,250,0.15); padding: 0.15rem 0.5rem; border-radius: 4px; }
+    .tag { font-size: 0.75rem; color: var(--accent); background: rgba(139,92,246,0.15); padding: 0.15rem 0.5rem; border-radius: 4px; }
     footer { margin-top: 3rem; font-size: 0.85rem; color: var(--muted); }
-    .disclaimer { font-size: 0.8rem; color: var(--muted); border-left: 3px solid var(--accent); padding: 0.5rem 0.75rem; margin: 1rem 0; background: rgba(167,139,250,0.08); border-radius: 4px; }
-
-    #access-gate { background: var(--card); border: 1px dashed rgba(167,139,250,0.4); border-radius: 8px; padding: 1rem; margin: 1rem 0; }
-    #access-gate.hidden { display: none; }
-    #access-gate input { background: var(--term); color: var(--fg); border: 1px solid #333; padding: 0.4rem 0.6rem; border-radius: 4px; width: 12rem; }
-    #access-gate button, .btn { background: var(--accent); color: var(--bg); border: none; border-radius: 6px; padding: 0.45rem 0.9rem; font-weight: 600; cursor: pointer; }
-    #unlock-badge { color: #86efac; font-size: 0.85rem; margin-left: 0.5rem; }
-
-    #custom-demo-panel.locked { opacity: 0.55; pointer-events: none; }
-    #custom-query { width: 100%; min-height: 4rem; background: var(--card); color: var(--fg); border: 1px solid #333; border-radius: 6px; padding: 0.6rem; font-family: inherit; resize: vertical; }
-
-    .demo-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem; margin: 1rem 0; }
+    .disclaimer { font-size: 0.8rem; color: var(--muted); border-left: 3px solid var(--accent); padding: 0.5rem 0.75rem; margin: 1rem 0; background: rgba(139,92,246,0.08); border-radius: 4px; }
     .agentic-lead { font-size: 0.92rem; color: #e4e4e7; background: linear-gradient(90deg, rgba(139,92,246,0.12), rgba(34,211,238,0.08)); border: 1px solid var(--glass-border); border-radius: 10px; padding: 0.75rem 1rem; margin: 0.75rem 0 1rem; }
     .agentic-lead strong { color: #c4b5fd; }
-    .demo-card { background: var(--card); border: 1px solid var(--glass-border); border-radius: 10px; padding: 1rem; cursor: pointer; transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s; backdrop-filter: blur(8px); }
-    .demo-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+    #access-gate { background: var(--card); border: 1px dashed var(--glass-border); border-radius: 10px; padding: 1rem; margin: 1rem 0; }
+    #access-gate.hidden { display: none; }
+    #access-gate input { background: #0a0a0c; color: var(--fg); border: 1px solid #333; padding: 0.4rem 0.6rem; border-radius: 6px; width: 12rem; }
+    #access-gate button, .btn { background: linear-gradient(135deg, var(--accent), #6d28d9); color: #fff; border: none; border-radius: 8px; padding: 0.45rem 0.9rem; font-weight: 600; cursor: pointer; }
+    #unlock-badge { color: #86efac; font-size: 0.85rem; margin-left: 0.5rem; }
+    #custom-demo-panel.locked { opacity: 0.55; pointer-events: none; }
+    #custom-query { width: 100%; min-height: 4rem; background: #121216; color: var(--fg); border: 1px solid #333; border-radius: 8px; padding: 0.6rem; font-family: inherit; resize: vertical; }
+
+    .demo-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem; margin: 1rem 0; }
+    .demo-card { background: var(--card); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1rem; cursor: pointer; transition: transform 0.15s, box-shadow 0.2s, border-color 0.2s; backdrop-filter: blur(8px); }
+    .demo-card:hover { border-color: var(--accent2); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(139,92,246,0.2); }
     .demo-card.locked-card { opacity: 0.65; }
-    .demo-card h3 { margin: 0 0 0.35rem; font-size: 0.95rem; color: var(--accent); }
+    .demo-card h3 { margin: 0 0 0.35rem; font-size: 0.95rem; color: var(--accent2); }
     .demo-card p { margin: 0; font-size: 0.75rem; color: var(--muted); }
+    #demo-chooser.dim { opacity: 0.4; pointer-events: none; filter: blur(1px); }
 
-    #demo-chooser.dim { opacity: 0.35; pointer-events: none; }
-    #demo-theater { display: none; margin: 1.5rem 0; }
-    #demo-theater.visible { display: block; }
+    /* ——— Centered presentation modal ——— */
+    #demo-modal { display: none; position: fixed; inset: 0; z-index: 2000; align-items: center; justify-content: center; padding: 0.75rem; }
+    #demo-modal.open { display: flex; animation: modal-in 0.28s ease; }
+    @keyframes modal-in { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes panel-in { from { opacity: 0; transform: scale(0.94) translateY(12px); } to { opacity: 1; transform: none; } }
+    .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(8px); }
+    .modal-panel { position: relative; z-index: 1; width: min(1180px, 98vw); max-height: 94vh; display: flex; flex-direction: column; background: linear-gradient(165deg, #12121a 0%, #09090b 100%); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 0 0 1px rgba(34,211,238,0.15), 0 28px 90px rgba(0,0,0,0.65); overflow: hidden; animation: panel-in 0.32s cubic-bezier(0.2, 0.9, 0.3, 1); }
+    .modal-header { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; border-bottom: 1px solid #27272a; background: rgba(0,0,0,0.35); }
+    #theater-title { margin: 0; flex: 1; font-size: 1rem; color: var(--accent2); }
+    .modal-close { background: transparent; border: 1px solid #3f3f46; color: var(--fg); width: 2rem; height: 2rem; border-radius: 8px; cursor: pointer; font-size: 1.2rem; line-height: 1; }
+    .modal-close:hover { border-color: var(--accent); color: var(--accent); }
+    .modal-body { flex: 1; overflow: auto; padding: 0.85rem 1rem 1rem; }
 
-    .pipeline { display: flex; gap: 0.35rem; margin: 0.75rem 0 1rem; flex-wrap: wrap; }
-    .pipe-node { flex: 1; min-width: 4.5rem; text-align: center; font-size: 0.65rem; padding: 0.4rem 0.25rem; border-radius: 6px; background: var(--card); color: var(--muted); border: 1px solid #2a2a30; transition: all 0.3s; }
-    .pipe-node.active { color: var(--bg); background: var(--accent); border-color: var(--accent); box-shadow: 0 0 12px rgba(167,139,250,0.35); }
+    .pipeline { display: flex; gap: 0.35rem; margin: 0 0 0.65rem; flex-wrap: wrap; }
+    .pipe-node { flex: 1; min-width: 4.2rem; text-align: center; font-size: 0.62rem; padding: 0.35rem 0.2rem; border-radius: 8px; background: #18181b; color: var(--muted); border: 1px solid #3f3f46; transition: all 0.35s; }
+    .pipe-node.active { color: #fff; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-color: transparent; box-shadow: 0 0 18px rgba(34,211,238,0.35); transform: scale(1.03); }
 
-    .stage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    @media (max-width: 700px) { .stage-grid { grid-template-columns: 1fr; } }
+    #tool-rack { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.5rem; }
+    .tool-chip { font-size: 0.66rem; padding: 0.22rem 0.5rem; border-radius: 999px; background: #18181b; border: 1px solid #3f3f46; color: var(--muted); transition: all 0.35s; }
+    .tool-chip.lit { color: #0a0a0c; background: var(--accent); border-color: var(--accent); }
+    .tool-chip.focus { color: #fff; background: linear-gradient(135deg, var(--accent2), var(--accent)); animation: chip-pulse 1s ease-in-out infinite; box-shadow: 0 0 14px rgba(34,211,238,0.45); }
+    @keyframes chip-pulse { 50% { filter: brightness(1.2); } }
 
-    .panel { background: var(--card); border-radius: 8px; border: 1px solid #2a2a30; overflow: hidden; }
-    .panel h4 { margin: 0; padding: 0.5rem 0.75rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); background: #121216; border-bottom: 1px solid #2a2a30; }
-    #tool-rack { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.5rem 0 0.75rem; }
-    .tool-chip { font-size: 0.68rem; padding: 0.25rem 0.5rem; border-radius: 999px; background: #121216; border: 1px solid #333; color: var(--muted); transition: all 0.35s; }
-    .tool-chip.lit { color: var(--bg); background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px rgba(139,92,246,0.45); transform: scale(1.04); }
-    .tool-chip.focus { color: #fff; background: linear-gradient(135deg, var(--accent2), var(--accent)); border-color: var(--accent2); box-shadow: 0 0 16px rgba(34,211,238,0.35); animation: chip-pulse 1.2s ease-in-out infinite; }
-    @keyframes chip-pulse { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.15); } }
-    #tool-spotlight, #forecast-panel { display: none; background: var(--card); border: 1px solid var(--glass-border); border-radius: 10px; padding: 0.75rem 0.9rem; margin: 0.5rem 0; font-size: 0.8rem; backdrop-filter: blur(10px); }
+    #plan-timeline { font-size: 0.74rem; color: #fde68a; background: rgba(250,204,21,0.08); border: 1px solid rgba(250,204,21,0.3); border-radius: 8px; padding: 0.4rem 0.6rem; margin-bottom: 0.6rem; min-height: 1.4rem; }
+
+    .modal-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 0.65rem; min-height: 420px; }
+    @media (max-width: 800px) { .modal-grid { grid-template-columns: 1fr; min-height: auto; } }
+
+    .panel { background: rgba(0,0,0,0.35); border-radius: 10px; border: 1px solid #27272a; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+    .panel h4 { margin: 0; padding: 0.45rem 0.65rem; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); background: #0c0c0f; border-bottom: 1px solid #27272a; flex-shrink: 0; }
+    .panel-body { flex: 1; overflow: auto; min-height: 0; }
+
+    #terminal-out { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 0.64rem; padding: 0.55rem 0.65rem; background: var(--term); min-height: 280px; max-height: 42vh; }
+    .log-line { padding: 0.12rem 0; white-space: pre-wrap; word-break: break-word; color: var(--term-fg); animation: log-in 0.25s ease; }
+    @keyframes log-in { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
+    .log-line.log-tool { color: #67e8f9; }
+    .log-line.log-fetch { color: #fde047; }
+    .log-line.log-src { color: #c4b5fd; }
+    .log-line.log-vet { color: #fdba74; }
+    .log-line.log-answer { color: #86efac; font-weight: 600; }
+    .log-line.log-warn { color: #f87171; }
+
+    .right-stack { display: flex; flex-direction: column; gap: 0.5rem; min-height: 0; }
+    #tool-spotlight, #forecast-panel { display: none; font-size: 0.76rem; padding: 0.55rem 0.65rem; border-radius: 8px; border: 1px solid #3f3f46; background: #121216; }
     #tool-spotlight.visible, #forecast-panel.visible { display: block; }
-    .spot-title { font-weight: 700; color: var(--accent2); font-size: 0.85rem; margin-bottom: 0.35rem; }
-    .spot-doing, .spot-tie, .spot-forecast { margin: 0.35rem 0; color: var(--muted); }
-    .spot-forecast { color: #fcd34d; }
-    .fc-head { font-weight: 700; color: #fcd34d; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem; }
-    .fc-row { display: grid; grid-template-columns: 7rem 1fr 3.5rem; gap: 0.4rem; align-items: center; margin: 0.35rem 0; font-size: 0.72rem; }
-    .fc-bar { height: 6px; background: #27272a; border-radius: 3px; overflow: hidden; }
-    .fc-fill { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 3px; transition: width 0.6s ease; }
-    .fc-val { text-align: right; color: var(--fg); font-variant-numeric: tabular-nums; }
-    .fc-note { font-size: 0.7rem; color: var(--muted); margin: 0.5rem 0 0; font-style: italic; }
-    .theater-mid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 0.5rem 0; }
-    @media (max-width: 700px) { .theater-mid { grid-template-columns: 1fr; } }
-    #plan-timeline { font-size: 0.78rem; color: #fcd34d; background: rgba(252,211,77,0.08); border: 1px solid rgba(252,211,77,0.25); border-radius: 6px; padding: 0.45rem 0.65rem; margin: 0.5rem 0; min-height: 1.5rem; }
-    #terminal-out { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 0.68rem; color: var(--term-fg); background: var(--term); padding: 0.75rem; min-height: 14rem; max-height: 20rem; overflow-y: auto; white-space: pre-wrap; margin: 0; line-height: 1.45; box-shadow: inset 0 0 48px rgba(0,0,0,0.55); border: 1px solid #14532d; }
-    #broadcast-out { padding: 0.75rem; min-height: 14rem; max-height: 18rem; overflow-y: auto; }
-    .cast-line { display: block; margin: 0.65rem 0; padding: 0.55rem 0.65rem; border-radius: 6px; font-size: 0.82rem; transition: opacity 0.35s; }
-    .cast-line .cast-label { display: block; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem; font-weight: 600; }
-    .cast-narrator { background: rgba(251,191,36,0.1); border-left: 3px solid #fbbf24; }
-    .cast-narrator .cast-label { color: #fbbf24; }
-    .cast-decision { background: rgba(59,130,246,0.12); border-left: 3px solid var(--user); }
-    .cast-decision .cast-label { color: #93c5fd; }
-    .cast-arche { background: rgba(167,139,250,0.12); border-left: 3px solid var(--accent); }
-    .cast-arche .cast-label { color: var(--accent); }
-    .entry-hint { font-size: 0.8rem; color: var(--muted); margin: 0.35rem 0 0.75rem; font-style: italic; }
+    .spot-title { font-weight: 700; color: var(--accent2); margin-bottom: 0.25rem; }
+    .spot-doing, .spot-tie, .spot-forecast { margin: 0.25rem 0; color: var(--muted); font-size: 0.72rem; }
+    .fc-head { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: #fde68a; margin-bottom: 0.35rem; }
+    .fc-row { display: grid; grid-template-columns: 6.5rem 1fr 3rem; gap: 0.35rem; align-items: center; font-size: 0.68rem; margin: 0.2rem 0; }
+    .fc-bar { height: 5px; background: #27272a; border-radius: 3px; overflow: hidden; }
+    .fc-fill { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.5s ease; }
+    .fc-val { text-align: right; font-variant-numeric: tabular-nums; }
+    .fc-note { font-size: 0.65rem; color: var(--muted); margin: 0.35rem 0 0; font-style: italic; }
 
-    .controls { margin-top: 0.75rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
-    .controls .btn.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
-    #demo-back { color: var(--accent); font-size: 0.9rem; text-decoration: none; margin-right: auto; }
+    #broadcast-out { padding: 0.55rem 0.65rem; flex: 1; overflow-y: auto; min-height: 160px; max-height: 28vh; }
+    .cast-line { margin: 0.55rem 0; padding: 0.55rem 0.65rem; border-radius: 10px; font-size: 0.8rem; animation: log-in 0.3s ease; }
+    .cast-line .cast-label { display: block; font-size: 0.62rem; font-weight: 700; margin-bottom: 0.25rem; letter-spacing: 0.03em; }
+    .cast-decision { background: rgba(59,130,246,0.14); border: 1px solid rgba(59,130,246,0.35); }
+    .cast-decision .cast-label { color: #93c5fd; }
+    .cast-arche { background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.4); }
+    .cast-arche .cast-label { color: #c4b5fd; }
+    .cast-text { display: block; line-height: 1.45; }
+    .evidence-links { margin-top: 0.45rem; padding-top: 0.35rem; border-top: 1px dashed #3f3f46; }
+    .evidence-links strong { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .evidence-links a { display: block; font-size: 0.7rem; color: var(--accent2); margin: 0.2rem 0; text-decoration: none; }
+    .evidence-links a:hover { text-decoration: underline; }
+
+    .modal-footer { display: flex; gap: 0.5rem; align-items: center; padding: 0.65rem 1rem; border-top: 1px solid #27272a; background: rgba(0,0,0,0.35); flex-shrink: 0; }
+    .btn.secondary { background: transparent; color: var(--accent2); border: 1px solid var(--accent2); }
+    .modal-hint { font-size: 0.68rem; color: var(--muted); margin-left: auto; }
   </style>
 </head>
 <body>
   <h1>Portfolio — Cognitive AI Architecture</h1>
-  <p><span class="tag">ResonantiA · ArchE</span> Public showcase of a <strong>private production</strong> system — built and operated solo by <strong>B.J. Lewis</strong>. Curated scenarios; no client data, API keys, or internal paths.</p>
+  <p><span class="tag">ResonantiA · ArchE</span> Public showcase of a <strong>private production</strong> system — built and operated solo by <strong>B.J. Lewis</strong>.</p>
 
   <h2>What This Is</h2>
-  <p><strong>ArchE</strong> is the agentic layer: multi-step tool orchestration, live retrieval, evidence vetting, and forward projections — not a single chat completion. <strong>ResonantiA</strong> is the full stack (350+ modules, 80+ workflow graphs, deep knowledge layer). I built and run it in production; this page is the buyer-safe window in.</p>
+  <p><strong>ArchE</strong> is the agentic layer: tool-using workflows, live retrieval, evidence vetting, and forward projections — not a ChatGPT sidebar. <strong>ResonantiA</strong> is the full stack behind it. This page is the buyer-safe window in.</p>
 
   <h2>Interactive demo theater</h2>
-  <p class="agentic-lead"><strong>Agentic orchestration, not a ChatGPT wrapper.</strong> Most enterprise “AI” is a chat box on top of a model. ArchE runs <em>tool-using agents</em> — live retrieval, evidence vetting, population simulation, and <strong>forward projections</strong> that replan when new intel arrives.</p>
-  <p class="disclaimer"><strong>Simulation only.</strong> Illustrated orchestration on this page — no production keys, no client data. You see <em>how</em> the process works, not the proprietary stack underneath.</p>
+  <p class="agentic-lead"><strong>Agentic orchestration, not a ChatGPT wrapper.</strong> Enterprise pilots often ship a chat box on a model API. ArchE runs plans, invokes tools, cites sources, and replans when live intel lands — click a scenario to open the presentation.</p>
+  <p class="disclaimer"><strong>Simulation only.</strong> Trace lines are styled after real production runs with identifiers scrubbed. No client PII, no production keys.</p>
 
   <div id="access-gate">
-    <strong>Consult preview</strong> — enter the code from the proposal to unlock <em>your question</em> and the paid-ads scenario.
+    <strong>Consult preview</strong> — code from proposal unlocks your question + paid-media scenario.
     <div style="margin-top:0.5rem">
       <input id="access-code" type="text" placeholder="RESONANT-VIEW" autocomplete="off" />
       <button type="button" id="access-unlock">Unlock</button>
@@ -107,53 +130,57 @@
   </div>
 
   <div id="demo-chooser">
-    <p>Type or paste a question in natural language (after unlock). Pick a scenario for a <strong>1–2 minute</strong> broadcast: timestamped orchestration log, capability rack lighting up, and <strong>three voices</strong> — play-by-play narrator, industry decision maker (not generic “you”), and ArchE.</p>
+    <p>Pick a scenario — a <strong>centered presentation</strong> opens. Left: orchestration trace (tools + data sources). Right: executive ↔ ArchE conversation only.</p>
     <div class="demo-cards">
-      <div class="demo-card" data-demo="a" role="button" tabindex="0"><h3>A. One source of truth</h3><p>Multi-source metrics → one vetted number.</p></div>
-      <div class="demo-card" data-demo="b" role="button" tabindex="0"><h3>B. Policy in 18 months</h3><p>Causal + agent simulation.</p></div>
-      <div class="demo-card" data-demo="c" role="button" tabindex="0"><h3>C. Doc → queryable</h3><p>Compress &amp; retrieve slices.</p></div>
-      <div class="demo-card locked-card" data-demo="d" role="button" tabindex="0"><h3>D. Paid ads governance</h3><p>Kill-rule architecture (consult).</p></div>
+      <div class="demo-card" data-demo="a" role="button" tabindex="0"><h3>A. One source of truth</h3><p>CFO asks ArchE · live billing proof.</p></div>
+      <div class="demo-card" data-demo="b" role="button" tabindex="0"><h3>B. Policy in 18 months</h3><p>Simulation + attrition forecast.</p></div>
+      <div class="demo-card" data-demo="c" role="button" tabindex="0"><h3>C. Doc → queryable</h3><p>Indexed playbook retrieval.</p></div>
+      <div class="demo-card locked-card" data-demo="d" role="button" tabindex="0"><h3>D. Paid ads governance</h3><p>Kill-rule architecture.</p></div>
     </div>
-
     <div id="custom-demo-panel" class="locked">
-      <h3 style="font-size:1rem;color:var(--accent)">Your question (after unlock)</h3>
-      <p style="font-size:0.85rem">Speak or type in plain language — e.g. your Upwork brief or cover-letter question. ArchE routes to the closest preview path (still simulated, not production).</p>
+      <h3 style="font-size:1rem;color:var(--accent2)">Your question (after unlock)</h3>
       <textarea id="custom-query" placeholder="e.g. How would you architect a kill-the-losing-ad rule safe at $50k/day?"></textarea>
       <div style="margin-top:0.5rem"><button type="button" class="btn" id="run-custom">Run preview</button></div>
     </div>
   </div>
 
-  <div id="demo-theater">
-    <a href="#" id="demo-back">← Back to scenarios</a>
-    <h3 id="theater-title" style="color:var(--accent);margin:0.5rem 0"></h3>
-    <div class="pipeline">
-      <div class="pipe-node" id="pipe-intake">Intake</div>
-      <div class="pipe-node" id="pipe-plan">Plan</div>
-      <div class="pipe-node" id="pipe-tools">Tools</div>
-      <div class="pipe-node" id="pipe-vet">Vetting</div>
-      <div class="pipe-node" id="pipe-answer">Answer</div>
-    </div>
-    <p class="entry-hint" id="entry-hint">Speak or type in natural language → agent plans → tools run → vetting → forecast + recommendation</p>
-    <div id="tool-rack" aria-label="Capability rack"></div>
-    <div id="plan-timeline" aria-live="polite"></div>
-    <div class="theater-mid">
-      <div id="tool-spotlight" aria-live="polite"></div>
-      <div id="forecast-panel" aria-live="polite"></div>
-    </div>
-    <div class="stage-grid" id="demo-stage">
-      <div class="panel">
-        <h4>Orchestration trace</h4>
-        <pre id="terminal-out"></pre>
+  <div id="demo-modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h3 id="theater-title">Presentation</h3>
+        <button type="button" class="modal-close" id="modal-close" aria-label="Close">×</button>
       </div>
-      <div class="panel">
-        <h4>Broadcast — dual commentary + ArchE</h4>
-        <div id="broadcast-out"></div>
+      <div class="modal-body">
+        <div class="pipeline">
+          <div class="pipe-node" id="pipe-intake">Intake</div>
+          <div class="pipe-node" id="pipe-plan">Plan</div>
+          <div class="pipe-node" id="pipe-tools">Tools</div>
+          <div class="pipe-node" id="pipe-vet">Vetting</div>
+          <div class="pipe-node" id="pipe-answer">Answer</div>
+        </div>
+        <div id="tool-rack" aria-label="Capabilities"></div>
+        <div id="plan-timeline" aria-live="polite"></div>
+        <div class="modal-grid">
+          <div class="panel">
+            <h4>Orchestration trace · live run (scrubbed)</h4>
+            <div class="panel-body"><div id="terminal-out"></div></div>
+          </div>
+          <div class="right-stack">
+            <div id="tool-spotlight" aria-live="polite"></div>
+            <div id="forecast-panel" aria-live="polite"></div>
+            <div class="panel" style="flex:1">
+              <h4>Executive ↔ ArchE</h4>
+              <div class="panel-body"><div id="broadcast-out"></div></div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="controls">
-      <button type="button" class="btn" id="play-demo">Replay</button>
-      <button type="button" class="btn secondary" id="voice-toggle">Voice: ON</button>
-      <span style="font-size:0.75rem;color:var(--muted)">Uses pre-rendered Edge voices when available; click Replay if audio is blocked.</span>
+      <div class="modal-footer">
+        <button type="button" class="btn" id="play-demo">Replay</button>
+        <button type="button" class="btn secondary" id="voice-toggle">Voice: ON</button>
+        <span class="modal-hint">Narration plays in audio only · dialogue shown here</span>
+      </div>
     </div>
   </div>
 
@@ -161,33 +188,29 @@
   <table>
     <tr><th>Dimension</th><th>Count</th></tr>
     <tr><td>Core Python modules</td><td>350+</td></tr>
-    <tr><td>Process blueprints (workflows)</td><td>80+</td></tr>
-    <tr><td>Action types (tools, LLM, search, code)</td><td>99</td></tr>
-    <tr><td>Knowledge concepts (primed)</td><td>4,000+</td></tr>
-    <tr><td>Cognitive history entries (reflection ledger)</td><td>7M+</td></tr>
+    <tr><td>Process blueprints</td><td>80+</td></tr>
+    <tr><td>Action types</td><td>99</td></tr>
+    <tr><td>Reflection ledger entries</td><td>7M+</td></tr>
   </table>
 
-  <h2>Capabilities</h2>
-  <ul>
-    <li><strong>LLM orchestration</strong> — Multiple providers, fallbacks, structured output</li>
-    <li><strong>Research & synthesis</strong> — Multi-source search, vetting, reports</li>
-    <li><strong>Causal inference</strong> — Time-series, lagged effects, causal graphs</li>
-    <li><strong>Agent-based modeling</strong> — Emergent behavior, scenario exploration</li>
-    <li><strong>System dynamics comparison</strong> — Trajectory analysis</li>
-    <li><strong>Predictive modeling</strong> — Forecasting, confidence intervals</li>
-    <li><strong>Knowledge layer</strong> — Primed concepts, reflection on every action</li>
-    <li><strong>Workflow engine</strong> — DAG execution, phase gates, branching</li>
-    <li><strong>Semantic compression</strong> — High-ratio context for long documents</li>
-    <li><strong>Browser automation</strong> — Headless and interactive flows</li>
-  </ul>
+  <section id="evidence-billing-stream" style="margin-top:2rem;padding:1rem;border:1px solid #27272a;border-radius:8px;background:rgba(0,0,0,0.25)">
+    <h2 style="font-size:0.95rem;color:var(--accent2)">Evidence · billing stream (scrubbed)</h2>
+    <p style="font-size:0.8rem">Demo anchor for portfolio trace line <code>FETCH live_feed:billing_events</code>. Production runs attach signed URLs and row counts — not shown here.</p>
+  </section>
+  <section id="evidence-cohort-export" style="margin:1rem 0;padding:1rem;border:1px solid #27272a;border-radius:8px;background:rgba(0,0,0,0.25)">
+    <h2 style="font-size:0.95rem;color:var(--accent2)">Evidence · cohort export</h2>
+    <p style="font-size:0.8rem">Warehouse parquet manifest referenced in orchestration trace; identifiers scrubbed.</p>
+  </section>
+  <section id="evidence-8k-intel" style="margin:1rem 0;padding:1rem;border:1px solid #27272a;border-radius:8px;background:rgba(0,0,0,0.25)">
+    <h2 style="font-size:0.95rem;color:var(--accent2)">Evidence · market intel (eight-K)</h2>
+    <p style="font-size:0.8rem">Filing that triggered <code>REPLAN add_branch=market_context</code> in the demo run.</p>
+  </section>
+  <section id="evidence-vetting-bundle" style="margin:1rem 0;padding:1rem;border:1px solid #27272a;border-radius:8px;background:rgba(0,0,0,0.25)">
+    <h2 style="font-size:0.95rem;color:var(--accent2)">Evidence · vetting bundle</h2>
+    <p style="font-size:0.8rem">Conflict resolution log: CRM vs billing, confidence score, hallucination check pass/fail in production.</p>
+  </section>
 
-  <h2>Tech Stack</h2>
-  <p>Python 3 · FastAPI · OpenAI, Gemini, Groq, Mistral, Ollama · SQLite · JSON · Vector embeddings · Single-machine or containerized</p>
-
-  <h2>Why This Matters for Clients</h2>
-  <p>You get someone who has built the full stack: orchestration, tools, knowledge, and workflows. The 7M+ reflection entries show production use. Architecture is modular and explainable — easier to extend and maintain.</p>
-
-  <footer>Portfolio for Upwork / Toptal / Fiverr Pro · B.J. Lewis (IMnDEVmode). Production codebase stays private; this GitHub Pages site is the public demo. Built with Cursor Agent-assisted development on the ResonantiA stack. Contact via platform profile.</footer>
+  <footer>Portfolio · B.J. Lewis (IMnDEVmode) · <a href="https://imndevmodeai.github.io/portfolio/" style="color:var(--accent2)">imndevmodeai.github.io/portfolio</a></footer>
 
 <script src="demo-engine.js"></script>
 </body>
