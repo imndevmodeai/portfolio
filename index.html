@@ -78,6 +78,8 @@
     .log-line.log-vet { color: #fdba74; }
     .log-line.log-answer { color: #86efac; font-weight: 600; }
     .log-line.log-warn { color: #f87171; }
+    .log-line.log-highlight { background: rgba(34,211,238,0.18); box-shadow: inset 3px 0 0 var(--accent2); }
+    #terminal-out { scroll-behavior: smooth; }
 
     .right-stack { display: flex; flex-direction: column; gap: 0.5rem; min-height: 0; }
     #tool-spotlight, #forecast-panel { display: none; font-size: 0.76rem; padding: 0.55rem 0.65rem; border-radius: 8px; border: 1px solid #3f3f46; background: #121216; }
@@ -111,7 +113,7 @@
 </head>
 <body>
   <h1>Portfolio — Cognitive AI Architecture</h1>
-  <p><span class="tag">ResonantiA · ArchE</span> Public showcase of a <strong>private production</strong> system — built and operated solo by <strong>B.J. Lewis</strong>.</p>
+  <p><span class="tag">ResonantiA · ArchE</span> Public showcase of a <strong>private production</strong> system — built and operated solo by <strong>B. Lewis</strong>.</p>
 
   <h2>What This Is</h2>
   <p><strong>ArchE</strong> is the agentic layer: tool-using workflows, live retrieval, evidence vetting, and forward projections — not a ChatGPT sidebar. <strong>ResonantiA</strong> is the full stack behind it. This page is the buyer-safe window in.</p>
@@ -132,7 +134,7 @@
   <div id="demo-chooser">
     <p>Pick a scenario — a <strong>centered presentation</strong> opens. Left: orchestration trace (tools + data sources). Right: executive ↔ ArchE conversation only.</p>
     <div class="demo-cards">
-      <div class="demo-card" data-demo="a" role="button" tabindex="0"><h3>A. One source of truth</h3><p>CFO asks ArchE · live billing proof.</p></div>
+      <div class="demo-card" data-demo="a" role="button" tabindex="0"><h3>A. One source of truth</h3><p>Jim (CFO, Midwest) · live clock &amp; prior thread.</p></div>
       <div class="demo-card" data-demo="b" role="button" tabindex="0"><h3>B. Policy in 18 months</h3><p>Simulation + attrition forecast.</p></div>
       <div class="demo-card" data-demo="c" role="button" tabindex="0"><h3>C. Doc → queryable</h3><p>Indexed playbook retrieval.</p></div>
       <div class="demo-card locked-card" data-demo="d" role="button" tabindex="0"><h3>D. Paid ads governance</h3><p>Kill-rule architecture.</p></div>
@@ -163,7 +165,7 @@
         <div id="plan-timeline" aria-live="polite"></div>
         <div class="modal-grid">
           <div class="panel">
-            <h4>Orchestration trace · live run (scrubbed)</h4>
+            <h4>Orchestration trace · live clock + run (scrubbed)</h4>
             <div class="panel-body"><div id="terminal-out"></div></div>
           </div>
           <div class="right-stack">
@@ -210,7 +212,18 @@
     <p style="font-size:0.8rem">Conflict resolution log: CRM vs billing, confidence score, hallucination check pass/fail in production.</p>
   </section>
 
-  <footer>Portfolio · B.J. Lewis (IMnDEVmode) · <a href="https://imndevmodeai.github.io/portfolio/" style="color:var(--accent2)">imndevmodeai.github.io/portfolio</a></footer>
+  <section id="evidence-sheet-preview" style="margin:1rem 0;padding:1rem;border:1px solid #27272a;border-radius:8px;background:rgba(0,0,0,0.25)">
+    <h2 style="font-size:0.95rem;color:var(--accent2)">Evidence · reconciliation preview (scrubbed)</h2>
+    <p style="font-size:0.8rem;margin-bottom:0.5rem">Sample slice ArchE would attach after billing × CRM join — numbers illustrative.</p>
+    <table style="width:100%;font-size:0.72rem;border-collapse:collapse">
+      <tr style="color:var(--muted)"><th style="text-align:left;padding:0.25rem">Source</th><th>Churn %</th><th>Definition</th></tr>
+      <tr><td>Billing cancels</td><td>4.2</td><td>cancel_date / active_subs</td></tr>
+      <tr><td>CRM activity</td><td>5.1</td><td>last_login proxy</td></tr>
+      <tr><td>Finance rollup</td><td>4.6</td><td>trailing 30d blended</td></tr>
+    </table>
+  </section>
+
+  <footer>Portfolio · B. Lewis · <a href="https://imndevmodeai.github.io/portfolio/" style="color:var(--accent2)">imndevmodeai.github.io/portfolio</a></footer>
 
 <script src="demo-engine.js"></script>
 </body>
