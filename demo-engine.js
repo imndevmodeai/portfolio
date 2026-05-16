@@ -98,13 +98,13 @@
   function speechChunks(text) {
     var clean = cleanForSpeech(text);
     if (!clean) return [];
-    var parts = clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g);
-    if (!parts) return [clean];
-    return parts
+    var parts = clean.split(/(?<=[!?])\s+|(?<=\.)\s+(?=[A-Z"'(])/);
+    parts = parts
       .map(function (p) {
         return p.trim();
       })
       .filter(Boolean);
+    return parts.length ? parts : [clean];
   }
 
   function audioKey(role, text) {
