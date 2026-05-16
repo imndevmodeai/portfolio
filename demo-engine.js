@@ -12,8 +12,11 @@
   var speechQueue = [];
   var speechBusy = false;
   var audioManifest = null;
+  var manifestPromise = null;
   var voicesReady = false;
   var activeAudios = [];
+  var audioPrimed = false;
+  var voiceStatusEl = null;
 
   var TOOL_CATALOG = {
     llm: {
@@ -171,31 +174,100 @@
     return role + "/" + slug + ".mp3";
   }
 
+  function setVoiceStatus(msg) {
+    if (!voiceStatusEl) voiceStatusEl = $("#voice-status");
+    if (voiceStatusEl) voiceStatusEl.textContent = msg || "";
+  }
+
+  /** Must run synchronously inside click/tap — unlocks HTML5 audio + speech for later async beats. */
+  function primeAudio() {
+    if (audioPrimed) return;
+    audioPrimed = true;
+    if (window.speechSynthesis) {
+      try {
+        window.speechSynthesis.getVoices();
+        var u = new SpeechSynthesisUtterance(" ");
+        u.volume = 0.01;
+        window.speechSynthesis.speak(u);
+        window.speechSynthesis.cancel();
+      } catch (e) {}
+    }
+    var probe = new Audio();
+    probe.preload = "auto";
+    if (audioManifest && audioManifest.files) {
+      var first = Object.values(audioManifest.files)[0];
+      if (first) probe.src = first;
+    }
+    probe.volume = 0.01;
+    var p = probe.play();
+    if (p && p.catch) {
+      p.catch(function () {
+        setVoiceStatus("Tap Replay if voice is silent (browser blocked autoplay).");
+      });
+    }
+  }
+
+  function loadManifest() {
+    if (manifestPromise) return manifestPromise;
+    manifestPromise = fetch("audio/manifest.json")
+      .then(function (r) {
+        if (!r.ok) throw new Error("no manifest");
+        return r.json();
+      })
+      .then(function (m) {
+        audioManifest = m;
+        setVoiceStatus(
+          m && m.files
+            ? "Voice: Edge TTS (" + Object.keys(m.files).length + " clips)"
+            : "Voice: browser fallback"
+        );
+        return m;
+      })
+      .catch(function () {
+        audioManifest = null;
+        setVoiceStatus("Voice: browser TTS (manifest unavailable)");
+        return null;
+      });
+    return manifestPromise;
+  }
+
   function playMp3(role, text) {
     if (!audioManifest || !audioManifest.files) return Promise.resolve(false);
     var rel = audioManifest.files[audioKey(role, text)];
     if (!rel) return Promise.resolve(false);
     return new Promise(function (resolve) {
       var a = new Audio(rel);
-      activeAudios.push(a);
       a.preload = "auto";
-      a.onended = function () {
+      a.volume = 1;
+      activeAudios.push(a);
+      var settled = false;
+      function finish(ok) {
+        if (settled) return;
+        settled = true;
         activeAudios = activeAudios.filter(function (x) {
           return x !== a;
         });
-        resolve(true);
+        resolve(!!ok);
+      }
+      a.onended = function () {
+        finish(true);
       };
       a.onerror = function () {
-        activeAudios = activeAudios.filter(function (x) {
-          return x !== a;
-        });
-        resolve(false);
+        finish(false);
       };
-      var p = a.play();
-      if (p && p.catch) {
-        p.catch(function () {
-          resolve(false);
-        });
+      function tryPlay() {
+        var p = a.play();
+        if (p && typeof p.then === "function") {
+          p.catch(function () {
+            finish(false);
+          });
+        }
+      }
+      if (a.readyState >= 3) tryPlay();
+      else {
+        a.addEventListener("canplaythrough", tryPlay, { once: true });
+        a.addEventListener("loadeddata", tryPlay, { once: true });
+        a.load();
       }
     });
   }
@@ -222,24 +294,41 @@
     var roleId = role || "arche";
     var clean = cleanForSpeech(text);
     if (!clean) return Promise.resolve();
+    setVoiceStatus("Speaking…");
 
-    return playMp3(roleId, clean).then(function (playedFull) {
-      if (playedFull) return;
-      var chunks = speechChunks(clean);
-      if (audioManifest && audioManifest.files && chunks.length) {
-        var allMp3 = chunks.every(function (part) {
-          return audioManifest.files[audioKey(roleId, part)];
-        });
-        if (allMp3) {
-          return chunks.reduce(function (chain, part) {
-            return chain.then(function () {
-              return playMp3(roleId, part);
+    function playChunks(chunks) {
+      var anyPlayed = false;
+      return chunks
+        .reduce(function (chain, part) {
+          return chain.then(function () {
+            return playMp3(roleId, part).then(function (ok) {
+              if (ok) anyPlayed = true;
             });
-          }, Promise.resolve());
+          });
+        }, Promise.resolve())
+        .then(function () {
+          return anyPlayed;
+        });
+    }
+
+    return playMp3(roleId, clean)
+      .then(function (playedFull) {
+        if (playedFull) return true;
+        var chunks = speechChunks(clean);
+        if (audioManifest && audioManifest.files && chunks.length > 1) {
+          return playChunks(chunks);
         }
-      }
-      return speakBrowserOnce(clean, roleId);
-    });
+        return false;
+      })
+      .then(function (hadMp3) {
+        if (hadMp3) {
+          setVoiceStatus(audioManifest ? "Voice: Edge TTS" : "Voice: ON");
+          return;
+        }
+        return speakBrowserOnce(clean, roleId).then(function () {
+          setVoiceStatus("Voice: browser TTS");
+        });
+      });
   }
 
   function pumpSpeechQueue() {
@@ -909,7 +998,9 @@
       play.disabled = true;
       play.textContent = "Running…";
     }
-    playScenario(activeScenario);
+    loadManifest().then(function () {
+      playScenario(activeScenario);
+    });
   }
 
   function init() {
@@ -924,8 +1015,19 @@
       });
 
     document.querySelectorAll(".demo-card").forEach(function (card) {
-      card.addEventListener("click", function () {
+      function onPick() {
+        primeAudio();
+        voiceOn = true;
+        var vt = $("#voice-toggle");
+        if (vt) vt.textContent = "Voice: ON";
         startScenario(card.getAttribute("data-demo"));
+      }
+      card.addEventListener("click", onPick);
+      card.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onPick();
+        }
       });
     });
 
@@ -935,21 +1037,36 @@
           alert("Unlock consult preview first.");
           return;
         }
+        primeAudio();
+        voiceOn = true;
+        var vt = $("#voice-toggle");
+        if (vt) vt.textContent = "Voice: ON";
         var q = sanitizeQuery(($("#custom-query") || {}).value);
         if (q) startScenario(null, q);
       });
 
     $("#play-demo") &&
       $("#play-demo").addEventListener("click", function () {
-        if (activeScenario) playScenario(activeScenario);
+        primeAudio();
+        if (activeScenario) {
+          loadManifest().then(function () {
+            playScenario(activeScenario);
+          });
+        }
       });
 
     $("#voice-toggle") &&
       $("#voice-toggle").addEventListener("click", function () {
+        primeAudio();
         voiceOn = !voiceOn;
         $("#voice-toggle").textContent = voiceOn ? "Voice: ON" : "Voice: OFF";
-        if (!voiceOn) stopSpeech();
-        else pumpSpeechQueue();
+        if (!voiceOn) {
+          stopSpeech();
+          setVoiceStatus("Voice: OFF");
+        } else {
+          setVoiceStatus("Voice: ON");
+          pumpSpeechQueue();
+        }
       });
 
     $("#modal-close") &&
@@ -967,17 +1084,8 @@
       }
     });
 
-    fetch("audio/manifest.json")
-      .then(function (r) {
-        if (!r.ok) throw new Error("no manifest");
-        return r.json();
-      })
-      .then(function (m) {
-        audioManifest = m;
-      })
-      .catch(function () {
-        audioManifest = null;
-      });
+    voiceStatusEl = $("#voice-status");
+    loadManifest();
 
     if (window.speechSynthesis) {
       window.speechSynthesis.getVoices();
