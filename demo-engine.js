@@ -100,6 +100,8 @@
     if (/FETCH|INVOKE|TOOL|CONNECT/.test(line)) return "tool";
     if (/\[SRC\]|SRC |CITE|URI|evidence/.test(line)) return "src";
     if (/VETTING|VET |CONFLICT/.test(line)) return "vet";
+    if (/RECALL|MEMORY|continuity/.test(line)) return "recall";
+    if (/TEMPORAL|viewer_local|weekday/.test(line)) return "temporal";
     if (/ANSWER|FORECAST|REFLECT/.test(line)) return "answer";
     if (/WARN|REJECT/.test(line)) return "warn";
     if (/FETCH/.test(line)) return "fetch";
@@ -109,289 +111,227 @@
     return ts(offsetSec || 0) + "  [" + tag + "]  " + msg;
   }
 
-  /** Live wall-clock + Midwest executive persona for scenario A (no static date in copy). */
-  function liveDemoContext() {
+  function termEntry(line, anchor) {
+    return { line: line, anchor: anchor || "" };
+  }
+
+  /** Live viewer clock (Midwest) for ArchE pleasantries — no explicit calendar recitation in speech. */
+  function getLiveContext() {
+    var tz = "America/Chicago";
     var now = new Date();
-    var h = now.getHours();
-    var dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    var monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December",
-    ];
-    var dayName = dayNames[now.getDay()];
-    var monthName = monthNames[now.getMonth()];
-    var greeting = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
-    var timeHint = h < 12 ? "this morning" : h < 17 ? "this afternoon" : "this evening";
-    var localStamp = now.toLocaleString(undefined, {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    var hour = parseInt(
+      new Intl.DateTimeFormat("en-US", { timeZone: tz, hour: "numeric", hour12: false }).format(now),
+      10
+    );
+    var dayName = new Intl.DateTimeFormat("en-US", { timeZone: tz, weekday: "long" }).format(now);
+    var month = new Intl.DateTimeFormat("en-US", { timeZone: tz, month: "long" }).format(now);
+    var clockLocal =
+      new Intl.DateTimeFormat("en-US", {
+        timeZone: tz,
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      }).format(now) + " CT";
+    var tod = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
+    var greet = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
     var seasonLine =
-      monthName === "May"
-        ? "May in the Midwest — everything green again, and the forecast finally cooperated"
-        : monthName + " in the Midwest — " + timeHint + " on the ops floor feels familiar";
+      month === "May"
+        ? "classic Midwest spring — warm enough to open the windows, storms still rolling through on " +
+          dayName +
+          " afternoons"
+        : month === "June" || month === "July" || month === "August"
+          ? "humid Midwest summer heat building across the plains"
+          : month === "December" || month === "January" || month === "February"
+            ? "cold Midwest winter holding steady — lake-effect grey on the horizon"
+            : "season turning across the Midwest — you can feel the shift in the air";
     return {
-      now: now,
+      execName: "Jim",
+      titleLabel: "Chief Financial Officer (Midwest) → ArchE",
+      archeLabel: "ArchE → Jim",
       dayName: dayName,
-      monthName: monthName,
-      greeting: greeting,
-      timeHint: timeHint,
-      localStamp: localStamp,
+      month: month,
+      tod: tod,
+      greet: greet,
       seasonLine: seasonLine,
-      execFirst: "Jim",
-      execTitle: "Chief Financial Officer",
-      region: "Midwest",
+      clockLocal: clockLocal,
     };
   }
 
   function buildScenarioA(ctx) {
-    var jim = ctx.execFirst;
-    var titleLabel = ctx.execTitle + " · " + ctx.region;
-    var jimAsk =
-      "ArchE — before standup I need one vetted monthly churn number, and I need to know why Sales, Product, and Finance are each telling a different story.";
-    var archeGreeting =
-      ctx.greeting +
+    var jim = ctx.execName;
+    var pleasantries =
+      ctx.greet +
       ", " +
       jim +
-      ". It is a beautiful " +
-      ctx.dayName +
-      " " +
-      ctx.timeHint +
-      " — " +
+      ". Beautiful " +
+      ctx.tod +
+      " your way — " +
       ctx.seasonLine +
-      ". Give me a moment while I pull our thread and the live feeds.";
-    var archeAnswer =
-      "If you remember, " +
-      jim +
-      " — last time we put attention on this, we parked on the CRM activity clock versus billing cancel timestamps. Sales was still quoting five point one percent off trailing logins. " +
-      "Today I closed that loop. Headline churn is four point two percent at ninety percent confidence — billing cancellations over active subscribers, last thirty days. " +
-      "Finance and Product were mixing definitions; I have the reconciliation paths in the trace if you want to walk them before standup.";
-    var jimSkeptic =
-      "That is a clean story. How do I know you are pointed at real data — not another polished summary?";
-    var archeProof =
-      "Great question, " +
-      jim +
-      ". This session hit live billing and warehouse endpoints — vetting passed with three citations. " +
-      "Click any source below and the trace will scroll to the exact FETCH or VETTING line. " +
-      "If a feed fails in production, you will see it in red here — I do not swap in a plausible number.";
+      ". Give me a moment: I am pulling what we locked on last time while billing streams in.";
+    var answerWithMemory =
+      "Jim — if you remember, last time we focused on the CRM activity metric versus cancel timestamps in billing. " +
+      "Today we close that loop. Headline churn is four point two percent at ninety percent confidence — billing cancellations over active subscribers, last thirty days. " +
+      "Sales still sees five point one because their window counts last login; Finance was blending both. " +
+      "I recommend billing as system of record for standup; net revenue retention band ninety-two to ninety-four percent next quarter if we patch the dictionary this week.";
+    var skeptic =
+      "That is a clean story — but how do I know you are not smoothing noise? Are you sure this is the right data?";
+    var proofReply =
+      "Great question. Every figure below ties to a line in the orchestration trace on the left — click a source and the log scrolls to the fetch. " +
+      "This session hit live billing and warehouse endpoints; vetting returned pass with three citations. If a feed fails, you will see it in trace and confidence drops — I do not swap in a polite guess.";
 
     return {
-      title: "Revenue Ops — " + titleLabel + " (live clock)",
+      title: "Revenue Ops — Midwest CFO Jim (live clock + coworker memory)",
       beats: [
         {
+          role: "narrator",
+          label: "Narration",
+          say:
+            "Jim, Midwest subscription finance. ArchE answers with today's rhythm, recalls prior working sessions, and shows every tool call in the trace.",
+          pipeline: "intake",
+        },
+        {
           role: "decision",
-          label: titleLabel + " → ArchE",
-          say: jimAsk,
+          label: ctx.titleLabel,
+          say:
+            "ArchE — I need one vetted monthly churn number before standup, and I need to understand why Sales, Product, and Finance still show different figures.",
           pipeline: "intake",
         },
         {
           terminal: [
-            runLog("CONTEXT", "local_wall_clock=" + ctx.localStamp + "  tz=visitor  region=US-Midwest", 0),
-            runLog("SESSION", "run_id=" + DEMO_RUN_ID + "  tenant=subscription_brand_scrub", 1),
-            runLog("MEMORY", "recall thread_id=REV-JIM-014  prior_focus=crm_vs_billing_def", 2),
-            runLog("MEMORY", "hit prior_turn: Sales quoted 5.1% CRM activity window", 3),
-            runLog("MEMORY", "hit prior_turn: billing cancel_date not in CRM export", 4),
-            runLog("INVOKE", "workflow=revenue_truth_single_source  step=decompose_intent", 5),
-            runLog("INVOKE", "tool=agent_orchestrator  plan_branches=3  parallel=on", 6),
+            termEntry(runLog("TEMPORAL", "viewer_local=" + ctx.clockLocal + "  weekday=" + ctx.dayName + "  tz=America/Chicago", 0), "trace-temporal"),
+            termEntry(runLog("RECALL", "memory_thread=jim_crm_vs_billing  prior_session=standup_apr22  topic=definition_mismatch", 1), "trace-recall"),
+            termEntry(runLog("RECALL", "nuance=Jim asked to stop using CRM last-activity as churn proxy", 2), "trace-recall"),
+            termEntry(runLog("SESSION", "run_id=" + DEMO_RUN_ID + "  tenant=midwest_sub_scrub  continuity=ON", 3), "trace-session"),
+            termEntry(runLog("INVOKE", "workflow=revenue_truth_single_source  step=decompose_intent", 4)),
+            termEntry(runLog("INVOKE", "tool=agent_orchestrator  action=plan_branches  branches=3", 5)),
           ],
-          terminalAnchors: [
-            "trace-ctx",
-            null,
-            "trace-memory",
-            null,
-            null,
-            null,
-            null,
-          ],
-          termDelay: 240,
+          termDelay: 280,
           pipeline: "plan",
-          tools: ["llm", "workflow", "research"],
+          tools: ["llm", "workflow"],
         },
         {
           role: "arche",
-          label: "ArchE → " + jim,
-          say: archeGreeting,
-          terminalParallel: true,
-          terminal: [
-            runLog("RESEARCH", "recall_embedding  topic=churn_definition  sessions=2  latency_ms=88", 7),
-            runLog("FETCH", "decision_memory  uri=internal://thread/REV-JIM-014  status=200", 8),
-            runLog("INVOKE", "tool=research_synthesis  market_context=competitor+sector", 9),
+          label: ctx.archeLabel,
+          say: pleasantries,
+          pipeline: "plan",
+          terminalParallel: [
+            termEntry(runLog("FETCH", "research_synthesis  uri=https://filings.demo.sec.gov/8k/scrub-competitor  status=200", 6), "trace-research"),
+            termEntry(runLog("FETCH", "market_pulse  uri=https://markets.demo/quotes/sector-subscription  status=200  delay_ms=88", 7), "trace-market"),
+            termEntry(runLog("FETCH", "analyst_note  uri=https://research.demo/brief/scrub-may-outlook  tier=A", 8)),
+            termEntry(runLog("CALC", "reconcile_definitions  crm_field=last_activity  billing_field=cancel_ts", 9), "trace-calc"),
           ],
-          terminalAnchors: [null, "trace-memory-fetch", null],
           termDelay: 260,
-          toolFocus: {
-            tool: "research",
-            doing: "Recalling your prior working session with " + jim + " while queuing market and billing feeds.",
-            tie: "MEMORY and RESEARCH lines in the trace — continuation, not a cold start.",
-            also: ["research", "llm"],
-          },
-          pipeline: "plan",
-        },
-        {
-          terminal: [
-            runLog("FETCH", "filings_feed  uri=https://filings.demo.sec.gov/8k/scrub-competitor  status=200  docs=4", 10),
-            runLog("FETCH", "analyst_wire  uri=https://news.demo.marketwire/scrub-note  tier=A  age_h=36", 11),
-            runLog("FETCH", "market_tick  uri=https://market.demo/quotes/sector-retail  symbols=8", 12),
-            runLog("SRC", "citation_id=RS-0041  claim=competitor_guidance_shift", 13),
-          ],
-          terminalAnchors: [null, null, "trace-market", null],
-          termDelay: 220,
-          pipeline: "plan",
-          tools: ["research", "live"],
-          forecast: {
-            title: "Projection (feeds landing)",
-            rows: [
-              { label: "CRM dashboard", pct: 62, value: "5.1%" },
-              { label: "Billing stream", pct: 48, value: "3.9–4.6%" },
-              { label: "Confidence", pct: 35, value: "35%" },
-            ],
-            note: "Band narrows after billing stream + vetting.",
-          },
         },
         {
           toolFocus: {
             tool: "live",
-            doing: "Streaming billing cancellation events — 184k rows in 420ms; warehouse cohort lockstep.",
-            tie: "Scroll to trace-fetch-billing when ArchE cites the stream.",
+            doing: "Streaming billing cancellation events — one hundred eighty-four thousand rows in four hundred twenty milliseconds.",
+            tie: "Money-movement anchor; lines tagged trace-billing-fetch below.",
             also: ["live", "llm"],
+            forecast: "Billing-backed churn converging near four point two percent.",
           },
           terminal: [
-            runLog("FETCH", "live_feed:billing_events  uri=https://api.demo.billing.cloud/v2/cancellations  rows=184k  ms=420", 14),
-            runLog("FETCH", "warehouse_export:cohort_v3  uri=s3://demo-warehouse-scrub/cohort/churn_v3.parquet  OK", 15),
-            runLog("FETCH", "crm_snapshot:activity  uri=https://crm.demo.internal/snapshot/scrub  OK", 16),
-            runLog("TOOL", "join billing×cohort  key=subscriber_id  match=99.2%", 17),
-            runLog("TOOL", "diff crm_vs_billing  rows_conflict=12,408", 18),
+            termEntry(runLog("FETCH", "live_feed:billing_events  uri=https://api.demo.billing.cloud/v2/cancellations  rows=184k  latency_ms=420", 10), "trace-billing-fetch"),
+            termEntry(runLog("FETCH", "warehouse_export:cohort_v3  uri=s3://demo-warehouse-scrub/cohort/churn_v3.parquet", 11), "trace-warehouse"),
+            termEntry(runLog("FETCH", "crm_snapshot:activity_based  uri=https://crm.demo.internal/snapshot/scrub", 12)),
+            termEntry(runLog("LINK", "live_feed → answer.churn_source=billing_events", 13)),
+            termEntry(runLog("CALC", "rolling_churn_30d  raw=4.18%  smoothed=4.2%", 14), "trace-calc"),
           ],
-          terminalAnchors: [
-            "trace-fetch-billing",
-            "trace-fetch-cohort",
-            null,
-            null,
-            null,
-          ],
-          termDelay: 200,
+          termDelay: 240,
           pipeline: "tools",
           tools: ["live", "research"],
+          forecast: {
+            title: "Projection while streams land",
+            rows: [
+              { label: "CRM dashboard (activity)", pct: 62, value: "5.1%" },
+              { label: "Billing stream", pct: 84, value: "4.2%" },
+              { label: "Confidence (pre-vet)", pct: 72, value: "72%" },
+            ],
+            note: "Band tightens after vetting gate.",
+          },
+        },
+        {
+          role: "arche",
+          label: ctx.archeLabel,
+          say: answerWithMemory,
+          pipeline: "vet",
+          tools: ["vetting", "research"],
         },
         {
           role: "narrator",
           label: "Narration",
-          say: "Competitor eight-K just hit the wire — the workflow replans while Jim waits.",
+          say: "Competitor eight-K lands mid-run — graph replans, trace shows the branch shift.",
           pipeline: "plan",
         },
         {
           terminal: [
-            runLog("INTEL", "push competitor_8k  priority=HIGH  source=RS-0041", 19),
-            runLog("REPLAN", "add_branch=market_context  timeline_shift=+12m  graph=v4", 20),
-            runLog("FETCH", "filings_feed  uri=https://filings.demo.sec.gov/8k/scrub-amend  status=200", 21),
+            termEntry(runLog("INTEL", "inject competitor_8k_headline  priority=HIGH", 15), "trace-8k"),
+            termEntry(runLog("REPLAN", "add_branch=market_context  timeline_shift=+12m", 16)),
+            termEntry(runLog("VETTING", "conflict=crm_vs_billing  resolution=billing_wins  conf=0.90", 17), "trace-vetting"),
+            termEntry(runLog("SRC", "evidence_bundle=EB-REV-12  citations=3  check=PASS", 18), "trace-vetting"),
           ],
-          termDelay: 210,
-          pipeline: "plan",
-          tools: ["workflow", "research"],
+          termDelay: 260,
+          pipeline: "vet",
+          tools: ["vetting", "workflow"],
           forecast: {
-            title: "Updated projection (post intel)",
+            title: "Post vetting",
             rows: [
-              { label: "Churn (billing)", pct: 84, value: "4.2%" },
-              { label: "CRM if unchanged", pct: 55, value: "5.1%" },
+              { label: "Churn (locked)", pct: 84, value: "4.2%" },
+              { label: "NRR Q+1 band", pct: 93, value: "92–94%" },
               { label: "Confidence", pct: 90, value: "90%" },
             ],
-            note: "Post live pull + conflict vetting.",
-          },
-        },
-        {
-          toolFocus: {
-            tool: "vetting",
-            doing: "Scoring definition mismatch — blocking publish until evidence bundle is sealed.",
-            tie: "trace-vet row is what Jim can audit.",
-            also: ["vetting", "live"],
-          },
-          terminal: [
-            runLog("VETTING", "conflict=crm_vs_billing  resolution=billing_wins  conf=0.90", 22),
-            runLog("VETTING", "hallucination_check=PASS  method=multi_source", 23),
-            runLog("SRC", "bundle=EB-REV-12  citations=3", 24),
-          ],
-          terminalAnchors: [null, "trace-vet", null],
-          termDelay: 230,
-          pipeline: "vet",
-          tools: ["vetting"],
-        },
-        {
-          role: "arche",
-          label: "ArchE → " + jim,
-          say: archeAnswer,
-          pipeline: "answer",
-          tools: ["vetting", "live"],
-          forecast: {
-            title: "Standup recommendation",
-            rows: [
-              { label: "Q+1 NRR band", pct: 93, value: "92–94%" },
-              { label: "Churn (locked)", pct: 84, value: "4.2%" },
-              { label: "Dictionary patch", pct: 70, value: "24h" },
-            ],
-            note: "Billing definition as system of record.",
+            note: "Ready for standup.",
           },
         },
         {
           role: "decision",
-          label: titleLabel + " → ArchE",
-          say: jimSkeptic,
+          label: ctx.titleLabel,
+          say: skeptic,
           pipeline: "answer",
         },
         {
           role: "arche",
-          label: "ArchE → " + jim,
-          say: archeProof,
+          label: ctx.archeLabel,
+          say: proofReply,
           pipeline: "answer",
           sources: [
             {
-              label: "Billing stream — 184k cancellation events (trace)",
-              href: "#trace-fetch-billing",
-              traceAnchor: "trace-fetch-billing",
+              label: "Jump to billing stream fetch in trace",
+              traceAnchor: "trace-billing-fetch",
             },
             {
-              label: "Warehouse cohort export — churn_v3 parquet",
-              href: "#trace-fetch-cohort",
-              traceAnchor: "trace-fetch-cohort",
+              label: "Jump to CRM vs billing recall",
+              traceAnchor: "trace-recall",
             },
             {
-              label: "Prior thread REV-JIM-014 — CRM vs billing recall",
-              href: "#trace-memory",
-              traceAnchor: "trace-memory",
+              label: "Jump to vetting bundle line",
+              traceAnchor: "trace-vetting",
             },
             {
-              label: "Vetting bundle EB-REV-12 — conflict resolution",
-              href: "#trace-vet",
-              traceAnchor: "trace-vet",
+              label: "Open cohort export summary (demo sheet)",
+              href: "https://imndevmodeai.github.io/portfolio/#evidence-cohort-export",
             },
             {
-              label: "Sample reconciliation sheet (preview)",
-              href: "#evidence-sheet-preview",
-              traceAnchor: "trace-fetch-billing",
+              label: "Market pulse feed (demo)",
+              traceAnchor: "trace-market",
             },
           ],
         },
         {
           terminal: [
-            runLog("ANSWER", "churn=4.2%  conf=0.90  citations=3  source=billing", 25),
-            runLog("FORECAST", "nrr_q+1=92-94%", 26),
-            runLog("REFLECT", "iar=logged  handoff=data_governance", 27),
-            runLog("SESSION", "complete  duration=17m48s", 28),
+            termEntry(runLog("ANSWER", "churn=4.2%  conf=0.90  jim=notified", 19)),
+            termEntry(runLog("FORECAST", "nrr_q+1=92-94%  governance_patch=24h", 20)),
+            termEntry(runLog("REFLECT", "iar=logged  handoff=data_governance", 21)),
+            termEntry(runLog("SESSION", "complete  duration=17m48s  run_id=" + DEMO_RUN_ID, 22)),
           ],
-          termDelay: 200,
-          timeline: "T+18m vetted headline  ·  T+2h reconciliation map  ·  T+24h dictionary patch",
+          termDelay: 220,
+          timeline: "T+18m vetted headline  ·  T+2h full reconciliation  ·  T+24h dictionary patch",
           pipeline: "answer",
         },
       ],
     };
   }
 
-  function getScenario(key) {
-    if (key === "a") return buildScenarioA(liveDemoContext());
-    return JSON.parse(JSON.stringify(SCENARIOS[key]));
-  }
 
   /* ——— Voices: queued, full text, three roles ——— */
   function getVoices() {
@@ -726,33 +666,29 @@
       (f.note ? '<p class="fc-note">' + f.note + "</p>" : "");
   }
 
-  function scrollTraceTo(anchorId) {
+  function scrollToTraceAnchor(anchorId) {
     if (!anchorId) return;
-    var el = document.getElementById(anchorId);
-    var panel = el && el.closest(".panel-body");
-    if (!el) return;
-    el.classList.add("log-highlight");
+    var row = document.getElementById(anchorId);
+    var term = $("#terminal-out");
+    if (!row || !term) return;
+    row.classList.add("log-highlight");
+    row.scrollIntoView({ block: "center", behavior: "smooth" });
     setTimeout(function () {
-      el.classList.remove("log-highlight");
-    }, 2400);
-    if (panel) {
-      var top = el.offsetTop - panel.clientHeight / 2;
-      panel.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-    } else {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
+      row.classList.remove("log-highlight");
+    }, 2600);
   }
 
-  function appendTerminal(line, anchorId) {
+  function appendTerminal(lineOrEntry, anchorId) {
     var term = $("#terminal-out");
     if (!term) return;
+    var line = typeof lineOrEntry === "string" ? lineOrEntry : lineOrEntry && lineOrEntry.line;
+    var anchor = anchorId || (lineOrEntry && lineOrEntry.anchor) || "";
+    if (!line) return;
     var row = document.createElement("div");
     row.className = "log-line log-" + logKind(line);
-    if (anchorId) row.id = anchorId;
     row.textContent = line;
+    if (anchor) row.id = anchor;
     term.appendChild(row);
-    var panel = term.closest(".panel-body") || term;
-    panel.scrollTop = panel.scrollHeight;
     term.scrollTop = term.scrollHeight;
   }
 
@@ -783,18 +719,15 @@
       ev.appendChild(head);
       sources.forEach(function (s) {
         var a = document.createElement("a");
-        a.href = s.href || "#";
         a.textContent = s.label;
         if (s.traceAnchor) {
+          a.href = "#" + s.traceAnchor;
           a.addEventListener("click", function (e) {
             e.preventDefault();
-            scrollTraceTo(s.traceAnchor);
-            if (s.href && s.href.indexOf("#evidence") === 0) {
-              var ext = document.querySelector(s.href);
-              if (ext) ext.scrollIntoView({ behavior: "smooth", block: "nearest" });
-            }
+            scrollToTraceAnchor(s.traceAnchor);
           });
-        } else {
+        } else if (s.href) {
+          a.href = s.href;
           a.target = "_blank";
           a.rel = "noopener noreferrer";
         }
@@ -832,8 +765,20 @@
     });
   }
 
+  /* portfolio-tts-export: seeds for Edge-TTS build (representative lines; live greet uses browser if no exact MP3). */
+  var __PORTFOLIO_TTS_SEEDS__ = [
+    { role: "narrator", say: "Jim, Midwest subscription finance. ArchE answers with today's rhythm, recalls prior working sessions, and shows every tool call in the trace." },
+    { role: "decision", say: "ArchE — I need one vetted monthly churn number before standup, and I need to understand why Sales, Product, and Finance still show different figures." },
+    { role: "arche", say: "Good morning, Jim. Beautiful morning your way — classic Midwest spring — warm enough to open the windows, storms still rolling through on Tuesday afternoons. Give me a moment: I am pulling what we locked on last time while billing streams in." },
+    { role: "arche", say: "Jim — if you remember, last time we focused on the CRM activity metric versus cancel timestamps in billing. Today we close that loop. Headline churn is four point two percent at ninety percent confidence — billing cancellations over active subscribers, last thirty days. Sales still sees five point one because their window counts last login; Finance was blending both. I recommend billing as system of record for standup; net revenue retention band ninety-two to ninety-four percent next quarter if we patch the dictionary this week." },
+    { role: "narrator", say: "Competitor eight-K lands mid-run — graph replans, trace shows the branch shift." },
+    { role: "decision", say: "That is a clean story — but how do I know you are not smoothing noise? Are you sure this is the right data?" },
+    { role: "arche", say: "Great question. Every figure below ties to a line in the orchestration trace on the left — click a source and the log scrolls to the fetch. This session hit live billing and warehouse endpoints; vetting returned pass with three citations. If a feed fails, you will see it in trace and confidence drops — I do not swap in a polite guess." },
+  ];
+
   /* ——— Screenplay scenarios ——— */
   var SCENARIOS = {
+    a: { hydrate: true },
     d: {
       title: "Paid media — governed kill rules ($50k/day preview)",
       consultOnly: true,
@@ -1002,7 +947,10 @@
   function buildCustomScenario(q) {
     var key = routeQuery(q);
     if (key !== "custom") {
-      var base = getScenario(key);
+      var base =
+        key === "a"
+          ? buildScenarioA(getLiveContext())
+          : JSON.parse(JSON.stringify(SCENARIOS[key]));
       base.title = "Your brief (routed preview)";
       if (base.beats && base.beats[1]) {
         base.beats[1].say = q;
@@ -1054,6 +1002,15 @@
     if (badge) badge.textContent = on ? "Consult preview unlocked" : "";
   }
 
+  async function drainTerminal(lines, token, termDelay) {
+    if (!lines || !lines.length) return;
+    for (var i = 0; i < lines.length; i++) {
+      if (token !== playToken) return;
+      appendTerminal(lines[i]);
+      await delay(termDelay || 280);
+    }
+  }
+
   async function runBeat(beat, token) {
     if (token !== playToken) return;
     if (beat.pipeline) setPipeline(beat.pipeline);
@@ -1062,43 +1019,28 @@
     if (beat.forecast) setForecast(beat.forecast);
     if (beat.timeline) setTimeline(beat.timeline);
 
-    var termDelay = beat.termDelay != null ? beat.termDelay : 520;
+    var role = beat.role || "narrator";
+    var label = beat.label || defaultLabel(role);
 
-    if (beat.terminal && beat.say && beat.terminalParallel) {
-      var roleP = beat.role || "narrator";
-      var labelP = beat.label || defaultLabel(roleP);
-      appendBroadcast(roleP, labelP, beat.say, beat.sources);
-      var speakP = speakQueued(beat.say, roleP);
-      for (var ti = 0; ti < beat.terminal.length; ti++) {
-        if (token !== playToken) return;
-        var aid =
-          beat.terminalAnchors && beat.terminalAnchors[ti] ? beat.terminalAnchors[ti] : null;
-        appendTerminal(beat.terminal[ti], aid);
-        await delay(termDelay);
-      }
+    if (beat.say && beat.terminalParallel && beat.terminalParallel.length) {
+      appendBroadcast(role, label, beat.say, beat.sources);
+      var speakP = speakQueued(beat.say, role);
+      await drainTerminal(beat.terminalParallel, token, beat.termDelay);
       await speakP;
-      await delay(beat.pauseAfter || 500);
+      await delay(beat.pauseAfter || 550);
       return;
     }
 
     if (beat.terminal) {
-      for (var i = 0; i < beat.terminal.length; i++) {
-        if (token !== playToken) return;
-        var anchor =
-          beat.terminalAnchors && beat.terminalAnchors[i] ? beat.terminalAnchors[i] : null;
-        appendTerminal(beat.terminal[i], anchor);
-        await delay(termDelay);
-      }
+      await drainTerminal(beat.terminal, token, beat.termDelay);
     }
 
     if (beat.say) {
-      var role = beat.role || "narrator";
-      var label = beat.label || defaultLabel(role);
       appendBroadcast(role, label, beat.say, beat.sources);
       await speakQueued(beat.say, role);
       await delay(beat.pauseAfter || 700);
     } else {
-      await delay(beat.pauseAfter || 650);
+      await delay(beat.pauseAfter || 450);
     }
   }
 
@@ -1162,7 +1104,11 @@
       return;
     }
     activeScenario =
-      customQuery != null ? buildCustomScenario(customQuery) : getScenario(key);
+      customQuery != null
+        ? buildCustomScenario(customQuery)
+        : key === "a"
+          ? buildScenarioA(getLiveContext())
+          : JSON.parse(JSON.stringify(SCENARIOS[key]));
     openModal();
     var title = $("#theater-title");
     if (title) title.textContent = activeScenario.title;
