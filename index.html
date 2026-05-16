@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portfolio — Cognitive AI Architecture (ResonantiA)</title>
   <style>
-    :root { --bg: #0f0f12; --fg: #e4e4e7; --muted: #a1a1aa; --accent: #a78bfa; --card: #18181b; --user: #3b82f6; --term: #0a0a0c; --term-fg: #86efac; }
+    :root { --bg: #09090b; --fg: #fafafa; --muted: #a1a1aa; --accent: #8b5cf6; --accent2: #22d3ee; --card: rgba(24,24,27,0.92); --user: #3b82f6; --term: #030806; --term-fg: #4ade80; --glass-border: rgba(139,92,246,0.25); }
     * { box-sizing: border-box; }
-    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--fg); line-height: 1.6; margin: 0; padding: 2rem; max-width: 960px; margin-left: auto; margin-right: auto; }
+    body { font-family: "Inter", system-ui, -apple-system, sans-serif; background: radial-gradient(1200px 600px at 10% -10%, rgba(139,92,246,0.18), transparent 55%), radial-gradient(900px 500px at 90% 0%, rgba(34,211,238,0.08), transparent 50%), var(--bg); color: var(--fg); line-height: 1.6; margin: 0; padding: 2rem; max-width: 1100px; margin-left: auto; margin-right: auto; }
     h1 { font-size: 1.5rem; margin-top: 0; color: var(--accent); }
     h2 { font-size: 1.15rem; margin-top: 2rem; border-bottom: 1px solid var(--card); padding-bottom: 0.25rem; }
     p { color: var(--muted); margin: 0.5rem 0; }
@@ -29,7 +29,9 @@
     #custom-query { width: 100%; min-height: 4rem; background: var(--card); color: var(--fg); border: 1px solid #333; border-radius: 6px; padding: 0.6rem; font-family: inherit; resize: vertical; }
 
     .demo-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem; margin: 1rem 0; }
-    .demo-card { background: var(--card); border: 1px solid rgba(167,139,250,0.3); border-radius: 8px; padding: 1rem; cursor: pointer; transition: border-color 0.2s, transform 0.15s; }
+    .agentic-lead { font-size: 0.92rem; color: #e4e4e7; background: linear-gradient(90deg, rgba(139,92,246,0.12), rgba(34,211,238,0.08)); border: 1px solid var(--glass-border); border-radius: 10px; padding: 0.75rem 1rem; margin: 0.75rem 0 1rem; }
+    .agentic-lead strong { color: #c4b5fd; }
+    .demo-card { background: var(--card); border: 1px solid var(--glass-border); border-radius: 10px; padding: 1rem; cursor: pointer; transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s; backdrop-filter: blur(8px); }
     .demo-card:hover { border-color: var(--accent); transform: translateY(-2px); }
     .demo-card.locked-card { opacity: 0.65; }
     .demo-card h3 { margin: 0 0 0.35rem; font-size: 0.95rem; color: var(--accent); }
@@ -50,9 +52,24 @@
     .panel h4 { margin: 0; padding: 0.5rem 0.75rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); background: #121216; border-bottom: 1px solid #2a2a30; }
     #tool-rack { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.5rem 0 0.75rem; }
     .tool-chip { font-size: 0.68rem; padding: 0.25rem 0.5rem; border-radius: 999px; background: #121216; border: 1px solid #333; color: var(--muted); transition: all 0.35s; }
-    .tool-chip.lit { color: var(--bg); background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px rgba(167,139,250,0.4); transform: scale(1.04); }
+    .tool-chip.lit { color: var(--bg); background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px rgba(139,92,246,0.45); transform: scale(1.04); }
+    .tool-chip.focus { color: #fff; background: linear-gradient(135deg, var(--accent2), var(--accent)); border-color: var(--accent2); box-shadow: 0 0 16px rgba(34,211,238,0.35); animation: chip-pulse 1.2s ease-in-out infinite; }
+    @keyframes chip-pulse { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.15); } }
+    #tool-spotlight, #forecast-panel { display: none; background: var(--card); border: 1px solid var(--glass-border); border-radius: 10px; padding: 0.75rem 0.9rem; margin: 0.5rem 0; font-size: 0.8rem; backdrop-filter: blur(10px); }
+    #tool-spotlight.visible, #forecast-panel.visible { display: block; }
+    .spot-title { font-weight: 700; color: var(--accent2); font-size: 0.85rem; margin-bottom: 0.35rem; }
+    .spot-doing, .spot-tie, .spot-forecast { margin: 0.35rem 0; color: var(--muted); }
+    .spot-forecast { color: #fcd34d; }
+    .fc-head { font-weight: 700; color: #fcd34d; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem; }
+    .fc-row { display: grid; grid-template-columns: 7rem 1fr 3.5rem; gap: 0.4rem; align-items: center; margin: 0.35rem 0; font-size: 0.72rem; }
+    .fc-bar { height: 6px; background: #27272a; border-radius: 3px; overflow: hidden; }
+    .fc-fill { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 3px; transition: width 0.6s ease; }
+    .fc-val { text-align: right; color: var(--fg); font-variant-numeric: tabular-nums; }
+    .fc-note { font-size: 0.7rem; color: var(--muted); margin: 0.5rem 0 0; font-style: italic; }
+    .theater-mid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 0.5rem 0; }
+    @media (max-width: 700px) { .theater-mid { grid-template-columns: 1fr; } }
     #plan-timeline { font-size: 0.78rem; color: #fcd34d; background: rgba(252,211,77,0.08); border: 1px solid rgba(252,211,77,0.25); border-radius: 6px; padding: 0.45rem 0.65rem; margin: 0.5rem 0; min-height: 1.5rem; }
-    #terminal-out { font-family: ui-monospace, monospace; font-size: 0.68rem; color: var(--term-fg); background: var(--term); padding: 0.75rem; min-height: 14rem; max-height: 18rem; overflow-y: auto; white-space: pre-wrap; margin: 0; line-height: 1.45; }
+    #terminal-out { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 0.68rem; color: var(--term-fg); background: var(--term); padding: 0.75rem; min-height: 14rem; max-height: 20rem; overflow-y: auto; white-space: pre-wrap; margin: 0; line-height: 1.45; box-shadow: inset 0 0 48px rgba(0,0,0,0.55); border: 1px solid #14532d; }
     #broadcast-out { padding: 0.75rem; min-height: 14rem; max-height: 18rem; overflow-y: auto; }
     .cast-line { display: block; margin: 0.65rem 0; padding: 0.55rem 0.65rem; border-radius: 6px; font-size: 0.82rem; transition: opacity 0.35s; }
     .cast-line .cast-label { display: block; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem; font-weight: 600; }
@@ -74,10 +91,11 @@
   <p><span class="tag">ResonantiA · ArchE</span> Public showcase of a <strong>private production</strong> system — built and operated solo by <strong>B.J. Lewis</strong>. Curated scenarios; no client data, API keys, or internal paths.</p>
 
   <h2>What This Is</h2>
-  <p><strong>ArchE</strong> is the cognitive agent layer: tool orchestration, vetting, workflows, and mandatory self-reflection on every action. <strong>ResonantiA</strong> is the full stack around it — 350+ Python modules, 80+ workflow blueprints, and a deep knowledge layer. I built and run it in production; this page is the client-safe window in.</p>
+  <p><strong>ArchE</strong> is the agentic layer: multi-step tool orchestration, live retrieval, evidence vetting, and forward projections — not a single chat completion. <strong>ResonantiA</strong> is the full stack (350+ modules, 80+ workflow graphs, deep knowledge layer). I built and run it in production; this page is the buyer-safe window in.</p>
 
   <h2>Interactive demo theater</h2>
-  <p class="disclaimer"><strong>Simulation only.</strong> This page does not connect to production. No codex, no internal blueprints, no live API keys — orchestration is <em>illustrated</em> so you can see how ArchE thinks, not copy the system from a browser.</p>
+  <p class="agentic-lead"><strong>Agentic orchestration, not a ChatGPT wrapper.</strong> Most enterprise “AI” is a chat box on top of a model. ArchE runs <em>tool-using agents</em> — live retrieval, evidence vetting, population simulation, and <strong>forward projections</strong> that replan when new intel arrives.</p>
+  <p class="disclaimer"><strong>Simulation only.</strong> Illustrated orchestration on this page — no production keys, no client data. You see <em>how</em> the process works, not the proprietary stack underneath.</p>
 
   <div id="access-gate">
     <strong>Consult preview</strong> — enter the code from the proposal to unlock <em>your question</em> and the paid-ads scenario.
@@ -115,9 +133,13 @@
       <div class="pipe-node" id="pipe-vet">Vetting</div>
       <div class="pipe-node" id="pipe-answer">Answer</div>
     </div>
-    <p class="entry-hint" id="entry-hint">Natural-language intake → planning → live tools → vetting → answer (portfolio simulation)</p>
+    <p class="entry-hint" id="entry-hint">Speak or type in natural language → agent plans → tools run → vetting → forecast + recommendation</p>
     <div id="tool-rack" aria-label="Capability rack"></div>
-    <div id="plan-timeline" aria-live="polite"></div>
+    <div id="plan-timeline" aria-live="polite"></motion>
+    <div class="theater-mid">
+      <div id="tool-spotlight" aria-live="polite"></div>
+      <div id="forecast-panel" aria-live="polite"></div>
+    </div>
     <div class="stage-grid" id="demo-stage">
       <div class="panel">
         <h4>Orchestration trace</h4>

@@ -13,17 +13,54 @@
   var speechBusy = false;
   var audioManifest = null;
   var voicesReady = false;
+  var activeAudios = [];
 
-  var TOOL_CHIPS = [
-    { id: "llm", label: "LLM orchestration" },
-    { id: "research", label: "Research & synthesis" },
-    { id: "causal", label: "Causal inference" },
-    { id: "abm", label: "Agent-based modeling" },
-    { id: "live", label: "Live data feeds" },
-    { id: "vetting", label: "Vetting gate" },
-    { id: "workflow", label: "Workflow DAG" },
-    { id: "compress", label: "Semantic compression" },
-  ];
+  var TOOL_CATALOG = {
+    llm: {
+      label: "Agent orchestration",
+      doing: "Decomposes the brief into parallel branches, assigns tools, and enforces evidence gates before any answer ships.",
+      tie: "Maps VP RevOps question → three evidence branches with explicit ETAs.",
+    },
+    research: {
+      label: "Research synthesis",
+      doing: "Queries live web and filings, dedupes sources, and tags each claim with recency and credibility tier.",
+      tie: "Supplies market context that explains why internal dashboards diverge.",
+    },
+    live: {
+      label: "Live data pulse",
+      doing: "Streams billing cancellations, warehouse cohorts, and CRM activity snapshots in real time.",
+      tie: "Anchors the headline churn number to billing events, not dashboard definitions.",
+    },
+    causal: {
+      label: "Causal time-lag analysis",
+      doing: "Estimates which inputs move the outcome first — and how many weeks the effect lags.",
+      tie: "Separates correlation in dashboards from plausible drivers.",
+    },
+    abm: {
+      label: "Population simulation",
+      doing: "Runs thousands of synthetic agents through policy or spend scenarios to see emergent outcomes.",
+      tie: "Turns HR or media policy bets into attrition or CPA trajectories.",
+    },
+    vetting: {
+      label: "Evidence vetting gate",
+      doing: "Blocks any metric from shipping until conflicts are scored and confidence is bounded.",
+      tie: "Explains why CRM says 5.1% but billing-backed churn is 4.2%.",
+    },
+    workflow: {
+      label: "Workflow graph",
+      doing: "Executes the plan as a directed graph — replanning when new intel changes priority.",
+      tie: "Adds a market-context branch after the competitor 8-K lands.",
+    },
+    compress: {
+      label: "Long-doc compression",
+      doing: "Indexes hundred-page playbooks so chat pulls only the slice needed per question.",
+      tie: "Keeps escalation paths exact without sending the whole PDF each turn.",
+    },
+  };
+
+  var TOOL_CHIPS = Object.keys(TOOL_CATALOG).map(function (id) {
+    return { id: id, label: TOOL_CATALOG[id].label };
+  });
 
   var PIPELINE_STEPS = ["intake", "plan", "tools", "vet", "answer"];
 
@@ -122,11 +159,18 @@
     if (!rel) return Promise.resolve(false);
     return new Promise(function (resolve) {
       var a = new Audio(rel);
+      activeAudios.push(a);
       a.preload = "auto";
       a.onended = function () {
+        activeAudios = activeAudios.filter(function (x) {
+          return x !== a;
+        });
         resolve(true);
       };
       a.onerror = function () {
+        activeAudios = activeAudios.filter(function (x) {
+          return x !== a;
+        });
         resolve(false);
       };
       var p = a.play();
@@ -135,6 +179,17 @@
           resolve(false);
         });
       }
+    });
+  }
+
+  function speakBrowserOnce(clean, role) {
+    return new Promise(function (resolve) {
+      if (!voiceOn || !window.speechSynthesis) {
+        resolve();
+        return;
+      }
+      speechQueue.push({ clean: clean, role: role, resolve: resolve });
+      pumpSpeechQueue();
     });
   }
 
@@ -147,20 +202,26 @@
   function speakQueued(text, role) {
     if (!voiceOn) return Promise.resolve();
     var roleId = role || "arche";
-    var chunks = speechChunks(text);
-    if (!chunks.length) return Promise.resolve();
+    var clean = cleanForSpeech(text);
+    if (!clean) return Promise.resolve();
 
-    return chunks.reduce(function (chain, part) {
-      return chain.then(function () {
-        return playMp3(roleId, part).then(function (played) {
-          if (played) return;
-          return new Promise(function (resolve) {
-            speechQueue.push({ clean: part, role: roleId, resolve: resolve });
-            pumpSpeechQueue();
-          });
+    return playMp3(roleId, clean).then(function (playedFull) {
+      if (playedFull) return;
+      var chunks = speechChunks(clean);
+      if (audioManifest && audioManifest.files && chunks.length) {
+        var allMp3 = chunks.every(function (part) {
+          return audioManifest.files[audioKey(roleId, part)];
         });
-      });
-    }, Promise.resolve());
+        if (allMp3) {
+          return chunks.reduce(function (chain, part) {
+            return chain.then(function () {
+              return playMp3(roleId, part);
+            });
+          }, Promise.resolve());
+        }
+      }
+      return speakBrowserOnce(clean, roleId);
+    });
   }
 
   function pumpSpeechQueue() {
@@ -193,6 +254,12 @@
   function stopSpeech() {
     speechQueue = [];
     speechBusy = false;
+    activeAudios.forEach(function (a) {
+      try {
+        a.pause();
+      } catch (e) {}
+    });
+    activeAudios = [];
     if (window.speechSynthesis) window.speechSynthesis.cancel();
   }
 
@@ -206,11 +273,67 @@
     });
   }
 
-  function highlightTools(ids) {
+  function highlightTools(ids, focusId) {
     document.querySelectorAll(".tool-chip").forEach(function (chip) {
-      var on = ids && ids.indexOf(chip.getAttribute("data-tool")) >= 0;
+      var id = chip.getAttribute("data-tool");
+      var on = ids && ids.indexOf(id) >= 0;
       chip.classList.toggle("lit", !!on);
+      chip.classList.toggle("focus", !!focusId && id === focusId);
     });
+  }
+
+  function showToolSpotlight(spec) {
+    var panel = $("#tool-spotlight");
+    if (!panel) return;
+    if (!spec || !spec.tool) {
+      panel.classList.remove("visible");
+      panel.textContent = "";
+      return;
+    }
+    var meta = TOOL_CATALOG[spec.tool] || { label: spec.tool, doing: "", tie: "" };
+    panel.classList.add("visible");
+    panel.innerHTML =
+      '<div class="spot-title">' +
+      meta.label +
+      "</div>" +
+      '<p class="spot-doing"><strong>Now:</strong> ' +
+      (spec.doing || meta.doing) +
+      "</p>" +
+      '<p class="spot-tie"><strong>Ties to log:</strong> ' +
+      (spec.tie || meta.tie) +
+      "</p>" +
+      (spec.forecast
+        ? '<p class="spot-forecast"><strong>Forward view:</strong> ' + spec.forecast + "</p>"
+        : "");
+    highlightTools(spec.also || [spec.tool], spec.tool);
+  }
+
+  function setForecast(f) {
+    var panel = $("#forecast-panel");
+    if (!panel) return;
+    if (!f) {
+      panel.classList.remove("visible");
+      panel.innerHTML = "";
+      return;
+    }
+    panel.classList.add("visible");
+    var rows = (f.rows || []).map(function (r) {
+      return (
+        '<div class="fc-row"><span class="fc-label">' +
+        r.label +
+        '</span><span class="fc-bar"><span class="fc-fill" style="width:' +
+        r.pct +
+        '%"></span></span><span class="fc-val">' +
+        r.value +
+        "</span></div>"
+      );
+    });
+    panel.innerHTML =
+      '<div class="fc-head">' +
+      (f.title || "Forward projection") +
+      "</div>" +
+      rows.join("") +
+      (f.note ? '<p class="fc-note">' + f.note + "</p>" : "");
   }
 
   function appendTerminal(line) {
@@ -250,6 +373,8 @@
     if (term) term.textContent = "";
     if (cast) cast.innerHTML = "";
     highlightTools([]);
+    showToolSpotlight(null);
+    setForecast(null);
     setTimeline("");
     setPipeline("intake");
   }
@@ -274,53 +399,109 @@
         {
           role: "narrator",
           label: "Play-by-play",
-          say: "Monday morning, D2C subscription brand. The board wants one churn number. Three dashboards disagree. Watch ArchE pull live sources, not a generic paragraph.",
+          say: "Monday morning, D2C subscription brand. Enterprise teams often ship ChatGPT in a sidebar — ArchE runs an agentic loop: plan, call tools, vet, and publish forward projections that update when new intel lands.",
           pipeline: "intake",
         },
         {
           role: "decision",
           label: "VP Revenue Operations",
-          say: "ArchE — what's our actual monthly churn right now, and why do Sales, Product, and Finance dashboards disagree? I need a vetted number before standup.",
+          say: "ArchE — what is our actual monthly churn right now, and why do Sales, Product, and Finance dashboards disagree? I need a vetted number before standup.",
           pipeline: "intake",
         },
         {
           role: "narrator",
           label: "Analyst booth",
-          say: "ArchE maps the ask to parallel evidence branches. Notice the capability rack — it's selecting research synthesis, live billing pulse, and a vetting gate. Not a single chat completion.",
+          say: "Watch the capability rack — agent orchestration picks research synthesis, live billing pulse, and an evidence gate. Each step will tie back to the green trace on the left.",
           pipeline: "plan",
           tools: ["llm", "research", "live", "vetting", "workflow"],
+          forecast: {
+            title: "Baseline projection (pre-live pull)",
+            rows: [
+              { label: "Churn band (CRM)", pct: 62, value: "5.1%" },
+              { label: "Churn band (billing est.)", pct: 48, value: "3.9–4.6%" },
+              { label: "Confidence", pct: 35, value: "35%" },
+            ],
+            note: "Wide band until live billing + vetting complete.",
+          },
         },
         {
+          toolFocus: {
+            tool: "research",
+            doing: "Scanning competitor 8-K history, analyst notes, and pricing pages — ranked by recency.",
+            tie: "Explains external narrative pressure on churn definitions.",
+            also: ["llm", "research"],
+            forecast: "If competitor raises churn guidance, our band shifts +0.3pt upward.",
+          },
           terminal: [
-            logLine("SESSION start  job=metric_reconciliation  operator=vp_revops", 0),
-            logLine("PLAN       branches=3  ETA_first_answer=18m  ETA_full_map=2h", 1),
-            logLine("TOOL       live_feed:billing_events  latency=420ms  rows=184k", 2),
-            logLine("TOOL       warehouse_export:cohort_v3  status=OK", 3),
-            logLine("TOOL       crm_snapshot:activity_based  status=OK", 4),
+            logLine("PLAN       branches=3  ETA_first=18m  ETA_full_map=2h", 1),
+            logLine("TOOL       research_synthesis  sources=12  tierA=4", 2),
+          ],
+          pipeline: "plan",
+        },
+        {
+          toolFocus: {
+            tool: "live",
+            doing: "Streaming billing cancellation events and warehouse cohort export — 184k rows in 420ms.",
+            tie: "Anchors headline metric to money movement, not CRM last-activity.",
+            also: ["live", "llm"],
+            forecast: "Billing-backed churn converging to 4.2% ±0.3 (90% conf target).",
+          },
+          terminal: [
+            logLine("TOOL       live_feed:billing_events  latency=420ms  rows=184k", 3),
+            logLine("TOOL       warehouse_export:cohort_v3  status=OK", 4),
+            logLine("TOOL       crm_snapshot:activity_based  status=OK", 5),
+            logLine("LINK       live → answer.churn_source=billing", 6),
           ],
           pipeline: "tools",
-          tools: ["research", "live", "llm"],
+          tools: ["live", "research"],
         },
         {
           role: "arche",
           label: "ArchE",
-          say: "Plan: ingest billing cancellations as source of record, align CRM activity definitions, reconcile sales trailing window. Parallel fetch now; vetting runs on every conflicting claim.",
+          say: "Ingesting billing cancellations as source of record. CRM activity and sales trailing windows stay as secondary checks — vetting scores every conflict before the number ships.",
           pipeline: "tools",
         },
         {
           role: "narrator",
           label: "Analyst booth",
-          say: "Mid-flight intel — competitor just filed an 8-K. ArchE ingests the headline, reweights urgency, and extends the plan. That's the dynamic mapper clients don't get from a vanilla LLM.",
+          say: "Mid-flight intel — competitor filed an 8-K. The workflow graph replans: new branch, plus twelve minutes on the clock. This is dynamic agentic routing, not a frozen chat transcript.",
           pipeline: "plan",
         },
         {
+          toolFocus: {
+            tool: "workflow",
+            doing: "Injecting market-context branch; shifting ETA and re-prioritizing research synthesis.",
+            tie: "Matches REPLAN line in trace — trajectory changed, not just wording.",
+            also: ["workflow", "research", "vetting"],
+          },
           terminal: [
             logLine("INTEL      inject  competitor_8k_headline  priority=HIGH", 8),
             logLine("REPLAN     add_branch=market_context  timeline_shift=+12m", 9),
-            logLine("VETTING    conflict: crm_vs_billing  confidence=0.90", 11),
           ],
           pipeline: "plan",
-          tools: ["research", "live", "vetting", "workflow"],
+          forecast: {
+            title: "Updated projection (post 8-K)",
+            rows: [
+              { label: "Churn (billing-backed)", pct: 84, value: "4.2%" },
+              { label: "Downside if CRM wins", pct: 55, value: "5.1%" },
+              { label: "Confidence", pct: 90, value: "90%" },
+            ],
+            note: "Trajectory narrowed after live pull + conflict vetting.",
+          },
+        },
+        {
+          toolFocus: {
+            tool: "vetting",
+            doing: "Scoring CRM vs billing conflict — blocking ship until definition mismatch is documented.",
+            tie: "Feeds the answer panel — why three dashboards disagreed.",
+            also: ["vetting", "live"],
+          },
+          terminal: [
+            logLine("VETTING    conflict: crm_vs_billing  resolution=billing_wins", 11),
+            logLine("LINK       vetting → forecast.confidence=0.90", 12),
+          ],
+          pipeline: "vet",
+          tools: ["vetting"],
         },
         {
           timeline: "T+0:18m  vetted headline metric  ·  T+2h  full reconciliation map  ·  T+1d  data dictionary patch",
@@ -328,16 +509,26 @@
         },
         {
           role: "arche",
-          label: "ArchE",
-          say: "Churn is 4.2 percent, ninety percent confidence, billing cancellations over active subs. CRM counts last activity, not cancel date. Sales uses a thirty day trailing window. Recommend billing as source of record and document the definition today.",
+          label: "ArchE — forecast",
+          say: "Final read: churn is 4.2 percent at ninety percent confidence, using billing cancellations over active subscribers. CRM still shows 5.1 percent because it counts last activity, not cancel date. Sales trailing window adds another 0.4 points of noise. Recommend billing as system of record; expect NRR risk band 92 to 94 percent next quarter if definition is not fixed this week.",
           pipeline: "answer",
           tools: ["vetting", "research"],
+          forecast: {
+            title: "Recommendation horizon",
+            rows: [
+              { label: "Q+1 NRR band", pct: 93, value: "92–94%" },
+              { label: "Churn (locked def.)", pct: 84, value: "4.2%" },
+              { label: "Governance ETA", pct: 70, value: "24h" },
+            ],
+            note: "Projections assume billing definition adopted in standup.",
+          },
         },
         {
           terminal: [
             logLine("ANSWER     churn=4.2%  conf=0.90  citations=3", 14),
-            logLine("REFLECT    logged  handoff=data_governance", 15),
-            logLine("SESSION    complete  duration=17m48s", 16),
+            logLine("FORECAST   nrr_q+1=92-94%  governance=24h", 15),
+            logLine("REFLECT    logged  handoff=data_governance", 16),
+            logLine("SESSION    complete  duration=17m48s", 17),
           ],
           pipeline: "answer",
         },
@@ -567,6 +758,8 @@
     if (token !== playToken) return;
     if (beat.pipeline) setPipeline(beat.pipeline);
     if (beat.tools) highlightTools(beat.tools);
+    if (beat.toolFocus) showToolSpotlight(beat.toolFocus);
+    if (beat.forecast) setForecast(beat.forecast);
     if (beat.timeline) setTimeline(beat.timeline);
 
     if (beat.terminal) {
