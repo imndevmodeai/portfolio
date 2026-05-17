@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portfolio — Cognitive AI Architecture (ResonantiA)</title>
+  <meta name="description" content="Sanitized ResonantiA / ArchE portfolio — interactive agent orchestration demo, production-scale cognitive stack." />
+  <meta property="og:title" content="ResonantiA — Cognitive AI Architecture" />
+  <meta property="og:description" content="Interactive demo: pipeline trace, vetting gates, causal + ABM scenarios. Built solo — 350+ modules." />
+  <meta property="og:image" content="https://imndevmodeai.github.io/portfolio/assets/architecture-diagram.svg" />
+  <meta property="og:type" content="website" />
   <style>
     :root { --bg: #09090b; --fg: #fafafa; --muted: #a1a1aa; --accent: #8b5cf6; --accent2: #22d3ee; --card: rgba(24,24,27,0.92); --user: #3b82f6; --term: #020403; --term-fg: #4ade80; --glass-border: rgba(139,92,246,0.35); }
     * { box-sizing: border-box; }
@@ -111,6 +116,11 @@
     .modal-footer { display: flex; gap: 0.5rem; align-items: center; padding: 0.65rem 1rem; border-top: 1px solid #27272a; background: rgba(0,0,0,0.35); flex-shrink: 0; }
     .btn.secondary { background: transparent; color: var(--accent2); border: 1px solid var(--accent2); }
     .modal-hint { font-size: 0.68rem; color: var(--muted); margin-left: auto; }
+    .hero-visual { margin: 1rem 0 1.25rem; border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden; background: #0c0c0f; }
+    .hero-visual img { display: block; width: 100%; height: auto; }
+    .hero-visual figcaption { font-size: 0.72rem; color: var(--muted); padding: 0.45rem 0.65rem; border-top: 1px solid #27272a; }
+    .evidence-chart { display: block; width: 100%; max-width: 420px; margin: 0.65rem 0 0; border-radius: 8px; border: 1px solid #3f3f46; }
+    #forecast-panel.visible { min-height: 4.5rem; }
   </style>
 </head>
 <body>
@@ -119,6 +129,11 @@
 
   <h2>What This Is</h2>
   <p><strong>ArchE</strong> is the agentic layer: tool-using workflows, live retrieval, evidence vetting, and forward projections — not a ChatGPT sidebar. <strong>ResonantiA</strong> is the full stack behind it. This page is the buyer-safe window in.</p>
+
+  <figure class="hero-visual">
+    <img src="assets/architecture-diagram.svg" width="920" height="320" alt="Diagram: Keyholder intent through workflow engine, search, causal and ABM tools, vetting gate, to answer and trace; knowledge layer below." loading="eager" decoding="async" />
+    <figcaption>Sanitized architecture map — matches the pipeline stages in the interactive demo (Intake → Plan → Tools → Vetting → Answer).</figcaption>
+  </figure>
 
   <h2>Interactive demo theater</h2>
   <p class="agentic-lead"><strong>Agentic orchestration, not a ChatGPT wrapper.</strong> Enterprise pilots often ship a chat box on a model API. ArchE runs plans, invokes tools, cites sources, and replans when live intel lands — click a scenario to open the presentation.</p>
@@ -137,13 +152,13 @@
     <p>Pick a scenario — a <strong>centered presentation</strong> opens. Left: orchestration trace (tools + data sources). Right: executive ↔ ArchE conversation only.</p>
     <div class="demo-cards">
       <div class="demo-card" data-demo="a" role="button" tabindex="0"><h3>A. One source of truth</h3><p>CFO asks ArchE · live billing proof.</p></div>
-      <div class="demo-card" data-demo="b" role="button" tabindex="0"><h3>B. Policy in 18 months</h3><p>Simulation + attrition forecast.</p></div>
+      <div class="demo-card" data-demo="b" role="button" tabindex="0"><h3>B. Policy in 18 months</h3><p>Causal lag + ABM trace · expert answer with plain-language gloss.</p></div>
       <div class="demo-card" data-demo="c" role="button" tabindex="0"><h3>C. Doc → queryable</h3><p>Indexed playbook retrieval.</p></div>
-      <div class="demo-card locked-card" data-demo="d" role="button" tabindex="0"><h3>D. Paid ads governance</h3><p>Kill-rule architecture.</p></div>
+      <div class="demo-card locked-card" data-demo="d" role="button" tabindex="0"><h3>D. Paid ads — automated closed loop</h3><p>Thousands of levers · orchestration plane · shadow → canary → autopilot.</p></div>
     </div>
     <div id="custom-demo-panel" class="locked">
       <h3 style="font-size:1rem;color:var(--accent2)">Your question (after unlock)</h3>
-      <textarea id="custom-query" placeholder="e.g. How would you architect a kill-the-losing-ad rule safe at $50k/day?"></textarea>
+      <textarea id="custom-query" placeholder="e.g. How do you automate kill decisions across thousands of creative and performance levers at $50k/day—closed loop, not manual rules?"></textarea>
       <div style="margin-top:0.5rem"><button type="button" class="btn" id="run-custom">Run preview</button></div>
     </div>
   </div>
@@ -200,10 +215,12 @@
   <section id="evidence-billing-stream" style="margin-top:2rem;padding:1rem;border:1px solid #27272a;border-radius:8px;background:rgba(0,0,0,0.25)">
     <h2 style="font-size:0.95rem;color:var(--accent2)">Evidence · billing stream (scrubbed)</h2>
     <p style="font-size:0.8rem">Demo anchor for portfolio trace line <code>FETCH live_feed:billing_events</code>. Production runs attach signed URLs and row counts — not shown here.</p>
+    <img class="evidence-chart" src="assets/evidence-chart-mock.svg" width="480" height="200" alt="Scrubbed chart mock: baseline versus policy metric lines, demo only." loading="lazy" />
   </section>
   <section id="evidence-cohort-export" style="margin:1rem 0;padding:1rem;border:1px solid #27272a;border-radius:8px;background:rgba(0,0,0,0.25)">
     <h2 style="font-size:0.95rem;color:var(--accent2)">Evidence · cohort export</h2>
     <p style="font-size:0.8rem">Warehouse parquet manifest referenced in orchestration trace; identifiers scrubbed.</p>
+    <img class="evidence-chart" src="assets/evidence-chart-mock.svg" width="480" height="200" alt="Scrubbed cohort export chart mock, demo only." loading="lazy" />
   </section>
   <section id="evidence-8k-intel" style="margin:1rem 0;padding:1rem;border:1px solid #27272a;border-radius:8px;background:rgba(0,0,0,0.25)">
     <h2 style="font-size:0.95rem;color:var(--accent2)">Evidence · market intel (eight-K)</h2>
@@ -212,6 +229,11 @@
   <section id="evidence-vetting-bundle" style="margin:1rem 0;padding:1rem;border:1px solid #27272a;border-radius:8px;background:rgba(0,0,0,0.25)">
     <h2 style="font-size:0.95rem;color:var(--accent2)">Evidence · vetting bundle</h2>
     <p style="font-size:0.8rem">Conflict resolution log: CRM vs billing, confidence score, hallucination check pass/fail in production.</p>
+  </section>
+  <section id="evidence-workforce-snapshot" style="margin:1rem 0;padding:1rem;border:1px solid #27272a;border-radius:8px;background:rgba(0,0,0,0.25)">
+    <h2 style="font-size:0.95rem;color:var(--accent2)">Evidence · workforce snapshot (scrubbed)</h2>
+    <p style="font-size:0.8rem">Demo anchor for scenario B trace <code>FETCH workforce_snapshot</code>. Production runs attach cohort parquet manifests and row counts.</p>
+    <img class="evidence-chart" src="assets/evidence-chart-mock.svg" width="480" height="200" alt="Scrubbed workforce attrition chart mock for scenario B, demo only." loading="lazy" />
   </section>
 
   <footer>Portfolio · B. L. · <a href="https://imndevmodeai.github.io/portfolio/" style="color:var(--accent2)">imndevmodeai.github.io/portfolio</a></footer>
