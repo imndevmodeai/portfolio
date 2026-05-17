@@ -712,9 +712,9 @@
     }
     return (
       voices.find(function (v) {
-        return /Ryan|Daniel|George|UK English Male|en-GB/i.test(v.name);
+        return /Christopher|Davis|Andrew|Guy|Microsoft.*English.*Male/i.test(v.name);
       }) || voices.find(function (v) {
-        return v.lang === "en-GB";
+        return v.lang === "en-US";
       }) || voices.find(function (v) { return v.lang && v.lang.startsWith("en"); })
     );
   }
@@ -1131,6 +1131,22 @@
     { role: "narrator", say: "Competitor eight-K lands mid-run — graph replans, trace shows the branch shift." },
     { role: "decision", say: "That is a clean story — but how do I know you are not smoothing noise? Are you sure this is the right data?" },
     { role: "arche", say: "Great question. Every figure below ties to a line in the orchestration trace on the left — click a source and the log scrolls to the fetch. This session hit live billing and warehouse endpoints; vetting returned pass with three citations. If a feed fails, you will see it in trace and confidence drops — I do not swap in a polite guess." },
+    {
+      role: "arche",
+      say: "You are not short on signals—you are short on a governor. The job posting is explicit: an agent that reasons over thousands of variables—creative features, audience slices, ROAS, CPA, hook performance—and ships the next action through your VEO, Fal, ElevenLabs, sync.so pipe into Meta. That only works if automation is layered: an orchestration plane beside your Next.js and Prisma app, not a bigger prompt.",
+    },
+    {
+      role: "arche",
+      say: "Sensors are RedTrack plus account metrics landing in Postgres; Meta Marketing API is the actuator only. Thousands of levers collapse into scored actions: policy shell caps how much budget can move per hour; evidence gates block kills until an ad has enough spend; a dual-signal kill score requires CPA stress and creative embedding drift to agree. Shadow mode, then five percent canary, then autopilot with rollback. That is how you remove yourselves from the loop without removing accountability.",
+    },
+    {
+      role: "arche",
+      say: "Click the trace on the left—lever registry ingest, job graph compile, shadow kills with execute equals zero. Full threshold math stays on a paid consult—this demo shows the automation spine your stack already asked for.",
+    },
+    {
+      role: "decision",
+      say: "Thousands of variables sounds like hype. How is this different from rules in Madgicx or a spreadsheet with twenty conditions?",
+    },
   ];
 
   /* ——— Screenplay scenarios ——— */
