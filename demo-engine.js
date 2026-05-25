@@ -190,7 +190,7 @@
           pipeline: "intake",
         },
         {
-          role: "decision",
+          role: "decision_jim",
           label: ctx.titleLabel,
           say:
             "ArchE — I need one vetted monthly churn number before standup, and I need to understand why Sales, Product, and Finance still show different figures.",
@@ -284,7 +284,7 @@
           },
         },
         {
-          role: "decision",
+          role: "decision_jim",
           label: ctx.titleLabel,
           say: skeptic,
           pipeline: "answer",
@@ -368,7 +368,7 @@
           pipeline: "intake",
         },
         {
-          role: "decision",
+          role: "decision_chro",
           label: chro,
           say:
             "Simulate eighteen months of full remote-with-visits versus our current hybrid baseline. Show attrition and productivity trajectories, and tell me what breaks if we mandate too fast.",
@@ -492,7 +492,7 @@
           },
         },
         {
-          role: "decision",
+          role: "decision_chro",
           label: chro,
           say: skeptic,
           pipeline: "answer",
@@ -554,7 +554,7 @@
           pipeline: "intake",
         },
         {
-          role: "decision",
+          role: "decision_media",
           label: perfLead,
           say: ask,
           pipeline: "intake",
@@ -654,7 +654,7 @@
           tools: ["vetting"],
         },
         {
-          role: "decision",
+          role: "decision_media",
           label: perfLead,
           say: skeptic,
           pipeline: "answer",
@@ -694,33 +694,62 @@
     return window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
   }
 
+  /** Edge TTS cast: narrator + arche fixed; each business character has its own decision_* role. */
   function pickVoice(role) {
     var voices = getVoices();
     if (role === "narrator") {
       return (
         voices.find(function (v) {
-          return /Samantha|Karen|Google US English|Jenny|Aria/i.test(v.name);
+          return /Aria|Samantha|Karen|Google US English/i.test(v.name);
         }) || voices.find(function (v) { return v.lang === "en-US"; })
       );
     }
-    if (role === "decision") {
+    if (role === "arche") {
+      return (
+        voices.find(function (v) {
+          return /Ryan|Daniel|Christopher|Microsoft.*English.*Male.*GB/i.test(v.name);
+        }) ||
+        voices.find(function (v) {
+          return /Christopher|Andrew|Guy|Microsoft.*English.*Male/i.test(v.name);
+        }) ||
+        voices.find(function (v) { return v.lang === "en-GB"; }) ||
+        voices.find(function (v) { return v.lang === "en-US"; })
+      );
+    }
+    var decisionHints = {
+      decision_jim: /Andrew|Davis|Mark|David/i,
+      decision_chro: /Guy|Mark|Eric/i,
+      decision_ops: /Michelle|Samantha|Jenny|Aria/i,
+      decision_media: /Roger|Guy|Eric/i,
+      decision_jordan: /Eric|Andrew|Guy/i,
+      decision_guest: /Brian|Guy|Mark/i,
+    };
+    var hint = decisionHints[role];
+    if (hint) {
+      return (
+        voices.find(function (v) {
+          return hint.test(v.name);
+        }) || voices.find(function (v) { return v.lang && v.lang.startsWith("en"); })
+      );
+    }
+    if (role === "decision" || (role && role.indexOf("decision_") === 0)) {
       return (
         voices.find(function (v) {
           return /Guy|Mark|David|Google US English Male|Microsoft.*English.*Male/i.test(v.name);
         }) || voices.find(function (v) { return v.lang && v.lang.startsWith("en"); })
       );
     }
-    return (
-      voices.find(function (v) {
-        return /Christopher|Davis|Andrew|Guy|Microsoft.*English.*Male/i.test(v.name);
-      }) || voices.find(function (v) {
-        return v.lang === "en-US";
-      }) || voices.find(function (v) { return v.lang && v.lang.startsWith("en"); })
-    );
+    return voices.find(function (v) { return v.lang && v.lang.startsWith("en"); });
   }
 
   function defaultLabel(role) {
     if (role === "arche") return "ArchE";
+    if (role === "decision_jim") return "Jim · CFO";
+    if (role === "decision_chro") return "Chief People Officer";
+    if (role === "decision_ops") return "Director of Operations";
+    if (role === "decision_media") return "Head of Performance Marketing";
+    if (role === "decision_jordan") return "Jordan · job seeker";
+    if (role === "decision_guest") return "Decision maker";
     if (role === "decision") return "Decision maker";
     return "Play-by-play";
   }
@@ -796,9 +825,13 @@
       })
       .then(function (m) {
         audioManifest = m;
+        var castNote =
+          m && m.cast && m.cast.arche
+            ? " · ArchE=" + String(m.cast.arche).replace(/Neural.*/, "")
+            : "";
         setVoiceStatus(
           m && m.files
-            ? "Voice: Edge TTS (" + Object.keys(m.files).length + " clips)"
+            ? "Voice: Edge TTS (" + Object.keys(m.files).length + " clips)" + castNote
             : "Voice: browser fallback"
         );
         return m;
@@ -865,7 +898,7 @@
 
   function itemRate(role) {
     if (role === "narrator") return 0.98;
-    if (role === "decision") return 0.92;
+    if (role === "decision" || (role && role.indexOf("decision_") === 0)) return 0.92;
     return 0.9;
   }
 
@@ -921,7 +954,14 @@
     }
     var u = new SpeechSynthesisUtterance(item.clean);
     u.rate = itemRate(item.role);
-    u.pitch = item.role === "decision" ? 0.92 : item.role === "narrator" ? 1.05 : 1;
+    u.pitch =
+      item.role && item.role.indexOf("decision_") === 0
+        ? 0.92
+        : item.role === "decision"
+          ? 0.92
+          : item.role === "narrator"
+            ? 1.05
+            : 1;
     u.volume = 1;
     var v = pickVoice(item.role);
     if (v) u.voice = v;
@@ -1125,11 +1165,11 @@
   /* portfolio-tts-export: seeds for Edge-TTS build (representative lines; live greet uses browser if no exact MP3). */
   var __PORTFOLIO_TTS_SEEDS__ = [
     { role: "narrator", say: "Jim, Midwest subscription finance. ArchE answers with today's rhythm, recalls prior working sessions, and shows every tool call in the trace." },
-    { role: "decision", say: "ArchE — I need one vetted monthly churn number before standup, and I need to understand why Sales, Product, and Finance still show different figures." },
+    { role: "decision_jim", say: "ArchE — I need one vetted monthly churn number before standup, and I need to understand why Sales, Product, and Finance still show different figures." },
     { role: "arche", say: "Good morning, Jim. Beautiful morning your way — classic Midwest spring — warm enough to open the windows, storms still rolling through on Tuesday afternoons. Give me a moment: I am pulling what we locked on last time while billing streams in." },
     { role: "arche", say: "Jim — if you remember, last time we focused on the CRM activity metric versus cancel timestamps in billing. Today we close that loop. Headline churn is four point two percent at ninety percent confidence — billing cancellations over active subscribers, last thirty days. Sales still sees five point one because their window counts last login; Finance was blending both. I recommend billing as system of record for standup; net revenue retention band ninety-two to ninety-four percent next quarter if we patch the dictionary this week." },
     { role: "narrator", say: "Competitor eight-K lands mid-run — graph replans, trace shows the branch shift." },
-    { role: "decision", say: "That is a clean story — but how do I know you are not smoothing noise? Are you sure this is the right data?" },
+    { role: "decision_jim", say: "That is a clean story — but how do I know you are not smoothing noise? Are you sure this is the right data?" },
     { role: "arche", say: "Great question. Every figure below ties to a line in the orchestration trace on the left — click a source and the log scrolls to the fetch. This session hit live billing and warehouse endpoints; vetting returned pass with three citations. If a feed fails, you will see it in trace and confidence drops — I do not swap in a polite guess." },
     {
       role: "arche",
@@ -1144,7 +1184,7 @@
       say: "Click the trace on the left—lever registry ingest, job graph compile, shadow kills with execute equals zero. Full threshold math stays on a paid consult—this demo shows the automation spine your stack already asked for.",
     },
     {
-      role: "decision",
+      role: "decision_media",
       say: "Thousands of variables sounds like hype. How is this different from rules in Madgicx or a spreadsheet with twenty conditions?",
     },
     {
@@ -1152,7 +1192,7 @@
       say: "The Job Seeker's Vault — paid subscribers text in on SMS. Same spine as our production webhook agent: intake, memory, Vault RAG, vetting, outbound reply.",
     },
     {
-      role: "decision",
+      role: "decision_jordan",
       say: "Need a tighter resume bullet for a product manager role. I pasted the job description in my last text. Can you rewrite one bullet using my Vault playbook tone, not generic career advice?",
     },
     {
@@ -1168,7 +1208,7 @@
       say: "Try this bullet: Led cross-functional launch of a subscription analytics feature, cutting time-to-insight from weeks to days and lifting trial-to-paid conversion eight percent in two quarters. Pulled from your Vault win-story patterns — not a generic ChatGPT template. Reply STOP any time to opt out.",
     },
     {
-      role: "decision",
+      role: "decision_jordan",
       say: "That sounds polished — how do I know this is not just ChatGPT career fluff? What actually ran on your side?",
     },
     {
@@ -1212,7 +1252,7 @@
           pipeline: "intake",
         },
         {
-          role: "decision",
+          role: "decision_jordan",
           label: seeker,
           say: opener,
           pipeline: "intake",
@@ -1265,7 +1305,7 @@
           termDelay: 220,
         },
         {
-          role: "decision",
+          role: "decision_jordan",
           label: seeker,
           say: skeptic,
           pipeline: "answer",
@@ -1321,7 +1361,7 @@
           pipeline: "intake",
         },
         {
-          role: "decision",
+          role: "decision_ops",
           label: "Director of Operations",
           say: "Make this playbook queryable in chat. Small context, fast answers, escalation paths must stay exact.",
           pipeline: "intake",
@@ -1393,7 +1433,16 @@
       base.title = "Your brief (routed preview)";
       if (base.beats && base.beats[1]) {
         base.beats[1].say = q;
-        base.beats[1].role = "decision";
+        base.beats[1].role =
+          key === "a"
+            ? "decision_jim"
+            : key === "b"
+              ? "decision_chro"
+              : key === "c"
+                ? "decision_ops"
+                : key === "e"
+                  ? "decision_jordan"
+                  : "decision_guest";
         base.beats[1].label = "Decision maker (your text)";
       }
       return base;
@@ -1407,7 +1456,7 @@
           pipeline: "intake",
         },
         {
-          role: "decision",
+          role: "decision_guest",
           label: "Decision maker (your text)",
           say: q,
           pipeline: "intake",
