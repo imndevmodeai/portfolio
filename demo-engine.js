@@ -310,6 +310,8 @@
             {
               label: "Open cohort export summary (demo sheet)",
               href: "https://imndevmodeai.github.io/portfolio/#evidence-cohort-export",
+              traceAnchor: "trace-warehouse",
+              proofKey: "evidence-cohort-export",
             },
             {
               label: "Market pulse feed (demo)",
@@ -1146,16 +1148,188 @@
       (f.note ? '<p class="fc-note">' + f.note + "</p>" : "");
   }
 
+  /** CLI proof screenshots keyed by trace anchor id (without prefix) or slug */
+  var PROOF_VISUALS = {
+    "trace-billing-fetch": {
+      src: "assets/proofs/billing-fetch.svg",
+      title: "Billing stream fetch",
+      subtitle: "Live cancellation feed — orchestration trace proof",
+    },
+    "trace-recall": {
+      src: "assets/proofs/recall.svg",
+      title: "Session recall",
+      subtitle: "Prior working-session memory thread",
+    },
+    "trace-vetting": {
+      src: "assets/proofs/vetting.svg",
+      title: "Vetting bundle",
+      subtitle: "Evidence gate — PASS with citations",
+    },
+    "trace-market": {
+      src: "assets/proofs/market.svg",
+      title: "Market pulse fetch",
+      subtitle: "External market context line",
+    },
+    "trace-warehouse": {
+      src: "assets/proofs/cohort-export.svg",
+      title: "Warehouse cohort export",
+      subtitle: "Scrubbed parquet export summary",
+    },
+    "trace-workforce": {
+      src: "assets/proofs/workforce.svg",
+      title: "Workforce snapshot",
+      subtitle: "HR cohort ingest proof",
+    },
+    "trace-causal": {
+      src: "assets/proofs/causal.svg",
+      title: "Causal lag estimates",
+      subtitle: "Temporal causal inference branch",
+    },
+    "trace-abm-emergent": {
+      src: "assets/proofs/abm-emergent.svg",
+      title: "ABM emergent pattern",
+      subtitle: "Population simulation output",
+    },
+    "trace-ingest": {
+      src: "assets/proofs/ingest.svg",
+      title: "Lever registry ingest",
+      subtitle: "Thousands of dimensions indexed",
+    },
+    "trace-graph": {
+      src: "assets/proofs/graph.svg",
+      title: "Closed-loop job graph",
+      subtitle: "Orchestration graph compile",
+    },
+    "trace-policy": {
+      src: "assets/proofs/policy.svg",
+      title: "Policy shell",
+      subtitle: "Shadow mode and budget caps",
+    },
+    "trace-shadow": {
+      src: "assets/proofs/shadow.svg",
+      title: "Shadow kill log",
+      subtitle: "Logged kills — zero executed in preview",
+    },
+    "trace-webhook": {
+      src: "assets/proofs/webhook.svg",
+      title: "SMS webhook intake",
+      subtitle: "Twilio inbound proof line",
+    },
+    "trace-rag": {
+      src: "assets/proofs/rag.svg",
+      title: "Vault RAG retrieval",
+      subtitle: "Grounded chunks before outbound SMS",
+    },
+    "trace-playbook": {
+      src: "assets/proofs/playbook-index.svg",
+      title: "Playbook index",
+      subtitle: "Compressed internal doc retrieval",
+    },
+    "evidence-cohort-export": {
+      src: "assets/proofs/cohort-export.svg",
+      title: "Cohort export sheet",
+      subtitle: "Demo export summary (scrubbed)",
+    },
+  };
+
+  var activeProofLink = null;
+
+  function resolveProofVisual(source) {
+    if (!source) return null;
+    if (source.proofImage) {
+      return {
+        src: source.proofImage,
+        title: source.proofTitle || source.label || "CLI proof",
+        subtitle: source.proofSubtitle || "Orchestration trace evidence",
+      };
+    }
+    if (source.traceAnchor && PROOF_VISUALS[source.traceAnchor]) {
+      return PROOF_VISUALS[source.traceAnchor];
+    }
+    if (source.proofKey && PROOF_VISUALS[source.proofKey]) {
+      return PROOF_VISUALS[source.proofKey];
+    }
+    return {
+      src: "assets/proofs/default.svg",
+      title: source.label || "CLI proof",
+      subtitle: "Trace-linked evidence (demo)",
+    };
+  }
+
+  function flashTerminalPanel() {
+    var term = $("#terminal-out");
+    if (!term) return;
+    term.classList.remove("trace-flash");
+    void term.offsetWidth;
+    term.classList.add("trace-flash");
+    setTimeout(function () {
+      term.classList.remove("trace-flash");
+    }, 2800);
+  }
+
   function scrollToTraceAnchor(anchorId) {
-    if (!anchorId) return;
+    if (!anchorId) return null;
     var row = document.getElementById(anchorId);
     var term = $("#terminal-out");
-    if (!row || !term) return;
+    if (!row || !term) return null;
+    row.classList.remove("log-highlight");
+    void row.offsetWidth;
     row.classList.add("log-highlight");
     row.scrollIntoView({ block: "center", behavior: "smooth" });
+    flashTerminalPanel();
     setTimeout(function () {
       row.classList.remove("log-highlight");
-    }, 2600);
+    }, 3200);
+    return row;
+  }
+
+  function showProofPopup(source) {
+    var visual = resolveProofVisual(source);
+    var pop = $("#proof-popup");
+    var img = $("#proof-popup-img");
+    var titleEl = $("#proof-popup-title");
+    var subEl = $("#proof-popup-sub");
+    if (!pop || !img || !visual) return;
+    img.src = visual.src;
+    img.alt = visual.title;
+    if (titleEl) titleEl.textContent = visual.title;
+    if (subEl) subEl.textContent = visual.subtitle || "";
+    pop.classList.remove("hidden");
+    pop.classList.add("visible");
+    pop.setAttribute("aria-hidden", "false");
+    if (source && source.traceAnchor) {
+      scrollToTraceAnchor(source.traceAnchor);
+    }
+  }
+
+  function hideProofPopup() {
+    var pop = $("#proof-popup");
+    if (!pop) return;
+    pop.classList.remove("visible");
+    pop.classList.add("hidden");
+    pop.setAttribute("aria-hidden", "true");
+    if (activeProofLink) {
+      activeProofLink.classList.remove("proof-active");
+      activeProofLink = null;
+    }
+  }
+
+  function openProofEvidence(source, linkEl) {
+    if (!source) return;
+    if (activeProofLink && activeProofLink !== linkEl) {
+      activeProofLink.classList.remove("proof-active");
+    }
+    activeProofLink = linkEl || null;
+    if (linkEl) linkEl.classList.add("proof-active");
+    showProofPopup(source);
+  }
+
+  function proofFromAnchor(anchorId) {
+    if (!anchorId) return { traceAnchor: "", proofKey: "" };
+    if (PROOF_VISUALS[anchorId]) {
+      return { traceAnchor: anchorId, label: PROOF_VISUALS[anchorId].title };
+    }
+    return { traceAnchor: anchorId, label: "CLI proof line" };
   }
 
   function appendTerminal(lineOrEntry, anchorId) {
@@ -1167,7 +1341,14 @@
     var row = document.createElement("div");
     row.className = "log-line log-" + logKind(line);
     row.textContent = line;
-    if (anchor) row.id = anchor;
+    if (anchor) {
+      row.id = anchor;
+      row.classList.add("log-proof-anchor");
+      row.title = "Click for CLI proof image";
+      row.addEventListener("click", function () {
+        openProofEvidence(proofFromAnchor(anchor), null);
+      });
+    }
     term.appendChild(row);
     term.scrollTop = term.scrollHeight;
   }
@@ -1200,16 +1381,24 @@
       sources.forEach(function (s) {
         var a = document.createElement("a");
         a.textContent = s.label;
-        if (s.traceAnchor) {
-          a.href = "#" + s.traceAnchor;
+        a.className = "proof-link";
+        if (s.traceAnchor || s.proofImage || s.proofKey) {
+          a.href = "#proof-" + (s.traceAnchor || s.proofKey || "cli");
           a.addEventListener("click", function (e) {
             e.preventDefault();
-            scrollToTraceAnchor(s.traceAnchor);
+            openProofEvidence(s, a);
           });
         } else if (s.href) {
+          var cohortProof = {
+            proofKey: "evidence-cohort-export",
+            traceAnchor: s.traceAnchor || "trace-warehouse",
+            label: s.label,
+          };
           a.href = s.href;
-          a.target = "_blank";
-          a.rel = "noopener noreferrer";
+          a.addEventListener("click", function (e) {
+            e.preventDefault();
+            openProofEvidence(cohortProof, a);
+          });
         }
         ev.appendChild(a);
       });
@@ -1227,6 +1416,7 @@
     if (term) term.innerHTML = "";
     if (cast) cast.innerHTML = "";
     hideSpeakerPopup();
+    hideProofPopup();
     highlightTools([]);
     showToolSpotlight(null);
     setForecast(null);
@@ -1467,10 +1657,10 @@
         },
         {
           terminal: [
-            logLine("SESSION start  job=playbook_rag  pages=198", 0),
-            logLine("TOOL       chunk_sections=42  index_entries=812", 1),
-            logLine("TOOL       retrieve top_k=3  tokens=2.8k", 3),
-            logLine("VETTING    escalation_path=exact_match", 4),
+            termEntry(runLog("SESSION", "start  job=playbook_rag  pages=198", 0), "trace-playbook"),
+            termEntry(runLog("TOOL", "chunk_sections=42  index_entries=812", 1), "trace-playbook"),
+            termEntry(runLog("TOOL", "retrieve top_k=3  tokens=2.8k", 3), "trace-rag"),
+            termEntry(runLog("VETTING", "escalation_path=exact_match", 4), "trace-vetting"),
           ],
           pipeline: "tools",
           tools: ["compress", "research"],
@@ -1480,6 +1670,24 @@
           label: "ArchE",
           say: "Tier two escalation returns only that section with contacts. Sub second retrieval in production; this preview is illustrative.",
           pipeline: "answer",
+        },
+        {
+          role: "decision_ops",
+          label: "Director of Operations",
+          say: "Show me the CLI proof for indexing and retrieval — not a slide, the actual trace lines.",
+          pipeline: "answer",
+        },
+        {
+          role: "arche",
+          label: "ArchE",
+          say:
+            "Click any source below — the orchestration trace flashes the matching line and a proof panel opens with the scrubbed CLI capture for that step.",
+          pipeline: "answer",
+          sources: [
+            { label: "Jump to playbook index lines", traceAnchor: "trace-playbook" },
+            { label: "Jump to retrieval proof", traceAnchor: "trace-rag" },
+            { label: "Jump to vetting gate", traceAnchor: "trace-vetting" },
+          ],
         },
         {
           timeline: "T+0:12m indexed  ·  T+0:25m first vetted Q&A slice",
@@ -1671,6 +1879,7 @@
     playToken++;
     stopSpeech();
     hideSpeakerPopup();
+    hideProofPopup();
     var modal = $("#demo-modal");
     if (modal) {
       modal.classList.remove("open");
@@ -1792,8 +2001,18 @@
       $("#modal-backdrop").addEventListener("click", function () {
         closeModal();
       });
+    $("#proof-popup-close") &&
+      $("#proof-popup-close").addEventListener("click", function () {
+        hideProofPopup();
+      });
+
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape") {
+        var proof = $("#proof-popup");
+        if (proof && proof.classList.contains("visible")) {
+          hideProofPopup();
+          return;
+        }
         var modal = $("#demo-modal");
         if (modal && modal.classList.contains("open")) closeModal();
       }
