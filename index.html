@@ -192,6 +192,7 @@
     </div>
     <div id="custom-demo-panel" class="locked">
       <h3 style="font-size:1rem;color:var(--accent2)">Your question (after unlock)</h3>
+      <p class="disclaimer" style="margin:0.35rem 0 0.5rem"><strong>Live ArchE (any question):</strong> GitHub Pages is static — run <code>python3 scripts/serve_portfolio_live.py</code> from the repo, open <code>http://127.0.0.1:17890/</code>, then Run preview. Optional: <code>PORTFOLIO_CURSOR_SDK=1</code> + <code>CURSOR_API_KEY</code> for Cursor agent; else local Ollama via ArchE.</p>
       <textarea id="custom-query" placeholder="e.g. How do you automate kill decisions across thousands of creative and performance levers at $50k/day—closed loop, not manual rules?"></textarea>
       <div style="margin-top:0.5rem"><button type="button" class="btn" id="run-custom">Run preview</button></div>
     </div>
@@ -303,6 +304,6 @@
 
   <footer>Portfolio · B. L. · <a href="https://imndevmodeai.github.io/portfolio/" style="color:var(--accent2)">imndevmodeai.github.io/portfolio</a></footer>
 
-<script src="demo-engine.js"></script>
+<script src="demo-engine.js?v=live-brief-1"></script>
 </body>
 </html>

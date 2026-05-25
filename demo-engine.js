@@ -6,6 +6,11 @@
   "use strict";
 
   var ACCESS_CODE = "RESONANT-VIEW";
+  /** Live brief API — same host when using scripts/serve_portfolio_live.py */
+  var PORTFOLIO_LIVE_API =
+    window.PORTFOLIO_LIVE_API ||
+    (typeof localStorage !== "undefined" && localStorage.getItem("PORTFOLIO_LIVE_API")) ||
+    "";
   var voiceOn = true;
   var unlocked = false;
   var playToken = 0;
@@ -1880,6 +1885,82 @@
     };
   }
 
+  function resolveLiveApiUrl() {
+    if (PORTFOLIO_LIVE_API) return PORTFOLIO_LIVE_API;
+    if (typeof location !== "undefined" && /^https?:/.test(location.protocol)) {
+      var host = location.hostname;
+      if (host === "127.0.0.1" || host === "localhost") {
+        var port = location.port === "17890" ? "" : ":17890";
+        return location.protocol + "//" + host + port + "/api/portfolio/brief";
+      }
+    }
+    return "";
+  }
+
+  function hydrateTerminalEntries(entries) {
+    if (!entries || !entries.length) return [];
+    return entries.map(function (e, i) {
+      var tag = e.tag || "LOG";
+      var msg = e.msg || "";
+      var anchor = e.anchor || "";
+      return termEntry(runLog(tag, msg, i + 2), anchor || "");
+    });
+  }
+
+  function hydrateLiveBeats(rawBeats) {
+    if (!rawBeats || !rawBeats.length) return [];
+    return rawBeats.map(function (b) {
+      var beat = {};
+      if (b.role) beat.role = b.role;
+      if (b.label) beat.label = b.label;
+      if (b.say) beat.say = b.say;
+      if (b.pipeline) beat.pipeline = b.pipeline;
+      if (b.tools) beat.tools = b.tools;
+      if (b.toolFocus) beat.toolFocus = b.toolFocus;
+      if (b.timeline) beat.timeline = b.timeline;
+      if (b.termDelay) beat.termDelay = b.termDelay;
+      if (b.sources) beat.sources = b.sources;
+      if (b.terminal) beat.terminal = hydrateTerminalEntries(b.terminal);
+      if (b.terminalParallel) beat.terminalParallel = hydrateTerminalEntries(b.terminalParallel);
+      return beat;
+    });
+  }
+
+  function fetchLiveBrief(query) {
+    var url = resolveLiveApiUrl();
+    if (!url || !query) return Promise.resolve(null);
+    var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+    var timer = ctrl
+      ? setTimeout(function () {
+          ctrl.abort();
+        }, 120000)
+      : null;
+    return fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ query: query }),
+      signal: ctrl ? ctrl.signal : undefined,
+    })
+      .then(function (r) {
+        if (!r.ok) throw new Error("brief api " + r.status);
+        return r.json();
+      })
+      .then(function (payload) {
+        if (!payload || !payload.ok || !payload.beats || !payload.beats.length) return null;
+        return {
+          title: payload.title || "Your brief (live ArchE)",
+          beats: hydrateLiveBeats(payload.beats),
+          engine: payload.engine || "live",
+        };
+      })
+      .catch(function () {
+        return null;
+      })
+      .finally(function () {
+        if (timer) clearTimeout(timer);
+      });
+  }
+
   function buildCustomScenario(q) {
     var key = routeQuery(q);
     if (key === "d") {
@@ -2108,29 +2189,46 @@
       alert("Unlock consult preview (code from proposal) for the paid-media scenario and custom brief.");
       return;
     }
-    activeScenario =
-      customQuery != null
-        ? buildCustomScenario(customQuery)
-        : key === "a"
-          ? buildScenarioA(getLiveContext())
-          : key === "b"
-            ? buildScenarioB(getLiveContext())
-            : key === "d"
-              ? buildScenarioD()
-              : key === "e"
-                ? buildScenarioE()
-                : JSON.parse(JSON.stringify(SCENARIOS[key]));
     openModal();
-    var title = $("#theater-title");
-    if (title) title.textContent = activeScenario.title;
     var play = $("#play-demo");
     if (play) {
       play.disabled = true;
       play.textContent = "Running…";
     }
-    loadManifest().then(function () {
-      playScenario(activeScenario);
-    });
+    var titleEl = $("#theater-title");
+
+    function runWithScenario(scenario) {
+      activeScenario = scenario;
+      if (titleEl) titleEl.textContent = activeScenario.title;
+      loadManifest().then(function () {
+        playScenario(activeScenario);
+      });
+    }
+
+    if (customQuery != null) {
+      if (titleEl) titleEl.textContent = "Your brief — calling live ArchE…";
+      setTimeline("Live brief: Cursor SDK or local LLM (when API is reachable)…");
+      fetchLiveBrief(customQuery).then(function (live) {
+        if (live) {
+          runWithScenario(live);
+        } else {
+          runWithScenario(buildCustomScenario(customQuery));
+        }
+      });
+      return;
+    }
+
+    activeScenario =
+      key === "a"
+        ? buildScenarioA(getLiveContext())
+        : key === "b"
+          ? buildScenarioB(getLiveContext())
+          : key === "d"
+            ? buildScenarioD()
+            : key === "e"
+              ? buildScenarioE()
+              : JSON.parse(JSON.stringify(SCENARIOS[key]));
+    runWithScenario(activeScenario);
   }
 
   function init() {
