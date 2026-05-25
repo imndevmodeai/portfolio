@@ -84,7 +84,8 @@
   /* ——— Timestamps for terminal ——— */
   var clockStart = 0;
   function ts(offsetSec) {
-    var d = new Date(Date.now() - clockStart + offsetSec * 1000);
+    var base = clockStart > 0 ? clockStart : Date.now();
+    var d = new Date(base + (offsetSec || 0) * 1000);
     return d.toISOString().replace("T", " ").slice(0, 19);
   }
 
@@ -1230,6 +1231,26 @@
       title: "Cohort export sheet",
       subtitle: "Demo export summary (scrubbed)",
     },
+    "trace-local-market": {
+      src: "assets/proofs/local-market.svg",
+      title: "Local market scan",
+      subtitle: "SW Michigan demand and competitor density",
+    },
+    "trace-reviews": {
+      src: "assets/proofs/reviews.svg",
+      title: "Review velocity",
+      subtitle: "Google Business Profile trend",
+    },
+    "trace-competitor": {
+      src: "assets/proofs/competitor-scan.svg",
+      title: "Competitor price band",
+      subtitle: "Installed price quotes — scrubbed",
+    },
+    "trace-margin": {
+      src: "assets/proofs/margin-model.svg",
+      title: "Margin model",
+      subtitle: "Profit vs review-risk tradeoff",
+    },
   };
 
   var activeProofLink = null;
@@ -1706,7 +1727,157 @@
     if (/playbook|rag|doc|compress/.test(t)) return "c";
     if (/sms|twilio|job search coach|job seeker|vault|resume bullet|linkedin headline|referral message|interview practice|accountability/.test(t))
       return "e";
+    if (
+      /window|door|home improvement|remodel|contractor|installer|siding|glass|profit|margin|review|google business|yelp|competit|local market|southwest michigan|kalamazoo|grand rapids|battle creek|niles|berrien|van buren/.test(
+        t
+      )
+    )
+      return "local";
     return "custom";
+  }
+
+  /** Custom brief — local home services (windows/doors, reviews, regional competition). */
+  function buildScenarioLocalServices(q) {
+    var ctx = getLiveContext();
+    var region = "southwest Michigan";
+    if (/kalamazoo/.test(q.toLowerCase())) region = "Kalamazoo / southwest Michigan";
+    else if (/grand rapids/.test(q.toLowerCase())) region = "Grand Rapids / west Michigan";
+    else if (/battle creek|niles|berrien/.test(q.toLowerCase())) region = "Berrien–Cass corridor";
+
+    var guestLabel = "Decision maker (your text)";
+    var archeLabel = "ArchE";
+    var skeptic =
+      "Every installer says they are competitive — how do I know this is not generic advice? Show me what ran.";
+    var proofReply =
+      "Fair question. Click each source — the trace flashes the matching CLI line and opens the scrubbed proof capture. " +
+      "This preview uses demo endpoints; production wires your CRM, ad accounts, and review APIs with your thresholds.";
+
+    var answer =
+      "Here is the balanced play for " +
+      region +
+      ": hold installed margin in a band roughly eighteen to twenty-two percent on standard replacement jobs — not race to the bottom on bid boards. " +
+      "Protect reviews by capping concurrent installs per crew, posting completion photos within forty-eight hours, and routing detractors to a human callback inside two hours — that keeps star rating velocity above four point six while you still win price-sensitive leads. " +
+      "Competitive position: cluster Google Local Services and Meta within a fifteen-mile radius of your shop, emphasize warranty and lead-time honesty in copy, and raise price only on surge weeks when competitor quotes lag more than six days — that is where profit lifts without review bleed.";
+
+    return {
+      title: "Local services — profit, reviews, competition (your brief)",
+      beats: [
+        {
+          role: "narrator",
+          label: "Play-by-play",
+          say:
+            "Regional installer brief — windows and doors, southwest Michigan. ArchE pulls local demand, competitor quotes, and review velocity before recommending a margin band.",
+          pipeline: "intake",
+        },
+        {
+          role: "decision_guest",
+          label: guestLabel,
+          say: q,
+          pipeline: "intake",
+        },
+        {
+          terminal: [
+            termEntry(runLog("TEMPORAL", "viewer_local=" + ctx.clockLocal + "  region=" + region.replace(/\s/g, "_"), 0), "trace-temporal"),
+            termEntry(runLog("SESSION", "run_id=" + DEMO_RUN_ID + "  vertical=home_services  mode=live_validation", 1), "trace-session"),
+            termEntry(runLog("INVOKE", "workflow=local_growth_margin  step=decompose_intent", 2)),
+            termEntry(runLog("MAP", "entities=profit,reviews,competition,install_capacity  market=" + region, 3), "trace-map-problem"),
+          ],
+          termDelay: 280,
+          pipeline: "plan",
+          tools: ["llm", "workflow"],
+        },
+        {
+          role: "arche",
+          label: archeLabel,
+          say:
+            ctx.greet +
+            ". I am pulling " +
+            region +
+            " demand signals, competitor install quotes, and your review trend before I recommend a margin band — give me a moment on the trace.",
+          pipeline: "plan",
+          terminalParallel: [
+            termEntry(runLog("FETCH", "local_market_scan  uri=https://markets.demo/local/sw-mi-windows-doors  status=200", 4), "trace-local-market"),
+            termEntry(runLog("FETCH", "google_business_reviews  uri=https://reviews.demo/gbp/scrub-installer  samples=90d", 5), "trace-reviews"),
+            termEntry(runLog("FETCH", "competitor_quotes  uri=https://research.demo/bids/sw-mi-replacement  n=38", 6), "trace-competitor"),
+          ],
+          termDelay: 260,
+        },
+        {
+          toolFocus: {
+            tool: "research",
+            doing: "Synthesizing bid-board spreads, seasonality, and review-risk curves for replacement windows and entry doors.",
+            tie: "Lines tagged trace-competitor and trace-reviews below.",
+            also: ["research", "live", "vetting"],
+            forecast: "Margin band tightening around eighteen to twenty-two percent with review guardrails.",
+          },
+          terminal: [
+            termEntry(runLog("CALC", "price_band=mid_market  competitor_undercut_pct=7.2", 7), "trace-competitor"),
+            termEntry(runLog("CALC", "review_velocity=4.61  detractor_callback_sla=2h", 8), "trace-reviews"),
+            termEntry(runLog("CALC", "margin_model  target=18-22%  surge_week=+4pt_max", 9), "trace-margin"),
+            termEntry(runLog("LINK", "margin_model → campaign_copy=lead_time_honesty", 10)),
+          ],
+          termDelay: 240,
+          pipeline: "tools",
+          tools: ["research", "live", "vetting"],
+          forecast: {
+            title: "While local evidence lands",
+            rows: [
+              { label: "Competitive undercut risk", pct: 68, value: "7.2%" },
+              { label: "Review floor (90d)", pct: 84, value: "4.6★" },
+              { label: "Target margin band", pct: 78, value: "18–22%" },
+            ],
+            note: "Vetting gate locks numbers before answer ships.",
+          },
+        },
+        {
+          role: "arche",
+          label: archeLabel,
+          say: answer,
+          pipeline: "vet",
+          tools: ["vetting", "research"],
+        },
+        {
+          terminal: [
+            termEntry(runLog("VETTING", "claims=local_market+reviews+margin  status=PASS  conf=0.84", 11), "trace-vetting"),
+            termEntry(runLog("SRC", "evidence_bundle=EB-LOCAL-03  citations=4  check=PASS", 12), "trace-vetting"),
+          ],
+          termDelay: 240,
+          pipeline: "vet",
+          tools: ["vetting"],
+        },
+        {
+          role: "decision_guest",
+          label: guestLabel,
+          say: skeptic,
+          pipeline: "answer",
+        },
+        {
+          role: "arche",
+          label: archeLabel,
+          say: proofReply,
+          pipeline: "answer",
+          sources: [
+            { label: "Jump to local market scan", traceAnchor: "trace-local-market" },
+            { label: "Jump to review velocity proof", traceAnchor: "trace-reviews" },
+            { label: "Jump to competitor quote band", traceAnchor: "trace-competitor" },
+            { label: "Jump to margin model line", traceAnchor: "trace-margin" },
+            { label: "Jump to vetting bundle", traceAnchor: "trace-vetting" },
+          ],
+        },
+        {
+          timeline: "T+0:45m vetted brief  ·  T+7d campaign test  ·  T+30d margin vs review scorecard",
+          pipeline: "answer",
+        },
+        {
+          terminal: [
+            termEntry(runLog("ANSWER", "region=" + region.replace(/\s/g, "_") + "  margin_band=18-22%  conf=0.84", 13), "trace-answer"),
+            termEntry(runLog("SESSION", "complete  duration=22m05s  run_id=" + DEMO_RUN_ID, 14)),
+          ],
+          termDelay: 220,
+          pipeline: "answer",
+        },
+      ],
+    };
   }
 
   function buildCustomScenario(q) {
@@ -1720,6 +1891,9 @@
       var sms = buildScenarioE(q);
       sms.title = "Your brief — SMS Vault RAG coach (preview)";
       return sms;
+    }
+    if (key === "local") {
+      return buildScenarioLocalServices(q);
     }
     if (key !== "custom") {
       var base =
@@ -1747,6 +1921,7 @@
       }
       return base;
     }
+    var ctx = getLiveContext();
     return {
       title: "Your brief (generic preview)",
       beats: [
@@ -1762,16 +1937,47 @@
           pipeline: "intake",
         },
         {
+          terminal: [
+            termEntry(runLog("SESSION", "run_id=" + DEMO_RUN_ID + "  mode=custom_preview", 0), "trace-session"),
+            termEntry(runLog("INVOKE", "workflow=custom_intake  step=decompose_intent", 1)),
+            termEntry(runLog("MAP", "intent=" + q.slice(0, 72) + (q.length > 72 ? "…" : ""), 2), "trace-map-problem"),
+          ],
+          termDelay: 280,
           tools: ["llm", "research", "live", "vetting", "workflow"],
           pipeline: "plan",
         },
         {
-          terminal: [logLine("PLAN  intent=" + q.slice(0, 60) + (q.length > 60 ? "…" : ""), 0)],
+          role: "arche",
+          label: "ArchE",
+          say:
+            ctx.greet +
+            ". I am routing your brief through research, live evidence, and vetting — watch the trace populate, then I will return a confidence-bounded answer.",
           pipeline: "plan",
+          terminalParallel: [
+            termEntry(runLog("FETCH", "research_synthesis  uri=https://research.demo/brief/custom  status=200", 3), "trace-market"),
+            termEntry(runLog("FETCH", "live_pulse  uri=https://api.demo/status/scrub  latency_ms=310", 4), "trace-billing-fetch"),
+          ],
+          termDelay: 260,
         },
         {
           role: "arche",
-          say: "I would parallelize live evidence gathering, run vetting before synthesis, and return confidence-bounded answers with an explicit ETA. Book a consult for a live run on your stack.",
+          label: "ArchE",
+          say:
+            "I would parallelize live evidence gathering, run vetting before synthesis, and return confidence-bounded answers with an explicit ETA. " +
+            "For a full production run on your stack — CRM, ads, ops data — book a consult; this page shows the orchestration shape.",
+          pipeline: "answer",
+          sources: [
+            { label: "Jump to intent map line", traceAnchor: "trace-map-problem" },
+            { label: "Jump to research fetch", traceAnchor: "trace-market" },
+            { label: "Jump to live pulse", traceAnchor: "trace-billing-fetch" },
+          ],
+        },
+        {
+          terminal: [
+            termEntry(runLog("VETTING", "custom_brief  status=PASS  conf=0.78", 5), "trace-vetting"),
+            termEntry(runLog("ANSWER", "mode=generic_preview  consult=recommended", 6)),
+          ],
+          termDelay: 220,
           pipeline: "answer",
         },
         { timeline: "T+0:20m first vetted slice  ·  T+4h decision-grade brief", pipeline: "answer" },
