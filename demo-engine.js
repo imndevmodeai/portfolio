@@ -1219,6 +1219,14 @@
       role: "narrator",
       say: "Vetting gate before send — coaching copy must be grounded or it does not ship on SMS.",
     },
+    {
+      role: "decision_chro",
+      say: "Simulate eighteen months of full remote-with-visits versus our current hybrid baseline. Show attrition and productivity trajectories, and tell me what breaks if we mandate too fast.",
+    },
+    {
+      role: "decision_chro",
+      say: "That reads polished — but how do I know this is not HR-flavored fiction? What actually ran, and what would break my credibility in the room?",
+    },
   ];
 
   function buildScenarioE(userQuery) {
