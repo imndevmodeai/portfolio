@@ -526,168 +526,6 @@
     };
   }
 
-  /** Scenario D — paid media: thousands of levers, automated closed loop (RESONANT-VIEW). */
-  function buildScenarioD(userQuery) {
-    var perfLead = "Head of Performance Marketing";
-    var archeLabel = "ArchE";
-    var defaultAsk =
-      "How would you architect a kill-the-losing-ad rule safe at fifty thousand dollars a day—when the account has thousands of levers and the goal is full automation, not humans tuning each dial?";
-    var ask = (userQuery && String(userQuery).trim()) || defaultAsk;
-
-    var expertAnswer =
-      "You are not short on signals—you are short on a governor. The job posting is explicit: an agent that reasons over thousands of variables—creative features, audience slices, ROAS, CPA, hook performance—and ships the next action through your VEO, Fal, ElevenLabs, sync.so pipe into Meta. That only works if automation is layered: an orchestration plane beside your Next.js and Prisma app, not a bigger prompt. Sensors are RedTrack plus account metrics landing in Postgres; Meta Marketing API is the actuator only. Every proposed kill, launch, or budget shift is a versioned job in the graph with tool contracts per step—planner, render QC, attribution ingest, policy check—so one bad LLM narration cannot move spend. Thousands of levers collapse into scored actions: policy shell caps how much budget can move per hour; evidence gates block kills until an ad has enough spend and conversions for its objective class; a dual-signal kill score requires CPA stress and creative embedding drift to agree. Shadow mode logs decisions without executing, then a five percent canary slice, then autopilot with rollback if portfolio CPA breaches band after a kill batch. That is how you remove yourselves from the loop without removing accountability.";
-
-    var proofReply =
-      "Click the trace on the left—lever registry ingest, job graph compile, shadow kills with execute equals zero. This preview is illustrative; production wires your live RedTrack fields and Prisma audit tables. Full threshold math and rollback rules stay on a paid consult—this demo shows the conversation shape and the automation spine your stack already asked for.";
-
-    var skeptic =
-      "Thousands of variables sounds like hype. How is this different from rules in Madgicx or a spreadsheet with twenty conditions?";
-
-    return {
-      title: "Paid media — thousands of levers, automated closed loop",
-      consultOnly: true,
-      beats: [
-        {
-          role: "narrator",
-          label: "Play-by-play",
-          say: "E-commerce performance agency, fifty thousand a day in spend. They want a closed loop: research, creative, Meta launch, live performance feeding back into what gets built next—with humans stepping out of the loop. ArchE models the orchestration plane, not a single kill switch.",
-          pipeline: "intake",
-        },
-        {
-          role: "decision",
-          label: perfLead,
-          say: ask,
-          pipeline: "intake",
-        },
-        {
-          role: "narrator",
-          label: "Analyst booth",
-          say: "Watch the rack ingest thousands of levers—creative embeddings, audience dimensions, ROAS and CPA slices, hook proxies—then compile an automated job graph. Shadow mode only in this preview: kills are logged, not sent to Meta.",
-          pipeline: "plan",
-          tools: ["live", "compress", "research", "causal", "abm", "vetting", "workflow", "llm"],
-        },
-        {
-          toolFocus: {
-            tool: "live",
-            doing:
-              "Streaming Meta insights plus RedTrack attribution into the feature store—hourly performance slices keyed by creative id.",
-            tie: "Lines tagged trace-ingest below; these are the sensors, not the brain.",
-            also: ["live", "workflow"],
-            forecast: "Feature rows landing for multimodal RAG over creative plus outcome vectors.",
-          },
-          terminal: [
-            termEntry(runLog("SESSION", "job=closed_loop_media  spend_band=50k/day  mode=shadow", 0)),
-            termEntry(runLog("INGEST", "lever_registry  creative_features=1842  audience_dims=396  budget_slices=612", 1), "trace-ingest"),
-            termEntry(runLog("INGEST", "signals=ROAS,CPA,hook_retention,thumb_stop,embed_distance  total_dims=2850", 2), "trace-ingest"),
-            termEntry(runLog("STORE", "postgres.feature_store  vectors=multimodal_rag  refresh=hourly", 3), "trace-ingest"),
-          ],
-          termDelay: 260,
-          pipeline: "tools",
-          tools: ["live", "compress"],
-        },
-        {
-          toolFocus: {
-            tool: "workflow",
-            doing:
-              "Compiling job graph: planner issues tool contracts to research, script, VEO/Fal/ElevenLabs/sync.so QC, then Meta actuator—each step scoped, retries bounded.",
-            tie: "Orchestration plane beside Vercel app; agents write through APIs you already trust.",
-            also: ["workflow", "llm", "vetting"],
-            forecast: "Closed loop propose → shadow log → canary → promote when gates pass.",
-          },
-          terminal: [
-            termEntry(runLog("GRAPH", "nodes=research|angle|render_qc|meta_launch|perf_feedback", 4), "trace-graph"),
-            termEntry(runLog("GRAPH", "edge=perf_feedback→rag_retrain→planner  loop=closed", 5), "trace-graph"),
-            termEntry(runLog("POLICY", "shell=ON  max_budget_move=8%/hr  max_kills=12/window", 6), "trace-policy"),
-            termEntry(runLog("MODE", "shadow=ON  canary=5%  execute_meta=BLOCKED", 7), "trace-policy"),
-          ],
-          termDelay: 240,
-          pipeline: "tools",
-          tools: ["workflow", "llm"],
-          forecast: {
-            title: "Automation spine — while graph compiles",
-            rows: [
-              { label: "Levers indexed", pct: 88, value: "2,850 dims" },
-              { label: "Human gates", pct: 72, value: "gradual exit" },
-              { label: "Shadow confidence", pct: 79, value: "79%" },
-            ],
-            note: "Kill score runs in log-only mode until canary promotion.",
-          },
-        },
-        {
-          toolFocus: {
-            tool: "causal",
-            doing:
-              "Ranking which lever families actually move CPA—creative drift vs audience fatigue vs budget pacing—not correlating noise.",
-            tie: "Causal lag estimates inform kill-score weights; tagged trace-causal.",
-            also: ["causal", "abm"],
-          },
-          terminal: [
-            termEntry(runLog("INVOKE", "tool=causal_inference  families=creative|audience|pacing", 8), "trace-causal"),
-            termEntry(runLog("CALC", "lag=hook_retention→CPA  weeks=1-2  conf=0.76", 9), "trace-causal"),
-            termEntry(runLog("SCORE", "kill_candidates=37  dual_signal_required=YES", 10), "trace-score"),
-          ],
-          termDelay: 220,
-          pipeline: "tools",
-          tools: ["causal", "abm"],
-        },
-        {
-          role: "arche",
-          label: archeLabel,
-          say: expertAnswer,
-          pipeline: "vet",
-          tools: ["vetting", "workflow", "live"],
-        },
-        {
-          role: "narrator",
-          label: "Play-by-play",
-          say: "Vetting gate: no external spend change in shadow. Every automated decision still emits a JSON trace—features, rule version, model route—so you can debug a two a.m. kill without guessing.",
-          pipeline: "vet",
-        },
-        {
-          terminal: [
-            termEntry(runLog("VETTING", "governance_layer  status=PASS  shadow_only=YES", 11), "trace-vetting"),
-            termEntry(runLog("SHADOW", "kills_logged=14  kills_executed=0  canary_slice=5%", 12), "trace-shadow"),
-            termEntry(runLog("AUDIT", "trace=preview-media-9c4e  rollback_armed=YES", 13), "trace-vetting"),
-          ],
-          termDelay: 240,
-          pipeline: "vet",
-          tools: ["vetting"],
-        },
-        {
-          role: "decision",
-          label: perfLead,
-          say: skeptic,
-          pipeline: "answer",
-        },
-        {
-          role: "arche",
-          label: archeLabel,
-          say: proofReply,
-          pipeline: "answer",
-          sources: [
-            { label: "Jump to lever registry ingest", traceAnchor: "trace-ingest" },
-            { label: "Jump to closed-loop job graph", traceAnchor: "trace-graph" },
-            { label: "Jump to policy shell and shadow mode", traceAnchor: "trace-policy" },
-            { label: "Jump to shadow kill log", traceAnchor: "trace-shadow" },
-          ],
-        },
-        {
-          timeline: "T+0:7d shadow log only  ·  T+14d 5% canary on kills and launches  ·  T+28d autopilot with portfolio rollback",
-          pipeline: "answer",
-        },
-        {
-          terminal: [
-            termEntry(runLog("ANSWER", "architecture=orchestration_plane  levers=automated  meta=actuator_only", 14), "trace-answer"),
-            termEntry(runLog("FORECAST", "human_review=gradual_exit  consult=thresholds_on_call", 15)),
-            termEntry(runLog("SESSION", "complete  mode=consult_preview  run_id=" + DEMO_RUN_ID, 16)),
-          ],
-          termDelay: 220,
-          pipeline: "answer",
-        },
-      ],
-    };
-  }
-
 
   /* ——— Voices: queued, full text, three roles ——— */
   function getVoices() {
@@ -712,9 +550,9 @@
     }
     return (
       voices.find(function (v) {
-        return /Christopher|Davis|Andrew|Guy|Microsoft.*English.*Male/i.test(v.name);
+        return /Ryan|Daniel|George|UK English Male|en-GB/i.test(v.name);
       }) || voices.find(function (v) {
-        return v.lang === "en-US";
+        return v.lang === "en-GB";
       }) || voices.find(function (v) { return v.lang && v.lang.startsWith("en"); })
     );
   }
@@ -1131,82 +969,71 @@
     { role: "narrator", say: "Competitor eight-K lands mid-run — graph replans, trace shows the branch shift." },
     { role: "decision", say: "That is a clean story — but how do I know you are not smoothing noise? Are you sure this is the right data?" },
     { role: "arche", say: "Great question. Every figure below ties to a line in the orchestration trace on the left — click a source and the log scrolls to the fetch. This session hit live billing and warehouse endpoints; vetting returned pass with three citations. If a feed fails, you will see it in trace and confidence drops — I do not swap in a polite guess." },
-    {
-      role: "arche",
-      say: "You are not short on signals—you are short on a governor. The job posting is explicit: an agent that reasons over thousands of variables—creative features, audience slices, ROAS, CPA, hook performance—and ships the next action through your VEO, Fal, ElevenLabs, sync.so pipe into Meta. That only works if automation is layered: an orchestration plane beside your Next.js and Prisma app, not a bigger prompt.",
-    },
-    {
-      role: "arche",
-      say: "Sensors are RedTrack plus account metrics landing in Postgres; Meta Marketing API is the actuator only. Thousands of levers collapse into scored actions: policy shell caps how much budget can move per hour; evidence gates block kills until an ad has enough spend; a dual-signal kill score requires CPA stress and creative embedding drift to agree. Shadow mode, then five percent canary, then autopilot with rollback. That is how you remove yourselves from the loop without removing accountability.",
-    },
-    {
-      role: "arche",
-      say: "Click the trace on the left—lever registry ingest, job graph compile, shadow kills with execute equals zero. Full threshold math stays on a paid consult—this demo shows the automation spine your stack already asked for.",
-    },
-    {
-      role: "decision",
-      say: "Thousands of variables sounds like hype. How is this different from rules in Madgicx or a spreadsheet with twenty conditions?",
-    },
   ];
-
-  function buildScenarioE(userQuery) {
-    var q = userQuery || "SMS job search coach with Vault RAG";
-    return {
-      title: "SMS job coach — Vault RAG (Twilio-class channel)",
-      beats: [
-        {
-          role: "narrator",
-          label: "Channel adapter",
-          say: "Inbound SMS webhook — same architecture as production Telegram: message in, memory keyed by phone, grounded reply out. Twilio is transport swap only.",
-          pipeline: "intake",
-        },
-        {
-          role: "decision",
-          label: "Product owner",
-          say: q.slice(0, 220),
-          pipeline: "intake",
-        },
-        {
-          role: "narrator",
-          label: "RAG booth",
-          say: "Vault chunks indexed — resume bullets, JD decode, LinkedIn copy, outreach scripts, interview practice, daily accountability. Generic career fluff blocked at vetting.",
-          pipeline: "plan",
-          tools: ["compress", "research", "llm", "vetting", "workflow"],
-        },
-        {
-          terminal: [
-            logLine("WEBHOOK   inbound sms from=+1***  bytes=142", 0),
-            logLine("MEMORY    thread_id=phone_hash  turns=7", 1),
-            logLine("RAG       retrieve top_k=4 vault_chunks=11  tokens=3.1k", 2),
-            logLine("OPENAI    intent=rewrite_resume_bullet  model=gpt-4o-mini", 3),
-            logLine("VETTING   grounded=yes  generic_advice=blocked", 4),
-            logLine("OUTBOUND  twilio_reply segments=1  chars=312", 5),
-          ],
-          pipeline: "tools",
-          tools: ["compress", "llm", "vetting"],
-        },
-        {
-          role: "arche",
-          label: "ArchE",
-          say: "Here is a tighter resume bullet grounded in your Vault playbook — not generic ChatGPT career text. STOP to opt out any time.",
-          pipeline: "answer",
-        },
-        {
-          timeline: "M1: ingest Vault → M2: webhook loop → M3: Systeme paid-user gate + admin log",
-          pipeline: "answer",
-        },
-      ],
-    };
-  }
 
   /* ——— Screenplay scenarios ——— */
   var SCENARIOS = {
     a: { hydrate: true },
-    /* Scenario D built at runtime via buildScenarioD() — thousands of levers, automated closed loop */
-    d: null,
+    d: {
+      title: "Paid media — governed kill rules ($50k/day preview)",
+      consultOnly: true,
+      beats: [
+        {
+          role: "narrator",
+          label: "Play-by-play",
+          say: "Performance agency, fifty thousand a day in spend. They want autopilot kill rules that won't torch the account. ArchE drafts governance, not a slogan.",
+          pipeline: "intake",
+        },
+        {
+          role: "decision",
+          label: "Head of Performance Marketing",
+          say: "How do we kill losing ads on autopilot without blowing up a fifty thousand dollar day? I need evidence gates, not vibes.",
+          pipeline: "intake",
+        },
+        {
+          role: "narrator",
+          label: "Analyst booth",
+          say: "Watch the rack: live creative performance feeds, causal lag checks, agent simulation, vetting. Shadow mode first — no spend change in this preview.",
+          pipeline: "plan",
+          tools: ["live", "causal", "abm", "vetting", "workflow", "llm"],
+        },
+        {
+          terminal: [
+            logLine("SESSION start  job=media_governance  spend_band=50k/day", 0),
+            logLine("PLAN       shadow_mode=ON  canary=5%  kill_cap=8%/hr", 1),
+            logLine("TOOL       live_feed:meta_insights  creatives=214", 2),
+            logLine("TOOL       feature_snapshot  CPA,ROAS,hook_retention", 3),
+          ],
+          pipeline: "tools",
+        },
+        {
+          role: "arche",
+          label: "ArchE",
+          say: "Dual signal kill score: CPA breach plus creative embedding drift. No kill until minimum spend and impressions. Circuit breaker if more than eight percent of budget moves in one hour.",
+          pipeline: "tools",
+          tools: ["vetting", "live", "causal"],
+        },
+        {
+          timeline: "T+0:7d shadow log only  ·  T+14d 5% canary  ·  T+28d autopilot with rollback",
+          pipeline: "answer",
+        },
+        {
+          role: "arche",
+          label: "ArchE",
+          say: "Every kill emits a JSON trace: features, rule version, model id. If portfolio CPA breaches band after a batch, auto rollback. That's how you earn autopilot on real money.",
+          pipeline: "answer",
+        },
+        {
+          terminal: [
+            logLine("AUDIT      trace=preview-7f2a  kills=0  shadow_only", 10),
+            logLine("SESSION    complete  consult_preview", 11),
+          ],
+          pipeline: "answer",
+        },
+      ],
+    },
     /* Scenario B built at runtime via buildScenarioB() — mapper-depth trace + dual-layer answer */
     b: null,
-    e: null,
     c: {
       title: "Ops playbook — queryable in minutes",
       beats: [
@@ -1255,37 +1082,20 @@
 
   function routeQuery(q) {
     var t = q.toLowerCase();
-    if (/kill|losing ad|roas|cpa|meta|creative|ads|autopilot|50k|media|lever|thousand|variable|closed.?loop|veo|redtrack|orchestrat/.test(t))
-      return "d";
+    if (/kill|losing ad|roas|cpa|meta|creative|ads|autopilot|50k|media/.test(t)) return "d";
     if (/churn|dashboard|disagree|metric/.test(t)) return "a";
     if (/policy|simulate|18|remote|retention/.test(t)) return "b";
     if (/playbook|rag|doc|compress/.test(t)) return "c";
-    if (/sms|twilio|job search coach|job seeker|vault|resume bullet|linkedin headline|referral message|interview practice|accountability/.test(t))
-      return "e";
     return "custom";
   }
 
   function buildCustomScenario(q) {
     var key = routeQuery(q);
-    if (key === "d") {
-      var media = buildScenarioD(q);
-      media.title = "Your brief — thousands of levers, automated (preview)";
-      return media;
-    }
-    if (key === "e") {
-      var sms = buildScenarioE(q);
-      sms.title = "Your brief — SMS Vault RAG coach (preview)";
-      return sms;
-    }
     if (key !== "custom") {
       var base =
         key === "a"
           ? buildScenarioA(getLiveContext())
-          : key === "b"
-            ? buildScenarioB(getLiveContext())
-            : key === "e"
-              ? buildScenarioE(q)
-              : JSON.parse(JSON.stringify(SCENARIOS[key]));
+          : JSON.parse(JSON.stringify(SCENARIOS[key]));
       base.title = "Your brief (routed preview)";
       if (base.beats && base.beats[1]) {
         base.beats[1].say = q;
@@ -1445,11 +1255,7 @@
           ? buildScenarioA(getLiveContext())
           : key === "b"
             ? buildScenarioB(getLiveContext())
-            : key === "d"
-              ? buildScenarioD()
-              : key === "e"
-                ? buildScenarioE()
-                : JSON.parse(JSON.stringify(SCENARIOS[key]));
+            : JSON.parse(JSON.stringify(SCENARIOS[key]));
     openModal();
     var title = $("#theater-title");
     if (title) title.textContent = activeScenario.title;

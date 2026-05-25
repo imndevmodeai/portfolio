@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Work samples — SMS RAG &amp; webhook agents</title>
+  <style>
+    :root { --bg:#0a0a0f; --fg:#e4e4e7; --accent:#22d3ee; --muted:#a1a1aa; }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--fg); max-width: 52rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.55; }
+    h1 { font-size: 1.35rem; }
+    a { color: var(--accent); }
+    .card { border: 1px solid #27272a; border-radius: 8px; padding: 1rem; margin: 1rem 0; background: rgba(0,0,0,.35); }
+    .card h2 { margin: 0 0 .5rem; font-size: 1rem; color: var(--accent); }
+    p { margin: .4rem 0; font-size: 0.92rem; }
+    footer { margin-top: 2rem; font-size: 0.8rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <h1>Public work samples (Upwork-safe links)</h1>
+  <p>Sanitized proof — no private repos, no client data, no credentials.</p>
+  <p><strong>Live demo:</strong> <a href="https://imndevmodeai.github.io/portfolio/">imndevmodeai.github.io/portfolio</a> — open scenario <strong>E</strong> (SMS job coach).</p>
+
+  <div class="card">
+    <h2>01 — SMS job search coach MVP</h2>
+    <p>Twilio inbound webhook, per-phone memory, Vault RAG, OpenAI intents, vetting, STOP + admin log, Systeme paid-user gate.</p>
+    <p><a href="case-studies/01-sms-rag-job-coach-mvp.md">Read case study (GitHub)</a></p>
+  </div>
+  <div class="card">
+    <h2>02 — Webhook agent channel (Telegram → SMS-equivalent)</h2>
+    <p>24/7 webhook agent architecture: normalize message → memory → RAG → LLM → reply. SMS is a transport swap.</p>
+    <p><a href="case-studies/02-telegram-webhook-agent-channel.md">Read case study (GitHub)</a></p>
+  </div>
+  <div class="card">
+    <h2>03 — Knowledge-base RAG assistant</h2>
+    <p>Indexed playbooks / Vault chunks before generation; block generic career fluff.</p>
+    <p><a href="case-studies/03-knowledge-base-rag-assistant.md">Read case study (GitHub)</a></p>
+  </div>
+  <div class="card">
+    <h2>04 — OpenAI automation governance</h2>
+    <p>Confidence scores, vetting gates, JSON audit traces on every automated decision.</p>
+    <p><a href="case-studies/04-openai-automation-governance.md">Read case study (GitHub)</a></p>
+  </div>
+
+  <p><a href="GITHUB_WORK_SAMPLES.md">Full index (markdown)</a> · <a href="index.html">Portfolio home</a></p>
+  <footer>Portfolio · B. J. Lewis · Public repo: <a href="https://github.com/imndevmodeai/portfolio">imndevmodeai/portfolio</a></footer>
+</body>
+</html>

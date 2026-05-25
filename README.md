@@ -7,7 +7,10 @@ Use this folder as your **proof of capability** on Upwork, Toptal, and Fiverr Pr
 | File | Use |
 |------|-----|
 | `PORTFOLIO.md` | Copy-paste or link for “portfolio” / “past work” on platforms. Good for “share a doc” requests. |
-| `index.html` | Single-file portfolio page. Host on VPS (e.g. `resonantia.ai/portfolio`) or GitHub Pages. Open in browser to preview. |
+| `index.html` | Portfolio page + interactive demo. Host on VPS or GitHub Pages. |
+| `assets/*.svg` | Architecture diagram + scrubbed chart mocks (required for images on the page and `og:image` link preview). |
+| `demo-engine.js` | Client-side demo theater (must ship alongside `index.html`). |
+| `audio/` | Pre-rendered Edge TTS clips for the demo voice rack. |
 
 ## Hosting the HTML Page
 
