@@ -1147,52 +1147,156 @@
       role: "decision",
       say: "Thousands of variables sounds like hype. How is this different from rules in Madgicx or a spreadsheet with twenty conditions?",
     },
+    {
+      role: "narrator",
+      say: "The Job Seeker's Vault — paid subscribers text in on SMS. Same spine as our production webhook agent: intake, memory, Vault RAG, vetting, outbound reply.",
+    },
+    {
+      role: "decision",
+      say: "Need a tighter resume bullet for a product manager role. I pasted the job description in my last text. Can you rewrite one bullet using my Vault playbook tone, not generic career advice?",
+    },
+    {
+      role: "arche",
+      say: "Jordan — got your text. I am loading your thread and the Vault chunks we indexed for resume rewrites. Give me a few seconds to retrieve playbook language before I answer on SMS.",
+    },
+    {
+      role: "narrator",
+      say: "Vault chunks indexed — resume bullets, job-description decode, LinkedIn lines, referral scripts, interview practice, accountability nudges.",
+    },
+    {
+      role: "arche",
+      say: "Try this bullet: Led cross-functional launch of a subscription analytics feature, cutting time-to-insight from weeks to days and lifting trial-to-paid conversion eight percent in two quarters. Pulled from your Vault win-story patterns — not a generic ChatGPT template. Reply STOP any time to opt out.",
+    },
+    {
+      role: "decision",
+      say: "That sounds polished — how do I know this is not just ChatGPT career fluff? What actually ran on your side?",
+    },
+    {
+      role: "arche",
+      say: "Fair challenge. Trace shows webhook in, memory keyed to your phone hash, four Vault chunks retrieved, then vetting blocked generic advice before Twilio sent the reply. If retrieval misses, I say I do not have your Vault passage yet — I do not invent coaching copy.",
+    },
+    {
+      role: "narrator",
+      say: "Vetting gate before send — coaching copy must be grounded or it does not ship on SMS.",
+    },
   ];
 
   function buildScenarioE(userQuery) {
-    var q = userQuery || "SMS job search coach with Vault RAG";
+    var seeker = "Jordan · job seeker (SMS)";
+    var archeLabel = "ArchE → Coach";
+    var opener =
+      (userQuery && userQuery.length > 20
+        ? userQuery.slice(0, 200)
+        : "Need a tighter resume bullet for a product manager role. I pasted the job description in my last text.") +
+      " Can you rewrite one bullet using my Vault playbook tone, not generic career advice?";
+    var coachOpen =
+      "Jordan — got your text. I am loading your thread and the Vault chunks we indexed for resume rewrites. " +
+      "Give me a few seconds to retrieve playbook language before I answer on SMS.";
+    var answer =
+      "Try this bullet: Led cross-functional launch of a subscription analytics feature, cutting time-to-insight from weeks to days and lifting trial-to-paid conversion eight percent in two quarters. " +
+      "Pulled from your Vault win-story patterns — not a generic ChatGPT template. Reply STOP any time to opt out.";
+    var skeptic =
+      "That sounds polished — how do I know this is not just ChatGPT career fluff? What actually ran on your side?";
+    var proofReply =
+      "Fair challenge. Trace shows webhook in, memory keyed to your phone hash, four Vault chunks retrieved, then vetting blocked generic advice before Twilio sent the reply. " +
+      "If retrieval misses, I say I do not have your Vault passage yet — I do not invent coaching copy.";
+
     return {
-      title: "SMS job coach — Vault RAG (Twilio-class channel)",
+      title: "SMS job coach — Vault RAG (live conversation)",
       beats: [
         {
           role: "narrator",
-          label: "Channel adapter",
-          say: "Inbound SMS webhook — same architecture as production Telegram: message in, memory keyed by phone, grounded reply out. Twilio is transport swap only.",
+          label: "Play-by-play",
+          say:
+            "The Job Seeker's Vault — paid subscribers text in on SMS. Same spine as our production webhook agent: intake, memory, Vault RAG, vetting, outbound reply.",
           pipeline: "intake",
         },
         {
           role: "decision",
-          label: "Product owner",
-          say: q.slice(0, 220),
+          label: seeker,
+          say: opener,
           pipeline: "intake",
+        },
+        {
+          role: "arche",
+          label: archeLabel,
+          say: coachOpen,
+          pipeline: "plan",
+          terminalParallel: [
+            termEntry(runLog("WEBHOOK   inbound sms from=+1***  bytes=142", 0), "trace-webhook"),
+            termEntry(runLog("MEMORY    thread_id=phone_hash  turns=7", 1), "trace-memory"),
+            termEntry(runLog("GATE      systeme_paid_user=verified", 2), "trace-gate"),
+          ],
+          termDelay: 280,
         },
         {
           role: "narrator",
           label: "RAG booth",
-          say: "Vault chunks indexed — resume bullets, JD decode, LinkedIn copy, outreach scripts, interview practice, daily accountability. Generic career fluff blocked at vetting.",
+          say:
+            "Vault chunks indexed — resume bullets, job-description decode, LinkedIn lines, referral scripts, interview practice, accountability nudges.",
           pipeline: "plan",
           tools: ["compress", "research", "llm", "vetting", "workflow"],
         },
         {
+          toolFocus: {
+            tool: "compress",
+            doing: "Compressing and indexing Vault playbook sections so retrieval stays small per SMS segment.",
+            tie: "Tagged trace-rag below — this is the grounded coaching layer.",
+            also: ["compress", "research", "llm"],
+            forecast: "Top four Vault chunks selected for resume-bullet intent.",
+          },
           terminal: [
-            logLine("WEBHOOK   inbound sms from=+1***  bytes=142", 0),
-            logLine("MEMORY    thread_id=phone_hash  turns=7", 1),
-            logLine("RAG       retrieve top_k=4 vault_chunks=11  tokens=3.1k", 2),
-            logLine("OPENAI    intent=rewrite_resume_bullet  model=gpt-4o-mini", 3),
-            logLine("VETTING   grounded=yes  generic_advice=blocked", 4),
-            logLine("OUTBOUND  twilio_reply segments=1  chars=312", 5),
+            termEntry(runLog("RAG       retrieve top_k=4 vault_chunks=11  tokens=3.1k", 3), "trace-rag"),
+            termEntry(runLog("OPENAI    intent=rewrite_resume_bullet  model=gpt-4o-mini", 4), "trace-llm"),
+            termEntry(runLog("VETTING   grounded=yes  generic_advice=blocked", 5), "trace-vetting"),
           ],
+          termDelay: 260,
           pipeline: "tools",
           tools: ["compress", "llm", "vetting"],
         },
         {
           role: "arche",
-          label: "ArchE",
-          say: "Here is a tighter resume bullet grounded in your Vault playbook — not generic ChatGPT career text. STOP to opt out any time.",
+          label: archeLabel,
+          say: answer,
+          pipeline: "answer",
+          terminal: [
+            termEntry(runLog("OUTBOUND  twilio_reply segments=1  chars=312", 6), "trace-outbound"),
+          ],
+          termDelay: 220,
+        },
+        {
+          role: "decision",
+          label: seeker,
+          say: skeptic,
           pipeline: "answer",
         },
         {
-          timeline: "M1: ingest Vault → M2: webhook loop → M3: Systeme paid-user gate + admin log",
+          role: "arche",
+          label: archeLabel,
+          say: proofReply,
+          pipeline: "answer",
+          sources: [
+            { label: "Jump to webhook intake", traceAnchor: "trace-webhook" },
+            { label: "Jump to Vault retrieval", traceAnchor: "trace-rag" },
+            { label: "Jump to vetting gate", traceAnchor: "trace-vetting" },
+          ],
+        },
+        {
+          role: "narrator",
+          label: "Play-by-play",
+          say: "Vetting gate before send — coaching copy must be grounded or it does not ship on SMS.",
+          pipeline: "vet",
+          tools: ["vetting"],
+        },
+        {
+          timeline: "M1: Vault ingest  ·  M2: Twilio webhook  ·  M3: Systeme paid-user gate + admin log",
+          pipeline: "answer",
+        },
+        {
+          terminal: [
+            termEntry(runLog("SESSION", "complete  mode=sms_coach_demo  conf=0.88", 7)),
+          ],
+          termDelay: 200,
           pipeline: "answer",
         },
       ],
