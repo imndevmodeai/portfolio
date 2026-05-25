@@ -988,6 +988,89 @@
     });
     activeAudios = [];
     if (window.speechSynthesis) window.speechSynthesis.cancel();
+    hideSpeakerPopup();
+  }
+
+  /** Portrait / φ-shell shown while a role is speaking */
+  var SPEAKER_VISUALS = {
+    arche: {
+      src: "assets/arche-phi-shell.png",
+      title: "ArchE",
+      subtitle: "φ-shell 2D knowledge layout",
+      arche: true,
+    },
+    decision_jim: {
+      src: "assets/speakers/jim-cfo.png",
+      title: "Jim · CFO",
+      subtitle: "Midwest subscription finance",
+    },
+    decision_chro: {
+      src: "assets/speakers/chro.svg",
+      title: "Chief People Officer",
+      subtitle: "HR policy simulation",
+    },
+    decision_ops: {
+      src: "assets/speakers/ops-director.svg",
+      title: "Director of Operations",
+      subtitle: "Internal playbook owner",
+    },
+    decision_media: {
+      src: "assets/speakers/media-lead.png",
+      title: "Head of Performance Marketing",
+      subtitle: "Paid media · closed loop",
+    },
+    decision_jordan: {
+      src: "assets/speakers/jordan.svg",
+      title: "Jordan · job seeker",
+      subtitle: "SMS · Vault RAG coach",
+    },
+    decision_guest: {
+      src: "assets/speakers/guest.svg",
+      title: "Decision maker",
+      subtitle: "Your brief",
+    },
+  };
+
+  function castRoleClass(role) {
+    if (role === "arche") return "arche";
+    if (role === "decision" || (role && role.indexOf("decision_") === 0)) return "decision";
+    return "narrator";
+  }
+
+  function resolveSpeakerVisual(role, label) {
+    if (role === "arche") return SPEAKER_VISUALS.arche;
+    if (role && SPEAKER_VISUALS[role]) return SPEAKER_VISUALS[role];
+    if (role && role.indexOf("decision_") === 0) return SPEAKER_VISUALS.decision_guest;
+    return null;
+  }
+
+  function showSpeakerPopup(role, label) {
+    var visual = resolveSpeakerVisual(role, label);
+    var pop = $("#speaker-popup");
+    var img = $("#speaker-popup-img");
+    var titleEl = $("#speaker-popup-title");
+    var subEl = $("#speaker-popup-sub");
+    if (!pop || !img) return;
+    if (!visual) {
+      hideSpeakerPopup();
+      return;
+    }
+    pop.classList.toggle("arche-mode", !!visual.arche);
+    img.src = visual.src;
+    img.alt = label || visual.title;
+    if (titleEl) titleEl.textContent = label || visual.title;
+    if (subEl) subEl.textContent = visual.subtitle || "";
+    pop.classList.remove("hidden");
+    pop.classList.add("visible");
+    pop.setAttribute("aria-hidden", "false");
+  }
+
+  function hideSpeakerPopup() {
+    var pop = $("#speaker-popup");
+    if (!pop) return;
+    pop.classList.remove("visible");
+    pop.classList.add("hidden");
+    pop.setAttribute("aria-hidden", "true");
   }
 
   /* ——— UI helpers ——— */
@@ -1099,7 +1182,7 @@
     var box = $("#broadcast-out");
     if (!box) return;
     var row = document.createElement("div");
-    row.className = "cast-line cast-" + role;
+    row.className = "cast-line cast-" + castRoleClass(role);
     var lab = document.createElement("span");
     lab.className = "cast-label";
     lab.textContent = label;
@@ -1143,6 +1226,7 @@
     var cast = $("#broadcast-out");
     if (term) term.innerHTML = "";
     if (cast) cast.innerHTML = "";
+    hideSpeakerPopup();
     highlightTools([]);
     showToolSpotlight(null);
     setForecast(null);
@@ -1520,9 +1604,11 @@
 
     if (beat.say && beat.terminalParallel && beat.terminalParallel.length) {
       appendBroadcast(role, label, beat.say, beat.sources);
+      showSpeakerPopup(role, label);
       var speakP = speakQueued(beat.say, role);
       await drainTerminal(beat.terminalParallel, token, beat.termDelay);
       await speakP;
+      hideSpeakerPopup();
       await delay(beat.pauseAfter || 550);
       return;
     }
@@ -1533,9 +1619,16 @@
 
     if (beat.say) {
       appendBroadcast(role, label, beat.say, beat.sources);
-      await speakQueued(beat.say, role);
+      showSpeakerPopup(role, label);
+      if (voiceOn) {
+        await speakQueued(beat.say, role);
+      } else {
+        await delay(Math.min(4200, 900 + beat.say.length * 28));
+      }
+      hideSpeakerPopup();
       await delay(beat.pauseAfter || 700);
     } else {
+      hideSpeakerPopup();
       await delay(beat.pauseAfter || 450);
     }
   }
@@ -1577,6 +1670,7 @@
   function closeModal() {
     playToken++;
     stopSpeech();
+    hideSpeakerPopup();
     var modal = $("#demo-modal");
     if (modal) {
       modal.classList.remove("open");

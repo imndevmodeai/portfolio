@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 400" role="img" aria-label="Chief People Officer portrait">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#09090b"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="400" fill="url(#bg)"/>
+  <ellipse cx="160" cy="355" rx="110" ry="28" fill="#000" opacity="0.35"/>
+  <path d="M95 340c20-55 110-55 130 0v60H95z" fill="#312e81"/>
+  <path d="M110 175c0-48 36-78 50-78s50 30 50 78v45H110z" fill="#fcd9b6"/>
+  <path d="M95 175c8-62 52-88 65-88s57 26 65 88c-18 8-112 8-130 0z" fill="#4a3728"/>
+  <path d="M118 200c12 18 72 18 84 0 6 22 6 38 0 55H118c-6-17-6-33 0-55z" fill="#f5c6a5"/>
+  <ellipse cx="138" cy="208" rx="8" ry="10" fill="#1f2937"/>
+  <ellipse cx="182" cy="208" rx="8" ry="10" fill="#1f2937"/>
+  <path d="M152 238c10 8 18 8 28 0" stroke="#9a3412" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M125 120c-8-18 18-32 35-32s43 14 35 32" fill="#4a3728"/>
+  <text x="160" y="385" text-anchor="middle" fill="#c4b5fd" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Chief People Officer</text>
+</svg>

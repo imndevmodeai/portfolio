@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 400" role="img" aria-label="Director of Operations portrait">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#134e4a"/>
+      <stop offset="100%" stop-color="#09090b"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="400" fill="url(#bg)"/>
+  <ellipse cx="160" cy="355" rx="110" ry="28" fill="#000" opacity="0.35"/>
+  <path d="M92 340c22-58 114-58 136 0v60H92z" fill="#115e59"/>
+  <path d="M108 172c0-50 40-82 52-82s52 32 52 82v48H108z" fill="#d4a574"/>
+  <path d="M88 168c10-55 58-90 72-90s62 35 72 90c-20 10-124 10-144 0z" fill="#2c1810"/>
+  <path d="M116 198c14 20 74 20 88 0 7 24 7 42 0 62H116c-7-20-7-38 0-62z" fill="#c68642"/>
+  <ellipse cx="136" cy="206" rx="9" ry="11" fill="#111827"/>
+  <ellipse cx="184" cy="206" rx="9" ry="11" fill="#111827"/>
+  <path d="M150 240c12 9 22 9 34 0" stroke="#7c2d12" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <rect x="198" y="300" width="42" height="8" rx="2" fill="#5eead4" opacity="0.8"/>
+  <text x="160" y="385" text-anchor="middle" fill="#99f6e4" font-family="system-ui,sans-serif" font-size="13" font-weight="600">Director of Operations</text>
+</svg>
