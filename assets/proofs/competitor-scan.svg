@@ -1,11 +1,60 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 280" role="img" aria-label="CALC · competitor band">
-  <rect width="520" height="280" rx="12" fill="#09090b" stroke="#67e8f9" stroke-width="2"/>
-  <rect x="0" y="0" width="520" height="36" rx="12" fill="#18181b"/>
-  <circle cx="18" cy="18" r="5" fill="#f87171"/><circle cx="34" cy="18" r="5" fill="#fde047"/><circle cx="50" cy="18" r="5" fill="#4ade80"/>
-  <text x="68" y="22" fill="#a1a1aa" font-family="ui-monospace,monospace" font-size="11">orchestration trace · proof</text>
-  <text x="20" y="48" fill="#67e8f9" font-family="ui-monospace,monospace" font-size="12" font-weight="700">CALC · competitor band</text>
-  <text x="20" y="52" fill="#e4e4e7" font-family="ui-monospace,monospace" font-size="11">[CALC] price_band=mid_market</text>
-  <text x="20" y="74" fill="#e4e4e7" font-family="ui-monospace,monospace" font-size="11">competitor_undercut_pct=7.2</text>
-  <text x="20" y="96" fill="#e4e4e7" font-family="ui-monospace,monospace" font-size="11">n=38  source=bid_board_scrub</text>
-  <text x="20" y="262" fill="#71717a" font-family="ui-monospace,monospace" font-size="10">scrubbed demo · click syncs to trace line</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" role="img" aria-label="Competitor install quotes">
+  <rect width="900" height="560" rx="14" fill="#fafafa" stroke="#d4d4d8"/>
+  <rect width="900" height="48" rx="14" fill="#18181b"/>
+  <text x="20" y="30" fill="#fafafa" font-family="system-ui,sans-serif" font-size="15" font-weight="700">Competitor install quotes</text>
+  <text x="720" y="30" fill="#a1a1aa" font-family="system-ui,sans-serif" font-size="12">scrubbed export</text>
+  <text x="24" y="72" fill="#52525b" font-family="system-ui,sans-serif" font-size="13">Bid-board scrub · replacement jobs (n=38)</text>
+  <rect x="24" y="78" width="852" height="420" rx="8" fill="#ffffff" stroke="#e4e4e7"/>
+  <rect x="24" y="88" width="126" height="28" fill="#27272a" stroke="#3f3f46"/>
+  <text x="32" y="106" fill="#fde047" font-family="system-ui,sans-serif" font-size="13" font-weight="600">Competitor</text>
+  <rect x="154" y="88" width="126" height="28" fill="#27272a" stroke="#3f3f46"/>
+  <text x="162" y="106" fill="#fde047" font-family="system-ui,sans-serif" font-size="13" font-weight="600">Median quote</text>
+  <rect x="284" y="88" width="126" height="28" fill="#27272a" stroke="#3f3f46"/>
+  <text x="292" y="106" fill="#fde047" font-family="system-ui,sans-serif" font-size="13" font-weight="600">Undercut %</text>
+  <rect x="414" y="88" width="126" height="28" fill="#27272a" stroke="#3f3f46"/>
+  <text x="422" y="106" fill="#fde047" font-family="system-ui,sans-serif" font-size="13" font-weight="600">Lead time</text>
+  <rect x="544" y="88" width="126" height="28" fill="#27272a" stroke="#3f3f46"/>
+  <text x="552" y="106" fill="#fde047" font-family="system-ui,sans-serif" font-size="13" font-weight="600">Source</text>
+  <rect x="24" y="120" width="126" height="28" fill="#18181b" stroke="#27272a"/>
+  <text x="32" y="139" fill="#e4e4e7" font-family="system-ui,sans-serif" font-size="12">Installer A</text>
+  <rect x="154" y="120" width="126" height="28" fill="#18181b" stroke="#27272a"/>
+  <text x="162" y="139" fill="#e4e4e7" font-family="system-ui,sans-serif" font-size="12">$7,950</text>
+  <rect x="284" y="120" width="126" height="28" fill="#18181b" stroke="#27272a"/>
+  <text x="292" y="139" fill="#e4e4e7" font-family="system-ui,sans-serif" font-size="12">—</text>
+  <rect x="414" y="120" width="126" height="28" fill="#18181b" stroke="#27272a"/>
+  <text x="422" y="139" fill="#e4e4e7" font-family="system-ui,sans-serif" font-size="12">9d</text>
+  <rect x="544" y="120" width="126" height="28" fill="#18181b" stroke="#27272a"/>
+  <text x="552" y="139" fill="#e4e4e7" font-family="system-ui,sans-serif" font-size="12">bid_board</text>
+  <rect x="24" y="150" width="126" height="28" fill="#0f0f12" stroke="#27272a"/>
+  <text x="32" y="169" fill="#e4e4e7" font-family="system-ui,sans-serif" font-size="12">Installer B</text>
+  <rect x="154" y="150" width="126" height="28" fill="#0f0f12" stroke="#27272a"/>
+  <text x="162" y="169" fill="#e4e4e7" font-family="system-ui,sans-serif" font-size="12">$7,420</text>
+  <rect x="284" y="150" width="126" height="28" fill="#0f0f12" stroke="#27272a"/>
+  <text x="292" y="169" fill="#e4e4e7" font-family="system-ui,sans-serif" font-size="12">6.7%</text>
+  <rect x="414" y="150" width="126" height="28" fill="#0f0f12" stroke="#27272a"/>
+  <text x="422" y="169" fill="#e4e4e7" font-family="system-ui,sans-serif" font-size="12">12d</text>
+  <rect x="544" y="150" width="126" height="28" fill="#0f0f12" stroke="#27272a"/>
+  <text x="552" y="169" fill="#e4e4e7" font-family="system-ui,sans-serif" font-size="12">bid_board</text>
+  <rect x="24" y="180" width="126" height="28" fill="#18181b" stroke="#27272a"/>
+  <text x="32" y="199" fill="#e4e4e7" font-family="system-ui,sans-serif" font-size="12">Installer C</text>
+  <rect x="154" y="180" width="126" height="28" fill="#18181b" stroke="#27272a"/>
+  <text x="162" y="199" fill="#e4e4e7" font-family="system-ui,sans-serif" font-size="12">$8,100</text>
+  <rect x="284" y="180" width="126" height="28" fill="#18181b" stroke="#27272a"/>
+  <text x="292" y="199" fill="#e4e4e7" font-family="system-ui,sans-serif" font-size="12">-1.9%</text>
+  <rect x="414" y="180" width="126" height="28" fill="#18181b" stroke="#27272a"/>
+  <text x="422" y="199" fill="#e4e4e7" font-family="system-ui,sans-serif" font-size="12">7d</text>
+  <rect x="544" y="180" width="126" height="28" fill="#18181b" stroke="#27272a"/>
+  <text x="552" y="199" fill="#e4e4e7" font-family="system-ui,sans-serif" font-size="12">bid_board</text>
+  <rect x="24" y="210" width="126" height="28" fill="#0f0f12" stroke="#27272a"/>
+  <text x="32" y="229" fill="#e4e4e7" font-family="system-ui,sans-serif" font-size="12">Your band</text>
+  <rect x="154" y="210" width="126" height="28" fill="#0f0f12" stroke="#27272a"/>
+  <text x="162" y="229" fill="#e4e4e7" font-family="system-ui,sans-serif" font-size="12">$8,050</text>
+  <rect x="284" y="210" width="126" height="28" fill="#0f0f12" stroke="#27272a"/>
+  <text x="292" y="229" fill="#e4e4e7" font-family="system-ui,sans-serif" font-size="12">target</text>
+  <rect x="414" y="210" width="126" height="28" fill="#0f0f12" stroke="#27272a"/>
+  <text x="422" y="229" fill="#e4e4e7" font-family="system-ui,sans-serif" font-size="12">8d</text>
+  <rect x="544" y="210" width="126" height="28" fill="#0f0f12" stroke="#27272a"/>
+  <text x="552" y="229" fill="#e4e4e7" font-family="system-ui,sans-serif" font-size="12">model</text>
+  <rect x="24" y="508" width="852" height="40" rx="6" fill="#f4f4f5" stroke="#22d3ee" stroke-width="1"/>
+  <text x="36" y="534" fill="#18181b" font-family="ui-monospace,monospace" font-size="12">Source: https://research.demo/bids/sw-mi-replacement</text>
 </svg>

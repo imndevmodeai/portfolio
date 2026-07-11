@@ -22,6 +22,11 @@
   var activeAudios = [];
   var audioPrimed = false;
   var voiceStatusEl = null;
+  var lastArcheAnswerText = "";
+  var lastEvidencePack = null;
+  var conversationState = { priorQuery: "", priorAnswer: "", presentUrl: "" };
+  var followUpBusy = false;
+  var lastLiveBriefPayload = null;
 
   var TOOL_CATALOG = {
     llm: {
@@ -715,13 +720,15 @@
     if (role === "arche") {
       return (
         voices.find(function (v) {
-          return /Ryan|Daniel|Christopher|Microsoft.*English.*Male.*GB/i.test(v.name);
+          return /Ryan/i.test(v.name);
         }) ||
         voices.find(function (v) {
-          return /Christopher|Andrew|Guy|Microsoft.*English.*Male/i.test(v.name);
+          return /Microsoft.*Ryan|en-GB.*Ryan/i.test(v.name);
         }) ||
-        voices.find(function (v) { return v.lang === "en-GB"; }) ||
-        voices.find(function (v) { return v.lang === "en-US"; })
+        voices.find(function (v) {
+          return v.lang === "en-GB" && /Male/i.test(v.name) && !/Female/i.test(v.name);
+        }) ||
+        voices.find(function (v) { return v.lang === "en-GB"; })
       );
     }
     var decisionHints = {
@@ -789,6 +796,70 @@
       .replace(/^-|-$/g, "")
       .slice(0, 48);
     return role + "/" + slug + ".mp3";
+  }
+
+  function showPresentGiftLink(presentPath) {
+    var link = $("#present-gift-link");
+    if (!link || !presentPath) return;
+    var root = resolvePortfolioApiRoot();
+    link.href = root ? root + presentPath : presentPath;
+    link.classList.remove("hidden");
+    conversationState.presentUrl = link.href;
+    var inline = $("#unlock-gift-inline");
+    if (inline) {
+      inline.href = link.href;
+      inline.removeAttribute("data-disabled");
+    }
+  }
+
+  function hidePresentGiftLink() {
+    var link = $("#present-gift-link");
+    if (link) {
+      link.classList.add("hidden");
+      link.href = "#";
+    }
+  }
+
+  function showBriefCompleteToast(message) {
+    var toast = $("#brief-complete-toast");
+    if (!toast) return;
+    toast.textContent =
+      message ||
+      "Brief complete — sticky pilot bar is live. Text or email from this page (Upwork-safe).";
+    toast.classList.add("visible");
+    setTimeout(function () {
+      toast.classList.remove("visible");
+    }, 12000);
+  }
+
+  function updateConversationFromScenario(live, customQuery) {
+    if (live && live.is_follow_up) {
+      if (live.prior_query) conversationState.priorQuery = live.prior_query;
+    } else if (customQuery) {
+      conversationState.priorQuery = customQuery;
+    }
+    if (live && live.arche_answer_snippet) {
+      conversationState.priorAnswer = live.arche_answer_snippet;
+    } else if (lastArcheAnswerText) {
+      conversationState.priorAnswer = lastArcheAnswerText;
+    }
+    if (live && live.present_url) {
+      showPresentGiftLink(live.present_url);
+    }
+    if (live && live.needs_clarification) {
+      focusClarificationFollowUp(live);
+    }
+  }
+
+  function focusClarificationFollowUp(live) {
+    var followEl = $("#answer-followup");
+    if (!followEl) return;
+    var hint =
+      live.clarification_question ||
+      "Add your business type and city/ZIP (e.g. auto repair in Kalamazoo 49007)";
+    followEl.placeholder = hint.slice(0, 120);
+    followEl.setAttribute("aria-label", hint);
+    setTimeline("Scope check — answer in the follow-up field, then Submit");
   }
 
   function setVoiceStatus(msg) {
@@ -932,6 +1003,48 @@
         });
     }
 
+    var apiRoot = resolvePortfolioApiRoot();
+    var archeLiveRyan = roleId === "arche" && apiRoot;
+
+    function afterMp3(hadMp3) {
+      if (hadMp3) {
+        setVoiceStatus(audioManifest ? "Voice: Edge TTS (manifest)" : "Voice: ON");
+        return;
+      }
+      if (archeLiveRyan) {
+        setVoiceStatus("Voice: Ryan API failed — refresh :17890 server");
+        return;
+      }
+      return playEdgeTtsApi(roleId, clean).then(function (hadLive) {
+        if (hadLive) {
+          setVoiceStatus("Voice: Edge TTS (live)");
+          return;
+        }
+        return speakBrowserOnce(clean, roleId).then(function () {
+          setVoiceStatus(roleId === "arche" ? "Voice: browser (not Ryan)" : "Voice: browser TTS");
+        });
+      });
+    }
+
+    if (archeLiveRyan) {
+      return playEdgeTtsApi(roleId, clean).then(function (hadLive) {
+        if (hadLive) {
+          setVoiceStatus("Voice: Edge TTS · en-GB-RyanNeural");
+          return;
+        }
+        return playMp3(roleId, clean)
+          .then(function (playedFull) {
+            if (playedFull) return true;
+            var chunks = speechChunks(clean);
+            if (audioManifest && audioManifest.files && chunks.length > 1) {
+              return playChunks(chunks);
+            }
+            return false;
+          })
+          .then(afterMp3);
+      });
+    }
+
     return playMp3(roleId, clean)
       .then(function (playedFull) {
         if (playedFull) return true;
@@ -941,15 +1054,7 @@
         }
         return false;
       })
-      .then(function (hadMp3) {
-        if (hadMp3) {
-          setVoiceStatus(audioManifest ? "Voice: Edge TTS" : "Voice: ON");
-          return;
-        }
-        return speakBrowserOnce(clean, roleId).then(function () {
-          setVoiceStatus("Voice: browser TTS");
-        });
-      });
+      .then(afterMp3);
   }
 
   function pumpSpeechQueue() {
@@ -1013,12 +1118,12 @@
       subtitle: "Midwest subscription finance",
     },
     decision_chro: {
-      src: "assets/speakers/chro.svg",
+      src: "assets/speakers/media-lead.png",
       title: "Chief People Officer",
       subtitle: "HR policy simulation",
     },
     decision_ops: {
-      src: "assets/speakers/ops-director.svg",
+      src: "assets/speakers/jim-cfo.png",
       title: "Director of Operations",
       subtitle: "Internal playbook owner",
     },
@@ -1028,14 +1133,14 @@
       subtitle: "Paid media · closed loop",
     },
     decision_jordan: {
-      src: "assets/speakers/jordan.svg",
+      src: "assets/speakers/jim-cfo.png",
       title: "Jordan · job seeker",
       subtitle: "SMS · Vault RAG coach",
     },
     decision_guest: {
-      src: "assets/speakers/guest.svg",
+      src: "assets/speakers/jim-cfo.png",
       title: "Decision maker",
-      subtitle: "Your brief",
+      subtitle: "Your brief · executive portrait",
     },
   };
 
@@ -1047,8 +1152,24 @@
 
   function resolveSpeakerVisual(role, label) {
     if (role === "arche") return SPEAKER_VISUALS.arche;
-    if (role && SPEAKER_VISUALS[role]) return SPEAKER_VISUALS[role];
-    if (role && role.indexOf("decision_") === 0) return SPEAKER_VISUALS.decision_guest;
+    if (role && SPEAKER_VISUALS[role]) {
+      var vis = SPEAKER_VISUALS[role];
+      if (label && role === "decision_guest") {
+        return {
+          src: vis.src,
+          title: label,
+          subtitle: vis.subtitle,
+        };
+      }
+      return vis;
+    }
+    if (role && role.indexOf("decision_") === 0) {
+      return {
+        src: "assets/speakers/jim-cfo.png",
+        title: label || "Decision maker",
+        subtitle: "Executive portrait (scrubbed demo)",
+      };
+    }
     return null;
   }
 
@@ -1170,6 +1291,13 @@
       src: "assets/proofs/vetting.svg",
       title: "Vetting bundle",
       subtitle: "Evidence gate — PASS with citations",
+      evidenceSlug: "sw-mi-zoning-vetting",
+    },
+    "trace-fetch-1": {
+      src: "assets/proofs/local-market.svg",
+      title: "Primary research fetch",
+      subtitle: "Scrubbed regional export (demo)",
+      evidenceSlug: "mdard-livestock-matrix",
     },
     "trace-market": {
       src: "assets/proofs/market.svg",
@@ -1238,48 +1366,735 @@
     },
     "trace-local-market": {
       src: "assets/proofs/local-market.svg",
-      title: "Local market scan",
-      subtitle: "SW Michigan demand and competitor density",
+      title: "Regional demand spreadsheet",
+      subtitle: "SW Michigan home-services lead index (scrubbed export)",
+      citation: "https://markets.demo/local/sw-mi-windows-doors",
     },
     "trace-reviews": {
       src: "assets/proofs/reviews.svg",
-      title: "Review velocity",
-      subtitle: "Google Business Profile trend",
+      title: "Google Business reviews",
+      subtitle: "Review velocity UI capture — 90 day window",
+      citation: "https://reviews.demo/gbp/scrub-installer",
     },
     "trace-competitor": {
       src: "assets/proofs/competitor-scan.svg",
-      title: "Competitor price band",
-      subtitle: "Installed price quotes — scrubbed",
+      title: "Competitor quote sheet",
+      subtitle: "Bid-board scrub — installed replacement jobs",
+      citation: "https://research.demo/bids/sw-mi-replacement",
     },
     "trace-margin": {
       src: "assets/proofs/margin-model.svg",
-      title: "Margin model",
-      subtitle: "Profit vs review-risk tradeoff",
+      title: "Margin vs review-risk dashboard",
+      subtitle: "Model output chart — target band 18–22%",
+      citation: "https://models.demo/local/margin-v3",
+    },
+    "trace-ag-regulatory": {
+      src: "assets/proofs/local-market.svg",
+      title: "MDARD / county permit matrix",
+      subtitle: "Livestock facility & CAFO rules — SW Michigan (scrubbed)",
+      citation: "https://research.demo/ag/mdard-sw-mi-livestock",
+    },
+    "trace-ag-capacity": {
+      src: "assets/proofs/competitor-scan.svg",
+      title: "Regional hog capacity sheet",
+      subtitle: "Indoor headcount vs packer off-take — competitor map",
+      citation: "https://markets.demo/ag/sw-mi-hog-capacity",
+    },
+    "trace-ag-economics": {
+      src: "assets/proofs/margin-model.svg",
+      title: "Unit economics dashboard",
+      subtitle: "Feed conversion, margin per head, capex per stall",
+      citation: "https://models.demo/ag/indoor-hog-unit-econ",
+    },
+    "trace-ag-biosecurity": {
+      src: "assets/proofs/reviews.svg",
+      title: "Biosecurity & audit checklist",
+      subtitle: "Ventilation, mortality, traceability — vetting panel",
+      citation: "https://vetting.demo/ag/biosecurity-audit",
+    },
+    "trace-auto-inventory": {
+      src: "assets/proofs/auto-inventory.svg",
+      title: "Lot inventory aging",
+      subtitle: "Days-on-lot and gross by unit (scrubbed export)",
+      citation: "https://api.demo/automotive/inventory/kz-lot-2025q2",
+    },
+    "trace-auto-pricing": {
+      src: "assets/proofs/auto-pricing.svg",
+      title: "Market pricing dashboard",
+      subtitle: "KBB/Manheim band vs your ask",
+      citation: "https://markets.demo/automotive/pricing/kz-used",
+    },
+    "trace-auto-comp": {
+      src: "assets/proofs/auto-comp-set.svg",
+      title: "Competitive set spreadsheet",
+      subtitle: "Dealer comps within 25 mi (public listings scrubbed)",
+      citation: "https://research.demo/automotive/comps/kz-dealers",
+    },
+    "trace-auto-reviews": {
+      src: "assets/proofs/auto-reviews.svg",
+      title: "Dealer reputation panel",
+      subtitle: "Google + marketplace review snapshot",
+      citation: "https://reviews.demo/gbp/scrub-dealer-kz",
+    },
+    "trace-auto-vetting": {
+      src: "assets/proofs/auto-vetting.svg",
+      title: "Vetting bundle",
+      subtitle: "Automotive brief — evidence gate PASS",
+      citation: "https://vetting.demo/bundles/EB-AUTO-07",
     },
   };
 
   var activeProofLink = null;
+  var activeBriefQuery = "";
+  var activeBuyerBusinessName = "";
+  var liveEvidenceAnchorMap = null;
+
+  /** Live brief trace anchors → served HTML/CSV under /api/portfolio/evidence/ */
+  var LIVE_EVIDENCE_BY_ANCHOR = {
+    "trace-vetting": "scope-vetting-brief",
+    "trace-local-action-plan": "local-seo-action-plan",
+    "trace-local-competition": "local-competition-map",
+    "trace-market-density": "market-density-sheet",
+    "trace-marketing-band": "market-density-sheet",
+    "trace-plan": "scope-vetting-brief",
+    "trace-fetch-1": "local-competition-map",
+    "trace-ag-regulatory": "mdard-livestock-matrix",
+    "trace-ag-capacity": "hog-capacity-sheet",
+    "trace-ag-economics": "hog-capacity-sheet",
+    "trace-auto-inventory": "local-competition-map",
+    "trace-auto-pricing": "market-density-sheet",
+    "trace-auto-vetting": "scope-vetting-brief",
+  };
+
+  function updateDataDisclosure(pack) {
+    var el = $("#data-disclosure-banner");
+    if (!el) return;
+    if (!pack) {
+      el.innerHTML =
+        "<strong>Data mode:</strong> Live preview offline — canned scenario only until the API reconnects.";
+      return;
+    }
+    var disclosure = pack.disclosure || "Evidence is tailored to your brief.";
+    var why = pack.why_not_live ? " " + pack.why_not_live : "";
+    var taste = pack.preview_note
+      ? " " + pack.preview_note
+      : " You get a targeted taste — full production vaults and scheduled ingest ship under contract.";
+    var liveNote = "";
+    if (pack.local_intel && pack.local_intel.ok && pack.local_intel.competitor_count != null) {
+      liveNote =
+        " Live public listings: " +
+        pack.local_intel.competitor_count +
+        " competitors near " +
+        (pack.local_intel.location || "market") +
+        " (" +
+        (pack.local_intel.source || "OpenStreetMap") +
+        ").";
+    }
+    if (pack.local_intel && pack.local_intel.census && pack.local_intel.census.ok) {
+      liveNote +=
+        " U.S. Census county pattern: " +
+        pack.local_intel.census.establishments +
+        " " +
+        (pack.local_intel.census.naics_label || "establishments") +
+        " in " +
+        (pack.local_intel.census.county || "county") +
+        " County, " +
+        (pack.local_intel.census.state || "") +
+        ".";
+    }
+    el.innerHTML = "<strong>Data mode:</strong> " + disclosure + why + taste + liveNote;
+  }
+
+  function getBuyerBusinessName() {
+    var el = $("#buyer-business-name");
+    return el && el.value ? el.value.trim().slice(0, 80) : activeBuyerBusinessName || "";
+  }
+
+  function updateGrowthStrategy(live) {
+    var panel = $("#strategy-panel");
+    var body = $("#strategy-body");
+    if (!panel || !body) return;
+    var text = live && (live.full_strategy || "");
+    var sections = (live && live.strategy_sections) || [];
+    if (!text && (!sections || !sections.length)) {
+      panel.classList.add("hidden");
+      body.innerHTML = "";
+      return;
+    }
+    panel.classList.remove("hidden");
+    var html = "";
+    if (text) {
+      var leadEnd = text.indexOf("\n\n1.");
+      var lead = leadEnd > 40 ? text.slice(0, leadEnd) : text.slice(0, 320);
+      html += '<p class="strategy-lead">' + escapeHtml(lead) + "</p>";
+    }
+    if (sections && sections.length) {
+      sections.forEach(function (sec, i) {
+        html +=
+          "<h3>" +
+          (i + 1) +
+          ". " +
+          escapeHtml(sec.title || "Strategy") +
+          "</h3><p>" +
+          escapeHtml(sec.body || "") +
+          "</p>";
+      });
+    } else if (text) {
+      html +=
+        '<pre style="white-space:pre-wrap;font-family:inherit;font-size:0.82rem;margin:0">' +
+        escapeHtml(text) +
+        "</pre>";
+    }
+    body.innerHTML = html;
+    updatePilotScopeControls(live);
+    updateSideBySide(live);
+  }
+
+  function pilotScopePdfUrl(query, buyerName) {
+    var q = encodeURIComponent((query || "").trim().slice(0, 500));
+    var bn = encodeURIComponent((buyerName || "").trim().slice(0, 80));
+    var base = location.protocol + "//" + location.host;
+    var url = base + "/api/portfolio/pilot-scope.pdf?brief=" + q;
+    if (bn) url += "&business_name=" + bn;
+    return url;
+  }
+
+  function updatePilotScopeControls(live) {
+    var btn = $("#pilot-scope-pdf");
+    var hint = $("#pilot-scope-hint");
+    if (!btn) return;
+    var query = (live && live.query) || activeBriefQuery || "";
+    var buyer = getBuyerBusinessName();
+    if (!query) {
+      btn.setAttribute("href", "#");
+      btn.classList.add("hidden");
+      if (hint) hint.classList.add("hidden");
+      return;
+    }
+    btn.classList.remove("hidden");
+    if (hint) hint.classList.remove("hidden");
+    btn.setAttribute("href", pilotScopePdfUrl(query, buyer));
+  }
+
+  function ungroundedDealershipHtml() {
+    // Intentionally generic: this is the "free AI / no live market intel" baseline.
+    var blocks = [
+      {
+        t: "Service-to-sales conversion",
+        b:
+          "Turn your service drive into your highest quality lead source. Track declined service RO’s, recall timing, and trade-in intent; then route hot customers to a sales closer within 15 minutes.",
+      },
+      {
+        t: "24/7 BDC + appointment booking",
+        b:
+          "Stand up a BDC that answers after-hours, books appointments, and follows up until the customer shows. The win is speed-to-lead and persistent follow-up — not more ad spend.",
+      },
+      {
+        t: "CRM reactivation (the cheapest growth lever)",
+        b:
+          "Run a weekly reactivation batch: unsold showroom traffic, orphan owners, aged leads, and equity candidates. Use a 3-touch sequence (call + text + email) with clear offers and a booking link.",
+      },
+      {
+        t: "Local trust + reviews flywheel",
+        b:
+          "Publish weekly inventory/offer posts, collect reviews with velocity, and respond to every review within 24 hours. Listings and review velocity determine who wins the local pack.",
+      },
+      {
+        t: "Offer discipline + measurement",
+        b:
+          "Pick one primary offer for 30 days, measure appointment rate and show rate, and iterate weekly. Treat this as a conversion system: lead → appointment → show → close.",
+      },
+    ];
+    var out = "";
+    blocks.forEach(function (x, i) {
+      out +=
+        "<h3 style=\"font-size:0.86rem;margin:0.55rem 0 0.25rem;color:#e4e4e7\">" +
+        (i + 1) +
+        ". " +
+        escapeHtml(x.t) +
+        "</h3><p style=\"margin:0 0 0.55rem;color:#a1a1aa;line-height:1.45\">" +
+        escapeHtml(x.b) +
+        "</p>";
+    });
+    return out;
+  }
+
+  function groundedSummaryHtml(live) {
+    var pack = (live && live.evidence_pack) || lastEvidencePack || {};
+    var plan = pack && pack.action_plan;
+    var out = "";
+    var sections = (live && live.strategy_sections) || [];
+    if (sections && sections.length) {
+      out +=
+        "<p style=\"margin:0 0 0.55rem;color:#e4e4e7;line-height:1.45\"><strong>Personalized strategy</strong>: " +
+        escapeHtml((sections[0] && sections[0].title) || "Playbook") +
+        " + 4 more sections.</p>";
+    }
+    if (plan && plan.top_ten && plan.top_ten.length) {
+      out +=
+        "<p style=\"margin:0.35rem 0 0.25rem;color:#a1a1aa\"><strong>Live competitors</strong> (" +
+        escapeHtml(plan.search_radius_miles_label || "trade area") +
+        "):</p><ul style=\"margin:0.25rem 0 0.55rem;padding-left:1.15rem;color:#a1a1aa\">";
+      (plan.top_ten || []).slice(0, 6).forEach(function (r) {
+        out += "<li>" + escapeHtml(r.name || "—") + "</li>";
+      });
+      out += "</ul>";
+    }
+    if (plan && plan.actions && plan.actions.length) {
+      out +=
+        "<p style=\"margin:0.35rem 0 0.25rem;color:#a1a1aa\"><strong>Ranked 30-day plan</strong>:</p><ol style=\"margin:0.25rem 0 0;padding-left:1.15rem;color:#a1a1aa\">";
+      (plan.actions || []).slice(0, 5).forEach(function (a) {
+        out +=
+          "<li><strong>[" +
+          escapeHtml(a.priority || "P1") +
+          " · " +
+          escapeHtml(a.channel || "Channel") +
+          "]</strong> " +
+          escapeHtml(a.title || "") +
+          "</li>";
+      });
+      out += "</ol>";
+    }
+    out +=
+      "<p style=\"margin:0.55rem 0 0;color:#a1a1aa\">Paid wiring turns this into a system: CRM/BDC sequences, review velocity, and weekly KPI packets.</p>";
+    return out;
+  }
+
+  function updateSideBySide(live) {
+    var toggle = $("#side-by-side-toggle");
+    var panel = $("#side-by-side-panel");
+    var left = $("#side-by-side-left");
+    var right = $("#side-by-side-right");
+    if (!toggle || !panel || !left || !right) return;
+
+    var hasStrategy =
+      !!(live && (live.full_strategy || (live.strategy_sections && live.strategy_sections.length)));
+    if (!hasStrategy) {
+      panel.classList.add("hidden");
+      toggle.checked = false;
+      left.innerHTML = "";
+      right.innerHTML = "";
+      return;
+    }
+
+    if (!toggle.checked) {
+      panel.classList.add("hidden");
+      left.innerHTML = "";
+      right.innerHTML = "";
+      return;
+    }
+
+    panel.classList.remove("hidden");
+    left.innerHTML = ungroundedDealershipHtml();
+    right.innerHTML = groundedSummaryHtml(live);
+  }
+
+  function updateActionPlan(pack) {
+    var panel = $("#action-plan-panel");
+    var body = $("#action-plan-body");
+    if (!panel || !body) return;
+    var plan = pack && pack.action_plan;
+    if (!plan || !plan.top_ten) {
+      panel.classList.add("hidden");
+      body.innerHTML = "";
+      return;
+    }
+    panel.classList.remove("hidden");
+    var br = plan.buyer_rank || {};
+    var verdict = br.headline || "Rank analysis ready.";
+    var disclosure = br.disclosure || "";
+    var buyerLine = "";
+    if (plan.buyer_name) {
+      buyerLine =
+        "<p><strong>Your business:</strong> " + escapeHtml(plan.buyer_name) + "</p>";
+    } else {
+      buyerLine =
+        '<p><strong>Your business:</strong> <em>Add your shop name above to see top-10 gap vs competitors.</em></p>';
+    }
+    var rows = "";
+    (plan.top_ten || []).forEach(function (row) {
+      var cls = row.is_buyer ? ' class="buyer-row"' : "";
+      rows +=
+        "<tr" +
+        cls +
+        "><td>" +
+        row.proxy_rank +
+        "</td><td>" +
+        escapeHtml(row.name) +
+        "</td><td>" +
+        escapeHtml(row.category) +
+        "</td><td>" +
+        '<a href="' +
+        escapeHtml(row.google_maps_url) +
+        '" target="_blank" rel="noopener">Google Maps</a> · ' +
+        '<a href="' +
+        escapeHtml(row.yelp_url) +
+        '" target="_blank" rel="noopener">Yelp</a></td></tr>';
+    });
+    var steps = "";
+    (plan.actions || []).forEach(function (a) {
+      steps +=
+        "<li><strong>[" +
+        escapeHtml(a.priority) +
+        " · " +
+        escapeHtml(a.channel) +
+        "]</strong> " +
+        escapeHtml(a.title) +
+        " — " +
+        escapeHtml(a.detail) +
+        "</li>";
+    });
+    var links = plan.links || {};
+    var fullDoc = evidenceUrlForSlug("local-seo-action-plan", activeBriefQuery);
+    body.innerHTML =
+      buyerLine +
+      '<div class="rank-verdict"><strong>Position verdict</strong><p style="margin:0.4rem 0 0">' +
+      escapeHtml(verdict) +
+      '</p><p style="margin:0.35rem 0 0;font-size:0.72rem;color:#a1a1aa">' +
+      escapeHtml(disclosure) +
+      "</p></div>" +
+      "<h3 style=\"font-size:0.88rem;margin:0.65rem 0 0.35rem\">Top 10 (proxy rank — click to verify live)</h3>" +
+      "<table><thead><tr><th>#</th><th>Business</th><th>Category</th><th>Verify</th></tr></thead><tbody>" +
+      (rows || "<tr><td colspan='4'>No listings in radius.</td></tr>") +
+      "</tbody></table>" +
+      "<h3 style=\"font-size:0.88rem;margin:0.65rem 0 0.35rem\">30-day move-up plan</h3>" +
+      '<ol class="action-steps">' +
+      (steps || "<li>Add your business name for personalized steps.</li>") +
+      "</ol>" +
+      '<p class="plan-links"><a href="' +
+      escapeHtml(links.google_business || "https://business.google.com/") +
+      '" target="_blank" rel="noopener">Google Business Profile</a> · ' +
+      '<a href="' +
+      escapeHtml(links.yelp_search_market || "#") +
+      '" target="_blank" rel="noopener">Yelp market search</a> · ' +
+      '<a href="' +
+      escapeHtml(links.google_maps_market || "#") +
+      '" target="_blank" rel="noopener">Google Maps market</a>' +
+      (fullDoc
+        ? ' · <a href="' + escapeHtml(fullDoc) + '" target="_blank" rel="noopener">Full action plan doc</a>'
+        : "") +
+      "</p>";
+  }
+
+  function setLiveEvidenceContext(pack, query) {
+    activeBriefQuery = (query || "").trim();
+    liveEvidenceAnchorMap = {};
+    if (pack && pack.items && pack.items.length) {
+      pack.items.forEach(function (it) {
+        if (it.trace_anchor && it.evidence_slug) {
+          liveEvidenceAnchorMap[it.trace_anchor] = it.evidence_slug;
+        }
+      });
+    }
+    updateDataDisclosure(pack);
+    updateSalesHooks(pack);
+    updateActionPlan(pack);
+  }
+
+  function updateSalesHooks(pack) {
+    if (!pack) return;
+    lastEvidencePack = pack;
+    var li = pack.local_intel || {};
+    var census = li.census || {};
+    var nComp = li.competitor_count;
+    var nCensus = census.ok ? census.establishments : null;
+    var loc = li.location || "your market";
+    var label = census.naics_label || "establishments";
+    var pitch = "Book a 20-min pilot — text or email (Upwork-safe on this page).";
+    if (nComp != null && nCensus != null) {
+      pitch =
+        nComp +
+        " nearby listings + " +
+        nCensus +
+        " county " +
+        label +
+        " near " +
+        loc +
+        " — text to book pilot.";
+    } else if (nCensus != null) {
+      pitch = nCensus + " county " + label + " in " + loc + " — text to book pilot.";
+    } else if (nComp != null) {
+      pitch = nComp + " public competitors near " + loc + " — text to book pilot.";
+    }
+
+    var modalCta = $("#modal-contact-cta");
+    if (modalCta) {
+      modalCta.innerHTML =
+        "<strong>RESONANT-VIEW → pilot slice:</strong> " +
+        pitch +
+        ' <a href="tel:+12698883503">Text (269) 888-3503</a> · <a href="sms:+12698883503">SMS</a> · <a href="mailto:imndevmodeai@gmail.com">Email</a>';
+    }
+    var stickyCopy = $("#sticky-sales-copy");
+    var sticky = $("#sticky-sales-cta");
+    if (stickyCopy) stickyCopy.textContent = pitch;
+    if (sticky) sticky.classList.remove("hidden");
+    var nextSteps = $("#modal-next-steps");
+    if (nextSteps && (pack.items || []).length) nextSteps.classList.remove("hidden");
+    showBriefCompleteToast(
+      "You unlocked the consult preview. Next: local comp map + ad carve-out — text to book pilot or open your gift link in the modal."
+    );
+  }
+
+  function hideSalesHooks() {
+    var sticky = $("#sticky-sales-cta");
+    if (sticky) sticky.classList.add("hidden");
+    var nextSteps = $("#modal-next-steps");
+    if (nextSteps) nextSteps.classList.add("hidden");
+  }
+
+  function evidenceUrlForSlug(slug, query) {
+    var root = resolvePortfolioApiRoot();
+    if (!root || !slug) return "";
+    var url = root + "/api/portfolio/evidence/" + slug;
+    var q = (query || activeBriefQuery || "").trim();
+    var params = [];
+    if (q) params.push("brief=" + encodeURIComponent(q.slice(0, 220)));
+    var bn = getBuyerBusinessName();
+    if (bn) params.push("business_name=" + encodeURIComponent(bn));
+    if (params.length) url += "?" + params.join("&");
+    return url;
+  }
+
+  /** Spreadsheet/chart/UI captures — keep as document image, not terminal HTML */
+  var PROOF_DOCUMENT_ANCHORS = {
+    "trace-vetting": true,
+    "trace-local-action-plan": true,
+    "trace-local-competition": true,
+    "trace-market-density": true,
+    "trace-marketing-band": true,
+    "trace-plan": true,
+    "trace-fetch-1": true,
+    "trace-local-market": true,
+    "trace-reviews": true,
+    "trace-competitor": true,
+    "trace-margin": true,
+    "trace-ag-regulatory": true,
+    "trace-ag-capacity": true,
+    "trace-ag-economics": true,
+    "trace-ag-biosecurity": true,
+    "trace-auto-inventory": true,
+    "trace-auto-pricing": true,
+    "trace-auto-comp": true,
+    "trace-auto-reviews": true,
+  };
+
+  /** Extra lines shown under the synced trace row in the HTML proof terminal */
+  var PROOF_TERMINAL_DETAILS = {
+    "trace-billing-fetch": [
+      "uri=https://api.demo.billing.cloud/v2/cancellations",
+      "rows=184k  latency_ms=420  status=200",
+      "LINK → answer.churn_source=billing_events",
+    ],
+    "trace-recall": [
+      "prior_session=standup_apr22",
+      "nuance=stop CRM last-activity as churn proxy",
+    ],
+    "trace-vetting": [
+      "resolution=billing_wins  conf=0.90",
+      "[SRC] evidence_bundle=EB-*  citations=3",
+      "check=PASS",
+    ],
+    "trace-market": [
+      "uri=https://markets.demo/quotes/sector-subscription",
+      "status=200  delay_ms=88",
+    ],
+    "trace-warehouse": [
+      "s3://demo-warehouse-scrub/cohort/churn_v3.parquet",
+      "scrubbed_export · demo only",
+    ],
+    "trace-workforce": [
+      "uri=s3://demo-hr-scrub/workforce/cohort_2024q4.parquet",
+      "rows=24k  status=200",
+    ],
+    "trace-causal": [
+      "action=estimate_lagged_effects  max_lag=16w",
+      "lag_weeks=12-14  outcome=engagement_decay",
+    ],
+    "trace-abm-emergent": [
+      "emergent=weak_tie_decay",
+      "trigger=clustered_visit_weeks",
+    ],
+    "trace-ingest": [
+      "creative_features=1842  audience_dims=396",
+      "signals=ROAS,CPA,hook_retention  total_dims=2850",
+    ],
+    "trace-graph": [
+      "edge=perf_feedback→rag_retrain→planner",
+      "loop=closed",
+    ],
+    "trace-policy": [
+      "[MODE] shadow=ON  canary=5%",
+      "execute_meta=BLOCKED",
+    ],
+    "trace-shadow": [
+      "kills_executed=0  canary_slice=5%",
+      "[AUDIT] rollback_armed=YES",
+    ],
+    "trace-webhook": [
+      "bytes=142  status=200",
+      "MEMORY    thread_id=phone_hash",
+    ],
+    "trace-rag": [
+      "vault_chunks=11  tokens=3.1k",
+      "OPENAI    intent=rewrite_resume_bullet",
+    ],
+    "trace-playbook": [
+      "TOOL       chunk_sections=42",
+      "index_entries=812",
+    ],
+    "evidence-cohort-export": [
+      "s3://demo-warehouse-scrub/cohort/churn_v3.parquet",
+      "scrubbed_export · demo only",
+    ],
+    "trace-auto-vetting": [
+      "status=PASS  conf=0.86",
+      "[SRC] evidence_bundle=EB-AUTO-07  citations=5",
+    ],
+  };
+
+  function escapeHtml(str) {
+    return String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function proofIsDocumentVisual(visual, source) {
+    if (visual && visual.kind === "document") return true;
+    if (visual && visual.kind === "terminal") return false;
+    var anchor = source && source.traceAnchor;
+    if (anchor && PROOF_DOCUMENT_ANCHORS[anchor]) return true;
+    if (visual && visual.src) {
+      var docFragments = [
+        "local-market",
+        "competitor-scan",
+        "margin-model",
+        "reviews.svg",
+        "auto-inventory",
+        "auto-pricing",
+        "auto-comp-set",
+        "auto-reviews",
+      ];
+      for (var i = 0; i < docFragments.length; i++) {
+        if (visual.src.indexOf(docFragments[i]) >= 0) return true;
+      }
+    }
+    return false;
+  }
+
+  function collectTerminalProofLines(source, visual) {
+    var lines = [];
+    var anchor = source && source.traceAnchor;
+    if (anchor) {
+      var row = document.getElementById(anchor);
+      if (row && row.textContent) lines.push(row.textContent.trim());
+    }
+    var extras =
+      (visual && visual.detailLines) ||
+      (anchor && PROOF_TERMINAL_DETAILS[anchor]) ||
+      [];
+    extras.forEach(function (ln) {
+      var t = (ln || "").trim();
+      if (t && lines.indexOf(t) < 0) lines.push(t);
+    });
+    if (!lines.length && visual && visual.fallbackLines) {
+      lines = visual.fallbackLines.slice();
+    }
+    return lines;
+  }
+
+  function renderProofTerminalHtml(lines, badge) {
+    var body = $("#proof-popup-terminal-body");
+    var wrap = $("#proof-popup-terminal");
+    var badgeEl = $("#proof-terminal-badge");
+    if (!body || !wrap) return;
+    if (badgeEl) badgeEl.textContent = badge || "";
+    body.innerHTML = lines
+      .map(function (ln, i) {
+        var cls = i === 0 ? "proof-terminal-line primary" : "proof-terminal-line meta";
+        return '<span class="' + cls + '">' + escapeHtml(ln) + "</span>";
+      })
+      .join("\n");
+    wrap.hidden = false;
+  }
+
+  function enrichProofSource(s) {
+    if (!s) return s;
+    var out = Object.assign({}, s);
+    var anchor = out.traceAnchor || "";
+    var anchorMap = liveEvidenceAnchorMap || LIVE_EVIDENCE_BY_ANCHOR;
+    if (!out.evidenceSlug && anchorMap[anchor]) {
+      out.evidenceSlug = anchorMap[anchor];
+    }
+    var vis = (anchor && PROOF_VISUALS[anchor]) || (out.proofKey && PROOF_VISUALS[out.proofKey]);
+    if (vis) {
+      if (!out.proofImage) out.proofImage = vis.src;
+      if (!out.proofTitle) out.proofTitle = vis.title;
+      if (!out.proofSubtitle) out.proofSubtitle = vis.subtitle;
+      if (!out.evidenceSlug && vis.evidenceSlug) out.evidenceSlug = vis.evidenceSlug;
+      if (!out.citationUrl && vis.citation) out.citationUrl = vis.citation;
+    }
+    if (out.label && !out.proofTitle) out.proofTitle = out.label;
+    if (out.serviceArm && out.guarantee) {
+      out.proofSubtitle = out.serviceArm + " — on purchase: " + out.guarantee;
+    }
+    var root = resolvePortfolioApiRoot();
+    if (out.evidenceSlug && root) {
+      var briefQ = out.briefQuery || activeBriefQuery || "";
+      out.evidenceUrl = evidenceUrlForSlug(out.evidenceSlug, briefQ);
+      out.citationUrl = out.evidenceUrl;
+      var disclosure =
+        out.disclosure ||
+        "Scrubbed demonstration file — not live market or government data.";
+      out.proofSubtitle =
+        (out.proofSubtitle || out.label || "Evidence document") +
+        " · " +
+        disclosure.slice(0, 140);
+    }
+    return out;
+  }
+
+  function enrichLiveSources(sources) {
+    if (!sources || !sources.length) return [];
+    return sources.map(enrichProofSource);
+  }
 
   function resolveProofVisual(source) {
     if (!source) return null;
+    var base = null;
     if (source.proofImage) {
-      return {
+      base = {
         src: source.proofImage,
-        title: source.proofTitle || source.label || "CLI proof",
+        title: source.proofTitle || source.label || "Evidence document",
         subtitle: source.proofSubtitle || "Orchestration trace evidence",
+        citation: source.citationUrl || source.citation || "",
+        evidenceSlug: source.evidenceSlug || "",
+        evidenceUrl: source.evidenceUrl || "",
+      };
+    } else if (source.traceAnchor && PROOF_VISUALS[source.traceAnchor]) {
+      base = Object.assign({}, PROOF_VISUALS[source.traceAnchor]);
+    } else if (source.proofKey && PROOF_VISUALS[source.proofKey]) {
+      base = Object.assign({}, PROOF_VISUALS[source.proofKey]);
+    } else {
+      base = {
+        src: "assets/proofs/default.svg",
+        title: source.label || "Evidence document",
+        subtitle: "Trace-linked scrubbed export (demo)",
+        citation: "",
       };
     }
-    if (source.traceAnchor && PROOF_VISUALS[source.traceAnchor]) {
-      return PROOF_VISUALS[source.traceAnchor];
+    if (source.evidenceSlug) base.evidenceSlug = source.evidenceSlug;
+    if (source.evidenceUrl) base.evidenceUrl = source.evidenceUrl;
+    if (base && (source.citationUrl || source.citation) && !base.citation) {
+      base.citation = source.citationUrl || source.citation;
     }
-    if (source.proofKey && PROOF_VISUALS[source.proofKey]) {
-      return PROOF_VISUALS[source.proofKey];
+    if (base && base.evidenceSlug && !base.evidenceUrl && resolvePortfolioApiRoot()) {
+      base.evidenceUrl =
+        resolvePortfolioApiRoot() + "/api/portfolio/evidence/" + base.evidenceSlug;
+      if (!base.citation) base.citation = base.evidenceUrl;
     }
-    return {
-      src: "assets/proofs/default.svg",
-      title: source.label || "CLI proof",
-      subtitle: "Trace-linked evidence (demo)",
-    };
+    return base;
   }
 
   function flashTerminalPanel() {
@@ -1313,13 +2128,62 @@
     var visual = resolveProofVisual(source);
     var pop = $("#proof-popup");
     var img = $("#proof-popup-img");
+    var frame = $("#proof-popup-frame");
+    var termWrap = $("#proof-popup-terminal");
     var titleEl = $("#proof-popup-title");
     var subEl = $("#proof-popup-sub");
+    var citeEl = $("#proof-popup-cite");
+    var card = pop && pop.querySelector(".proof-popup-card");
     if (!pop || !img || !visual) return;
-    img.src = visual.src;
-    img.alt = visual.title;
+
+    var useDocument = proofIsDocumentVisual(visual, source) || !!visual.evidenceUrl;
+    if (card) {
+      card.classList.toggle("proof-mode-document", useDocument);
+      card.classList.toggle("proof-mode-terminal", !useDocument);
+    }
+
+    if (useDocument) {
+      if (termWrap) termWrap.hidden = true;
+      if (visual.evidenceUrl && frame) {
+        frame.style.display = "block";
+        frame.src = visual.evidenceUrl;
+        img.style.display = "none";
+        img.removeAttribute("src");
+      } else {
+        if (frame) {
+          frame.style.display = "none";
+          frame.removeAttribute("src");
+        }
+        img.style.display = "block";
+        img.onerror = function () {
+          img.onerror = null;
+          if (visual.evidenceUrl && frame) {
+            frame.style.display = "block";
+            frame.src = visual.evidenceUrl;
+            img.style.display = "none";
+          } else {
+            img.src = "assets/proofs/default.svg";
+          }
+        };
+        img.src = visual.src;
+        img.alt = visual.title;
+      }
+    } else {
+      if (frame) {
+        frame.style.display = "none";
+        frame.removeAttribute("src");
+      }
+      img.style.display = "none";
+      img.removeAttribute("src");
+      renderProofTerminalHtml(collectTerminalProofLines(source, visual), visual.title || "");
+    }
+
     if (titleEl) titleEl.textContent = visual.title;
     if (subEl) subEl.textContent = visual.subtitle || "";
+    if (citeEl) {
+      citeEl.textContent = visual.citation ? "Source: " + visual.citation : "";
+      citeEl.style.display = visual.citation ? "block" : "none";
+    }
     pop.classList.remove("hidden");
     pop.classList.add("visible");
     pop.setAttribute("aria-hidden", "false");
@@ -1331,6 +2195,15 @@
   function hideProofPopup() {
     var pop = $("#proof-popup");
     if (!pop) return;
+    var termWrap = $("#proof-popup-terminal");
+    if (termWrap) termWrap.hidden = true;
+    var frame = $("#proof-popup-frame");
+    if (frame) {
+      frame.style.display = "none";
+      frame.removeAttribute("src");
+    }
+    var body = $("#proof-popup-terminal-body");
+    if (body) body.textContent = "";
     pop.classList.remove("visible");
     pop.classList.add("hidden");
     pop.setAttribute("aria-hidden", "true");
@@ -1398,11 +2271,14 @@
     body.textContent = cleanForSpeech(text);
     row.appendChild(lab);
     row.appendChild(body);
+    if (role === "arche" && text) {
+      lastArcheAnswerText = cleanForSpeech(text);
+    }
     if (sources && sources.length) {
       var ev = document.createElement("div");
       ev.className = "evidence-links";
       var head = document.createElement("strong");
-      head.textContent = "Sources ArchE used (scrubbed run)";
+      head.textContent = "Cited sources — click to open document + trace line";
       ev.appendChild(head);
       sources.forEach(function (s) {
         var a = document.createElement("a");
@@ -1441,6 +2317,7 @@
     var cast = $("#broadcast-out");
     if (term) term.innerHTML = "";
     if (cast) cast.innerHTML = "";
+    lastArcheAnswerText = "";
     hideSpeakerPopup();
     hideProofPopup();
     highlightTools([]);
@@ -1723,8 +2600,47 @@
     },
   };
 
+  function isHomeServicesQuery(t) {
+    return (
+      /\b(?:window|door|windows|doors|remodel|contractor|installer|siding|roofing|gutter)s?\b/.test(t) ||
+      /\bhome improvement\b/.test(t) ||
+      /\bglass replacement\b/.test(t) ||
+      /\breplacement windows?\b/.test(t)
+    );
+  }
+
+  function isAgricultureQuery(t) {
+    return /\b(?:pig|pigs|hog|hogs|swine|livestock|dairy|cattle|poultry|farmer|farming|agricultur|greenhouse|barn|feedlot|cafo|animal husbandry|indoor farm)\b/.test(
+      t
+    ) || /\b(?:pig|hog|swine|livestock|dairy)\s+farm\b/.test(t) || /\bfarm\b/.test(t) && /\b(?:pig|hog|swine|indoor|livestock)\b/.test(t);
+  }
+
+  function detectBriefVertical(q) {
+    var t = (q || "").toLowerCase();
+    if (
+      /strip club|stripclub|gentlemen.?s club|nightclub|night club|adult entertainment|cabaret|liquor license|bottle service/.test(
+        t
+      )
+    )
+      return "nightlife";
+    if (
+      /automotive|auto dealer|dealership|dealerships|used car|pre-?owned|car lot|vehicle|vehicles|\bcars\b|car sales|suv|truck|vin\b|manheim|kbb|kelley|nada|days on lot|floorplan|trade-?in|recon cost|dealership lot/.test(
+        t
+      )
+    )
+      return "automotive";
+    if (isAgricultureQuery(t)) return "agriculture";
+    if (isHomeServicesQuery(t)) return "local";
+    return null;
+  }
+
   function routeQuery(q) {
     var t = q.toLowerCase();
+    var vertical = detectBriefVertical(q);
+    if (vertical === "automotive") return "automotive";
+    if (vertical === "nightlife") return "nightlife";
+    if (vertical === "agriculture") return "agriculture";
+    if (vertical === "local") return "local";
     if (/kill|losing ad|roas|cpa|meta|creative|ads|autopilot|50k|media|lever|thousand|variable|closed.?loop|veo|redtrack|orchestrat/.test(t))
       return "d";
     if (/churn|dashboard|disagree|metric/.test(t)) return "a";
@@ -1732,13 +2648,349 @@
     if (/playbook|rag|doc|compress/.test(t)) return "c";
     if (/sms|twilio|job search coach|job seeker|vault|resume bullet|linkedin headline|referral message|interview practice|accountability/.test(t))
       return "e";
-    if (
-      /window|door|home improvement|remodel|contractor|installer|siding|glass|profit|margin|review|google business|yelp|competit|local market|southwest michigan|kalamazoo|grand rapids|battle creek|niles|berrien|van buren/.test(
-        t
-      )
-    )
-      return "local";
     return "custom";
+  }
+
+  function sourceProof(label, traceAnchor, citationUrl) {
+    var vis = PROOF_VISUALS[traceAnchor] || {};
+    return {
+      label: label,
+      traceAnchor: traceAnchor,
+      citationUrl: citationUrl || vis.citation || "",
+      proofImage: vis.src,
+      proofTitle: vis.title,
+      proofSubtitle: vis.subtitle,
+    };
+  }
+
+  /** Custom brief — automotive / dealership (inventory, pricing, comps, reviews). */
+  function buildScenarioAutomotive(q) {
+    var ctx = getLiveContext();
+    var region = "Kalamazoo / southwest Michigan";
+    if (/grand rapids/.test(q.toLowerCase())) region = "Grand Rapids / west Michigan";
+    var guestLabel = "Decision maker (your text)";
+    var archeLabel = "ArchE";
+    var skeptic =
+      "Every dealer says they are priced right — show me the actual comps and lot data, not generic advice.";
+    var proofReply =
+      "Click each source — you get a full spreadsheet or dashboard capture plus the cited URI in the popup footer. " +
+      "Production wires your DMS, pricing feeds, and reputation APIs with your margin rules.";
+
+    var answer =
+      "For " +
+      region +
+      " used and CPO, target thirty-six to forty-one days on lot on core units — hold recon under twelve hundred on sedans and fifteen hundred on trucks. " +
+      "Price to market index one point zero to one point zero three on high-demand SUVs; do not chase sub-one on aged sedans — wholesale or slash ask after fifty-five days. " +
+      "Gross per unit should land twenty-two hundred to thirty-eight hundred on retail self-financed deals when you tighten trade-in bands to KBB retail minus eight to eleven percent. " +
+      "Spend on Google Vehicle Listings and Meta inventory campaigns only on units under twenty-eight days with photo sets complete — that lifts lot traffic without eroding front gross.";
+
+    return {
+      title: "Automotive — inventory, pricing, and lot gross (your brief)",
+      beats: [
+        {
+          role: "narrator",
+          label: "Play-by-play",
+          say:
+            "Dealer brief — cars and trucks, not home services. ArchE pulls lot aging, market pricing bands, comp set, and reputation before recommending days-on-lot and gross targets.",
+          pipeline: "intake",
+        },
+        { role: "decision_guest", label: guestLabel, say: q, pipeline: "intake" },
+        {
+          terminal: [
+            termEntry(runLog("TEMPORAL", "viewer_local=" + ctx.clockLocal + "  vertical=automotive", 0), "trace-temporal"),
+            termEntry(runLog("SESSION", "run_id=" + DEMO_RUN_ID + "  vertical=automotive  mode=live_validation", 1), "trace-session"),
+            termEntry(runLog("INVOKE", "workflow=dealer_lot_gross  step=decompose_intent", 2)),
+            termEntry(runLog("MAP", "entities=inventory,pricing,comps,reviews,days_on_lot", 3), "trace-map-problem"),
+          ],
+          termDelay: 280,
+          pipeline: "plan",
+          tools: ["llm", "workflow", "research"],
+        },
+        {
+          role: "arche",
+          label: archeLabel,
+          say:
+            ctx.greet +
+            ". I am pulling your lot aging, market pricing index, and dealer comp set for " +
+            region +
+            " — watch the trace; I will cite each source as a document you can open.",
+          pipeline: "plan",
+          terminalParallel: [
+            termEntry(runLog("FETCH", "inventory_aging  uri=https://api.demo/automotive/inventory/kz-lot-2025q2  status=200", 4), "trace-auto-inventory"),
+            termEntry(runLog("FETCH", "market_pricing  uri=https://markets.demo/automotive/pricing/kz-used  status=200", 5), "trace-auto-pricing"),
+            termEntry(runLog("FETCH", "comp_set_25mi  uri=https://research.demo/automotive/comps/kz-dealers  n=4", 6), "trace-auto-comp"),
+            termEntry(runLog("FETCH", "dealer_reviews  uri=https://reviews.demo/gbp/scrub-dealer-kz  window=90d", 7), "trace-auto-reviews"),
+          ],
+          termDelay: 260,
+        },
+        {
+          toolFocus: {
+            tool: "research",
+            doing: "Synthesizing days-on-lot, market index, and comp spreads for your segment.",
+            tie: "Spreadsheet and chart proofs open from the source links.",
+            also: ["research", "live", "vetting"],
+            forecast: "DOM target 36–41d · gross band $2.2k–$3.8k/unit",
+          },
+          terminal: [
+            termEntry(runLog("CALC", "median_dom=38  target_dom=36-41  units_over_55d=12", 8), "trace-auto-inventory"),
+            termEntry(runLog("CALC", "price_index=1.01  segment=suv_truck  sedans_below_1.0=flag", 9), "trace-auto-pricing"),
+            termEntry(runLog("CALC", "comp_spread=+2.1% vs median_ask  dealers=4", 10), "trace-auto-comp"),
+            termEntry(runLog("CALC", "review_velocity=4.58  detractor_sla=2h", 11), "trace-auto-reviews"),
+          ],
+          termDelay: 240,
+          pipeline: "tools",
+          tools: ["research", "live", "vetting"],
+          forecast: {
+            title: "While automotive evidence lands",
+            rows: [
+              { label: "Median days on lot", pct: 72, value: "38d" },
+              { label: "Market price index", pct: 81, value: "1.01" },
+              { label: "Target gross / unit", pct: 76, value: "$2.2–3.8k" },
+            ],
+            note: "Vetting locks numbers before the answer ships.",
+          },
+        },
+        { role: "arche", label: archeLabel, say: answer, pipeline: "vet", tools: ["vetting", "research"] },
+        {
+          terminal: [
+            termEntry(runLog("VETTING", "vertical=automotive  status=PASS  conf=0.86", 12), "trace-auto-vetting"),
+            termEntry(runLog("SRC", "evidence_bundle=EB-AUTO-07  citations=5  check=PASS", 13), "trace-auto-vetting"),
+          ],
+          termDelay: 240,
+          pipeline: "vet",
+          tools: ["vetting"],
+        },
+        { role: "decision_guest", label: guestLabel, say: skeptic, pipeline: "answer" },
+        {
+          role: "arche",
+          label: archeLabel,
+          say: proofReply,
+          pipeline: "answer",
+          sources: [
+            sourceProof("Open lot inventory spreadsheet", "trace-auto-inventory", "https://api.demo/automotive/inventory/kz-lot-2025q2"),
+            sourceProof("Open market pricing dashboard", "trace-auto-pricing", "https://markets.demo/automotive/pricing/kz-used"),
+            sourceProof("Open competitive set sheet", "trace-auto-comp", "https://research.demo/automotive/comps/kz-dealers"),
+            sourceProof("Open dealer reviews panel", "trace-auto-reviews", "https://reviews.demo/gbp/scrub-dealer-kz"),
+            sourceProof("Open vetting bundle", "trace-auto-vetting", "https://vetting.demo/bundles/EB-AUTO-07"),
+          ],
+        },
+        {
+          timeline: "T+0:40m vetted brief  ·  T+3d pricing test  ·  T+14d DOM vs gross scorecard",
+          pipeline: "answer",
+        },
+        {
+          terminal: [
+            termEntry(runLog("ANSWER", "vertical=automotive  dom_target=36-41  conf=0.86", 14), "trace-answer"),
+            termEntry(runLog("SESSION", "complete  duration=19m40s  run_id=" + DEMO_RUN_ID, 15)),
+          ],
+          termDelay: 220,
+          pipeline: "answer",
+        },
+      ],
+    };
+  }
+
+  /** Custom brief — nightlife / venue (NOT home services). */
+  function buildScenarioNightlife(q) {
+    var ctx = getLiveContext();
+    var region = /kalamazoo|southwest michigan|grand rapids|battle creek/.test(q.toLowerCase())
+      ? "southwest Michigan"
+      : "your market";
+    var answer =
+      "Becoming the dominant adult nightclub in " +
+      region +
+      " is a licensing, zoning, security, and reputation stack — not a contractor margin problem. " +
+      "You need counsel on municipal adult-use ordinances, liquor license class and quota waitlists, fire-occupancy upgrades, and security staffing ratios before you scale marketing. " +
+      "Competitive position: map incumbent venues within thirty miles, their cover and VIP mix, review sentiment, and incident history — then differentiate on safety, lighting, and predictable door policy rather than racing on promotion alone. " +
+      "Cap expansion spend until you pass a vetting gate on legal and insurance — ArchE would wire live ordinances, comp set footfall proxies, and reputation feeds in production.";
+
+    return {
+      title: "Nightlife / venue strategy (your brief)",
+      beats: [
+        {
+          role: "narrator",
+          label: "Play-by-play",
+          say:
+            "Venue strategy brief for the buyer's actual question — adult nightlife in " +
+            region +
+            ". ArchE pulls zoning, liquor licensing context, comp venues, and reputation — not windows or doors.",
+          pipeline: "intake",
+        },
+        { role: "decision_guest", label: "Decision maker (your text)", say: q, pipeline: "intake" },
+        {
+          terminal: [
+            termEntry(runLog("MAP", "vertical=nightlife_venue  intent=" + q.slice(0, 60), 0), "trace-map-problem"),
+            termEntry(runLog("INVOKE", "workflow=venue_market_strategy  step=decompose_intent", 1)),
+          ],
+          termDelay: 280,
+          pipeline: "plan",
+          tools: ["research", "live", "vetting"],
+        },
+        {
+          role: "arche",
+          label: "ArchE",
+          say:
+            ctx.greet +
+            ". I am on your actual question — venue dominance in " +
+            region +
+            " — pulling ordinance summaries, comp venue signals, and reputation trends on the trace.",
+          pipeline: "plan",
+          terminalParallel: [
+            termEntry(runLog("FETCH", "zoning_adult_use  uri=https://research.demo/zoning/sw-mi-adult  status=200", 2), "trace-market"),
+            termEntry(runLog("FETCH", "comp_venues_30mi  uri=https://research.demo/nightlife/comps  n=12", 3), "trace-market"),
+            termEntry(runLog("FETCH", "reputation_feed  uri=https://reviews.demo/venue/scrub  window=90d", 4), "trace-reviews"),
+          ],
+          termDelay: 260,
+        },
+        {
+          role: "arche",
+          label: "ArchE",
+          say: answer,
+          pipeline: "vet",
+          tools: ["vetting", "research"],
+        },
+        {
+          terminal: [termEntry(runLog("VETTING", "vertical=nightlife  status=PASS  conf=0.82", 5), "trace-vetting")],
+          termDelay: 220,
+          pipeline: "vet",
+        },
+        {
+          role: "arche",
+          label: "ArchE",
+          say: "Click sources for spreadsheet and review captures — each cites a scrubbed URI. This preview is illustrative; production uses your counsel packet and live feeds.",
+          pipeline: "answer",
+          sources: [
+            sourceProof("Open zoning / comp research sheet", "trace-market", "https://research.demo/nightlife/comps"),
+            sourceProof("Open reputation panel", "trace-reviews", "https://reviews.demo/venue/scrub"),
+            sourceProof("Open vetting bundle", "trace-vetting", "https://vetting.demo/bundles/EB-NIGHT-01"),
+          ],
+        },
+        { timeline: "T+0:50m vetted brief  ·  T+14d licensing checkpoint", pipeline: "answer" },
+      ],
+    };
+  }
+
+  /** Custom brief — agriculture / livestock (pig, hog, indoor production). */
+  function buildScenarioAgriculture(q) {
+    var ctx = getLiveContext();
+    var region = /southwest michigan|kalamazoo|berrien|cass|van buren/.test(q.toLowerCase())
+      ? "southwest Michigan"
+      : "your region";
+    var isPig = /\bpig|hog|swine|farrow|finisher/.test(q.toLowerCase());
+    var species = isPig ? "indoor hog" : "livestock";
+    var guestLabel = "Decision maker (your text)";
+    var archeLabel = "ArchE";
+    var skeptic =
+      "Every ag consultant says scale up — how do I know this is not generic advice? Show me what ran.";
+    var proofReply =
+      "Fair question. Click each source — the trace flashes the matching CLI line and opens the scrubbed proof capture. " +
+      "Production wires MDARD filings, packer contracts, feed bids, and your mortality logs with your thresholds.";
+    var answer =
+      "To become the largest " +
+      species +
+      " operation in " +
+      region +
+      ", you scale in phases — permits and packer access before headcount. " +
+      "Phase one: confirm county zoning and MDARD site-approval for confined feeding; model ventilation and manure management for indoor barns — that caps realistic headcount before you sign feed contracts. " +
+      "Phase two: secure packer or marketing cooperative off-take with weekly kill windows; without binding slaughter capacity, growing inventory becomes a margin trap. " +
+      "Phase three: unit economics — target feed conversion near 2.7 to 2.9 on finishers, keep all-in cost per head under your regional comp set, and stage barn expansion only when biosecurity audits and mortality stay inside your vetting band. " +
+      "Competitive map: benchmark the three largest existing producers within fifty miles on permitted capacity, not marketing claims — then close the gap on logistics (feed mill distance, trucking, wash stations) where incumbents are slow.";
+
+    return {
+      title: "Agriculture — " + species + " scale & unit economics (your brief)",
+      beats: [
+        {
+          role: "narrator",
+          label: "Play-by-play",
+          say:
+            "Livestock brief for the buyer's actual question — " +
+            species +
+            " in " +
+            region +
+            ". ArchE pulls regulatory capacity, regional hog inventory, packer off-take, and unit economics — not windows, doors, or installer margins.",
+          pipeline: "intake",
+        },
+        { role: "decision_guest", label: guestLabel, say: q, pipeline: "intake" },
+        {
+          terminal: [
+            termEntry(runLog("TEMPORAL", "viewer_local=" + ctx.clockLocal + "  vertical=agriculture", 0), "trace-temporal"),
+            termEntry(runLog("SESSION", "run_id=" + DEMO_RUN_ID + "  vertical=agriculture  mode=live_validation", 1), "trace-session"),
+            termEntry(runLog("INVOKE", "workflow=livestock_scale_strategy  step=decompose_intent", 2)),
+            termEntry(runLog("MAP", "entities=permits,capacity,packer,feed,biosecurity  region=" + region.replace(/\s/g, "_"), 3), "trace-map-problem"),
+          ],
+          termDelay: 280,
+          pipeline: "plan",
+          tools: ["llm", "research", "live", "vetting"],
+        },
+        {
+          role: "arche",
+          label: archeLabel,
+          say:
+            ctx.greet +
+            ". I am on your " +
+            species +
+            " question for " +
+            region +
+            " — pulling MDARD permit context, regional capacity, packer schedules, and feed economics on the trace.",
+          pipeline: "plan",
+          terminalParallel: [
+            termEntry(runLog("FETCH", "mdard_permits  uri=https://research.demo/ag/mdard-sw-mi-livestock  status=200", 4), "trace-ag-regulatory"),
+            termEntry(runLog("FETCH", "regional_capacity  uri=https://markets.demo/ag/sw-mi-hog-capacity  status=200", 5), "trace-ag-capacity"),
+            termEntry(runLog("FETCH", "packer_offtake  uri=https://api.demo/ag/packer-slots/sw-mi  status=200", 6), "trace-ag-capacity"),
+          ],
+          termDelay: 260,
+        },
+        {
+          toolFocus: {
+            tool: "research",
+            doing: "Synthesizing permitted capacity, packer binding, and feed conversion for staged barn expansion.",
+            tie: "Spreadsheet and unit-econ proofs open from the source links.",
+            also: ["research", "live", "vetting"],
+            forecast: "Staged headcount · FCR 2.7–2.9 · packer gate before build",
+          },
+          terminal: [
+            termEntry(runLog("CALC", "permitted_headroom=+4200  phase=1  county=berrien", 7), "trace-ag-regulatory"),
+            termEntry(runLog("CALC", "comp_capacity_50mi=3  largest_incumbent=12.4k_head", 8), "trace-ag-capacity"),
+            termEntry(runLog("CALC", "unit_econ  fcr=2.82  margin_head=$18-24  conf=0.83", 9), "trace-ag-economics"),
+            termEntry(runLog("VETTING", "biosecurity_audit=PASS  mortality_band=ok", 10), "trace-ag-biosecurity"),
+          ],
+          termDelay: 240,
+          pipeline: "tools",
+          tools: ["research", "live", "vetting"],
+        },
+        { role: "arche", label: archeLabel, say: answer, pipeline: "vet", tools: ["vetting", "research"] },
+        {
+          terminal: [
+            termEntry(runLog("VETTING", "vertical=agriculture  claims=permits+capacity+econ  status=PASS  conf=0.83", 11), "trace-vetting"),
+          ],
+          termDelay: 220,
+          pipeline: "vet",
+        },
+        { role: "decision_guest", label: guestLabel, say: skeptic, pipeline: "answer" },
+        {
+          role: "arche",
+          label: archeLabel,
+          say: proofReply,
+          pipeline: "answer",
+          sources: [
+            sourceProof("Open MDARD / county permit matrix", "trace-ag-regulatory", "https://research.demo/ag/mdard-sw-mi-livestock"),
+            sourceProof("Open regional capacity sheet", "trace-ag-capacity", "https://markets.demo/ag/sw-mi-hog-capacity"),
+            sourceProof("Open unit economics dashboard", "trace-ag-economics", "https://models.demo/ag/indoor-hog-unit-econ"),
+            sourceProof("Open biosecurity audit panel", "trace-ag-biosecurity", "https://vetting.demo/ag/biosecurity-audit"),
+            sourceProof("Open vetting bundle", "trace-vetting", "https://vetting.demo/bundles/EB-AG-01"),
+          ],
+        },
+        { timeline: "T+0:45m vetted brief  ·  T+21d permit checkpoint  ·  T+90d phase-1 capacity gate", pipeline: "answer" },
+        {
+          terminal: [
+            termEntry(runLog("ANSWER", "vertical=agriculture  species=" + species.replace(/\s/g, "_") + "  conf=0.83", 12), "trace-answer"),
+            termEntry(runLog("SESSION", "complete  duration=21m10s  run_id=" + DEMO_RUN_ID, 13)),
+          ],
+          termDelay: 220,
+          pipeline: "answer",
+        },
+      ],
+    };
   }
 
   /** Custom brief — local home services (windows/doors, reviews, regional competition). */
@@ -1862,11 +3114,11 @@
           say: proofReply,
           pipeline: "answer",
           sources: [
-            { label: "Jump to local market scan", traceAnchor: "trace-local-market" },
-            { label: "Jump to review velocity proof", traceAnchor: "trace-reviews" },
-            { label: "Jump to competitor quote band", traceAnchor: "trace-competitor" },
-            { label: "Jump to margin model line", traceAnchor: "trace-margin" },
-            { label: "Jump to vetting bundle", traceAnchor: "trace-vetting" },
+            sourceProof("Open regional demand spreadsheet", "trace-local-market", "https://markets.demo/local/sw-mi-windows-doors"),
+            sourceProof("Open review velocity panel", "trace-reviews", "https://reviews.demo/gbp/scrub-installer"),
+            sourceProof("Open competitor quote sheet", "trace-competitor", "https://research.demo/bids/sw-mi-replacement"),
+            sourceProof("Open margin dashboard", "trace-margin", "https://models.demo/local/margin-v3"),
+            sourceProof("Open vetting bundle", "trace-vetting", "https://vetting.demo/bundles/EB-LOCAL-03"),
           ],
         },
         {
@@ -1887,14 +3139,108 @@
 
   function resolveLiveApiUrl() {
     if (PORTFOLIO_LIVE_API) return PORTFOLIO_LIVE_API;
-    if (typeof location !== "undefined" && /^https?:/.test(location.protocol)) {
-      var host = location.hostname;
-      if (host === "127.0.0.1" || host === "localhost") {
-        var port = location.port === "17890" ? "" : ":17890";
-        return location.protocol + "//" + host + port + "/api/portfolio/brief";
+    if (typeof location === "undefined" || !/^https?:/.test(location.protocol)) return "";
+    var host = location.hostname;
+    if (host === "127.0.0.1" || host === "localhost") {
+      if (location.port === "17890") {
+        return location.protocol + "//" + location.host + "/api/portfolio/brief";
       }
+      return location.protocol + "//" + host + ":17890/api/portfolio/brief";
     }
+    var probedKey = "PORTFOLIO_LIVE_API_PROBE_" + location.origin;
+    var probedVal = "";
+    try {
+      probedVal = (typeof localStorage !== "undefined" && localStorage.getItem(probedKey)) || "";
+    } catch (e) {}
+    if (probedVal === "ok") {
+      return location.origin + "/api/portfolio/brief";
+    }
+    if (probedVal === "no") {
+      return "";
+    }
+    return location.origin + "/api/portfolio/brief";
+  }
+
+  function probeSameOriginPortfolioApi() {
+    if (typeof location === "undefined" || !/^https?:/.test(location.protocol)) return;
+    var host = location.hostname;
+    if (host === "127.0.0.1" || host === "localhost") return;
+    var probedKey = "PORTFOLIO_LIVE_API_PROBE_" + location.origin;
+    try {
+      fetch(location.origin + "/api/portfolio/health", {
+        method: "GET",
+        cache: "no-store",
+        headers: { "ngrok-skip-browser-warning": "1" },
+      })
+        .then(function (r) {
+          if (r.ok) {
+            try { localStorage.setItem(probedKey, "ok"); } catch (e) {}
+            setVoiceStatus("Voice: Edge TTS (live ArchE)");
+            updateDataDisclosure({
+              disclosure:
+                "Live preview connected. Orchestration and answers run on ArchE; evidence HTML is generated on the fly from your brief (scrubbed demo rows — not your production vault).",
+            });
+          } else {
+            try { localStorage.setItem(probedKey, "no"); } catch (e) {}
+          }
+        })
+        .catch(function () {
+          try { localStorage.setItem(probedKey, "no"); } catch (e) {}
+        });
+    } catch (e) {}
+  }
+  probeSameOriginPortfolioApi();
+
+  function resolvePortfolioApiRoot() {
+    var brief = resolveLiveApiUrl();
+    if (brief) return brief.replace(/\/api\/portfolio\/brief\/?$/i, "");
     return "";
+  }
+
+  function playEdgeTtsApi(role, text) {
+    var root = resolvePortfolioApiRoot();
+    if (!root || !text) return Promise.resolve(false);
+    var url =
+      root +
+      "/api/portfolio/tts?role=" +
+      encodeURIComponent(role || "arche") +
+      "&text=" +
+      encodeURIComponent(text.substring(0, 900));
+    return new Promise(function (resolve) {
+      var a = new Audio(url);
+      a.preload = "auto";
+      a.volume = 1;
+      activeAudios.push(a);
+      var settled = false;
+      function finish(ok) {
+        if (settled) return;
+        settled = true;
+        activeAudios = activeAudios.filter(function (x) {
+          return x !== a;
+        });
+        resolve(!!ok);
+      }
+      a.onended = function () {
+        finish(true);
+      };
+      a.onerror = function () {
+        finish(false);
+      };
+      function tryPlay() {
+        var p = a.play();
+        if (p && typeof p.then === "function") {
+          p.catch(function () {
+            finish(false);
+          });
+        }
+      }
+      if (a.readyState >= 3) tryPlay();
+      else {
+        a.addEventListener("canplaythrough", tryPlay, { once: true });
+        a.addEventListener("loadeddata", tryPlay, { once: true });
+        a.load();
+      }
+    });
   }
 
   function hydrateTerminalEntries(entries) {
@@ -1919,112 +3265,143 @@
       if (b.toolFocus) beat.toolFocus = b.toolFocus;
       if (b.timeline) beat.timeline = b.timeline;
       if (b.termDelay) beat.termDelay = b.termDelay;
-      if (b.sources) beat.sources = b.sources;
+      if (b.sources) beat.sources = enrichLiveSources(b.sources);
       if (b.terminal) beat.terminal = hydrateTerminalEntries(b.terminal);
       if (b.terminalParallel) beat.terminalParallel = hydrateTerminalEntries(b.terminalParallel);
       return beat;
     });
   }
 
-  function fetchLiveBrief(query) {
+  function fetchLiveBrief(query, opts) {
+    opts = opts || {};
     var url = resolveLiveApiUrl();
-    if (!url || !query) return Promise.resolve(null);
-    var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
-    var timer = ctrl
-      ? setTimeout(function () {
-          ctrl.abort();
-        }, 120000)
-      : null;
-    return fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ query: query }),
-      signal: ctrl ? ctrl.signal : undefined,
-    })
-      .then(function (r) {
-        if (!r.ok) throw new Error("brief api " + r.status);
-        return r.json();
+    if (!url || !query) {
+      return Promise.resolve({
+        ok: false,
+        error: "no_live_api",
+        detail:
+          "Live ArchE is offline right now. Reload in a moment, or message the team for a guided run.",
+      });
+    }
+    var root = url.replace(/\/api\/portfolio\/brief\/?$/i, "");
+
+    function postBrief() {
+      var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+      var timeoutMs = 180000;
+      var timer = ctrl
+        ? setTimeout(function () {
+            ctrl.abort();
+          }, timeoutMs)
+        : null;
+      var postBody = { query: query };
+      var bn = opts.businessName != null ? opts.businessName : getBuyerBusinessName();
+      if (bn) postBody.business_name = bn;
+      if (opts.followUp) {
+        postBody.is_follow_up = true;
+        postBody.follow_up = query;
+        postBody.prior_query = opts.priorQuery || conversationState.priorQuery || "";
+        postBody.prior_answer = opts.priorAnswer || conversationState.priorAnswer || lastArcheAnswerText || "";
+      }
+      return fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(postBody),
+        signal: ctrl ? ctrl.signal : undefined,
       })
-      .then(function (payload) {
-        if (!payload || !payload.ok || !payload.beats || !payload.beats.length) return null;
+        .then(function (r) {
+          if (!r.ok) throw new Error("brief api HTTP " + r.status);
+          return r.json();
+        })
+        .then(function (payload) {
+          if (!payload || !payload.ok || !payload.beats || !payload.beats.length) {
+            return {
+              ok: false,
+              error: (payload && payload.error) || "empty_brief",
+              engine: payload && payload.engine,
+              detail: (payload && payload.error) || "ArchE returned no beats",
+            };
+          }
+          return {
+            ok: true,
+            title: payload.title || "Your brief (live ArchE)",
+            beats: hydrateLiveBeats(payload.beats),
+            engine: payload.engine || "live",
+            error: payload.error,
+            evidence_pack: payload.evidence_pack || null,
+            query: payload.query || query,
+            prior_query: payload.prior_query || "",
+            is_follow_up: !!payload.is_follow_up,
+            needs_clarification: !!payload.needs_clarification,
+            clarification_kind: payload.clarification_kind || "",
+            clarification_question: payload.clarification_question || "",
+            present_url: payload.present_url || "",
+            arche_answer_snippet: payload.arche_answer_snippet || "",
+            full_strategy: payload.full_strategy || "",
+            strategy_sections: payload.strategy_sections || [],
+          };
+        })
+        .finally(function () {
+          if (timer) clearTimeout(timer);
+        });
+    }
+
+    function healthOk() {
+      return fetch(root + "/api/portfolio/health", { method: "GET", cache: "no-store" })
+        .then(function (r) {
+          return r.ok;
+        })
+        .catch(function () {
+          return false;
+        });
+    }
+
+    return healthOk()
+      .then(function (ok) {
+        if (!ok) throw new Error("portfolio health unreachable at " + root);
+        return postBrief();
+      })
+      .catch(function (e) {
+        return delay(400).then(function () {
+          return healthOk().then(function (ok2) {
+            if (!ok2) throw e;
+            return postBrief();
+          });
+        });
+      })
+      .catch(function (e) {
         return {
-          title: payload.title || "Your brief (live ArchE)",
-          beats: hydrateLiveBeats(payload.beats),
-          engine: payload.engine || "live",
+          ok: false,
+          error: "fetch_failed",
+          detail: e && e.message ? e.message : String(e),
         };
-      })
-      .catch(function () {
-        return null;
-      })
-      .finally(function () {
-        if (timer) clearTimeout(timer);
       });
   }
 
-  function buildCustomScenario(q) {
-    var key = routeQuery(q);
-    if (key === "d") {
-      var media = buildScenarioD(q);
-      media.title = "Your brief — thousands of levers, automated (preview)";
-      return media;
-    }
-    if (key === "e") {
-      var sms = buildScenarioE(q);
-      sms.title = "Your brief — SMS Vault RAG coach (preview)";
-      return sms;
-    }
-    if (key === "local") {
-      return buildScenarioLocalServices(q);
-    }
-    if (key !== "custom") {
-      var base =
-        key === "a"
-          ? buildScenarioA(getLiveContext())
-          : key === "b"
-            ? buildScenarioB(getLiveContext())
-            : key === "e"
-              ? buildScenarioE(q)
-              : JSON.parse(JSON.stringify(SCENARIOS[key]));
-      base.title = "Your brief (routed preview)";
-      if (base.beats && base.beats[1]) {
-        base.beats[1].say = q;
-        base.beats[1].role =
-          key === "a"
-            ? "decision_jim"
-            : key === "b"
-              ? "decision_chro"
-              : key === "c"
-                ? "decision_ops"
-                : key === "e"
-                  ? "decision_jordan"
-                  : "decision_guest";
-        base.beats[1].label = "Decision maker (your text)";
-      }
-      return base;
-    }
+  /** Shown only when live ArchE API is unreachable — never keyword vertical scripts. */
+  function buildLiveArchEUnavailableScenario(q, reason) {
     var ctx = getLiveContext();
+    var why =
+      reason && reason.detail
+        ? reason.detail
+        : reason && reason.error
+          ? reason.error
+          : "Live API not reachable";
     return {
-      title: "Your brief (generic preview)",
+      title: "Live ArchE is offline — please try again in a moment",
       beats: [
         {
           role: "narrator",
-          say: "Custom intake. ArchE decomposes your language, picks capabilities, and projects a timeline. Production runs on private infrastructure — this page is illustrative.",
+          say:
+            "This live preview is temporarily offline. Your question was received but not run.",
           pipeline: "intake",
         },
-        {
-          role: "decision_guest",
-          label: "Decision maker (your text)",
-          say: q,
-          pipeline: "intake",
-        },
+        { role: "decision_guest", label: "You", say: q, pipeline: "intake" },
         {
           terminal: [
-            termEntry(runLog("SESSION", "run_id=" + DEMO_RUN_ID + "  mode=custom_preview", 0), "trace-session"),
-            termEntry(runLog("INVOKE", "workflow=custom_intake  step=decompose_intent", 1)),
-            termEntry(runLog("MAP", "intent=" + q.slice(0, 72) + (q.length > 72 ? "…" : ""), 2), "trace-map-problem"),
+            termEntry(runLog("STATUS", "live_arche  state=offline  retry=auto", 0), "trace-session"),
+            termEntry(runLog("NEXT", "refresh_page_or_request_guided_run", 1), "trace-plan"),
           ],
           termDelay: 280,
-          tools: ["llm", "research", "live", "vetting", "workflow"],
           pipeline: "plan",
         },
         {
@@ -2032,36 +3409,15 @@
           label: "ArchE",
           say:
             ctx.greet +
-            ". I am routing your brief through research, live evidence, and vetting — watch the trace populate, then I will return a confidence-bounded answer.",
-          pipeline: "plan",
-          terminalParallel: [
-            termEntry(runLog("FETCH", "research_synthesis  uri=https://research.demo/brief/custom  status=200", 3), "trace-market"),
-            termEntry(runLog("FETCH", "live_pulse  uri=https://api.demo/status/scrub  latency_ms=310", 4), "trace-billing-fetch"),
-          ],
-          termDelay: 260,
-        },
-        {
-          role: "arche",
-          label: "ArchE",
-          say:
-            "I would parallelize live evidence gathering, run vetting before synthesis, and return confidence-bounded answers with an explicit ETA. " +
-            "For a full production run on your stack — CRM, ads, ops data — book a consult; this page shows the orchestration shape.",
-          pipeline: "answer",
-          sources: [
-            { label: "Jump to intent map line", traceAnchor: "trace-map-problem" },
-            { label: "Jump to research fetch", traceAnchor: "trace-market" },
-            { label: "Jump to live pulse", traceAnchor: "trace-billing-fetch" },
-          ],
-        },
-        {
-          terminal: [
-            termEntry(runLog("VETTING", "custom_brief  status=PASS  conf=0.78", 5), "trace-vetting"),
-            termEntry(runLog("ANSWER", "mode=generic_preview  consult=recommended", 6)),
-          ],
-          termDelay: 220,
+            ". The live preview is offline right now, so I have not run your question yet. " +
+            "Please refresh the page in a moment, or send the question through the contact link and we will reply with a full vetted brief. " +
+            "Your text is preserved in the box so you can re-run with one click when the service returns.",
           pipeline: "answer",
         },
-        { timeline: "T+0:20m first vetted slice  ·  T+4h decision-grade brief", pipeline: "answer" },
+        {
+          timeline: "Reload in a moment · all answers come from the live ArchE LLM, not canned scripts",
+          pipeline: "answer",
+        },
       ],
     };
   }
@@ -2075,6 +3431,8 @@
     if (custom) custom.classList.toggle("locked", !on);
     var badge = $("#unlock-badge");
     if (badge) badge.textContent = on ? "Consult preview unlocked" : "";
+    var reward = $("#unlock-reward-banner");
+    if (reward) reward.classList.toggle("hidden", !on);
   }
 
   async function drainTerminal(lines, token, termDelay) {
@@ -2128,6 +3486,74 @@
     }
   }
 
+  async function playFollowUpBeats(beats) {
+    var token = ++playToken;
+    var play = $("#play-demo");
+    if (play) {
+      play.disabled = true;
+      play.textContent = "Follow-up…";
+    }
+    setTimeline("Follow-up → live ArchE (evidence regenerated for your thread)…");
+    for (var i = 0; i < beats.length; i++) {
+      if (token !== playToken) return;
+      await runBeat(beats[i], token);
+    }
+    if (lastArcheAnswerText) conversationState.priorAnswer = lastArcheAnswerText;
+    if (play) {
+      play.disabled = false;
+      play.textContent = "Replay";
+    }
+  }
+
+  function submitFollowUp() {
+    if (followUpBusy) return;
+    var followEl = $("#answer-followup");
+    var followText = followEl && followEl.value ? followEl.value.trim() : "";
+    if (!followText) {
+      setVoiceStatus("Type a follow-up first");
+      return;
+    }
+    if (!conversationState.priorQuery && !lastArcheAnswerText) {
+      setVoiceStatus("Run an initial brief first");
+      return;
+    }
+    primeAudio();
+    voiceOn = true;
+    followUpBusy = true;
+    var btn = $("#followup-submit");
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "…";
+    }
+    setTimeline("Calling live ArchE for your follow-up…");
+    fetchLiveBrief(followText, {
+      followUp: true,
+      priorQuery: conversationState.priorQuery,
+      priorAnswer: conversationState.priorAnswer || lastArcheAnswerText,
+    })
+      .then(function (live) {
+        if (live && live.ok && live.beats) {
+          if (live.evidence_pack) {
+            setLiveEvidenceContext(live.evidence_pack, (conversationState.priorQuery + " " + followText).trim());
+          }
+          activeBriefQuery = (conversationState.priorQuery + " " + followText).trim();
+          updateConversationFromScenario(live, null);
+          if (followEl) followEl.value = "";
+          return loadManifest().then(function () {
+            return playFollowUpBeats(live.beats);
+          });
+        }
+        setTimeline("Follow-up failed — " + (live && live.error ? live.error : "unavailable"));
+      })
+      .finally(function () {
+        followUpBusy = false;
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "Submit";
+        }
+      });
+  }
+
   async function playScenario(scenario) {
     var token = ++playToken;
     stopSpeech();
@@ -2149,6 +3575,16 @@
       replay.disabled = false;
       replay.textContent = "Replay";
     }
+    if (scenario && scenario.arche_answer_snippet) {
+      conversationState.priorAnswer = scenario.arche_answer_snippet;
+    } else if (lastArcheAnswerText) {
+      conversationState.priorAnswer = lastArcheAnswerText;
+    }
+    if (scenario && scenario.evidence_pack) {
+      updateSalesHooks(scenario.evidence_pack);
+    } else if (lastEvidencePack) {
+      updateSalesHooks(lastEvidencePack);
+    }
   }
 
   function openModal() {
@@ -2165,6 +3601,11 @@
   function closeModal() {
     playToken++;
     stopSpeech();
+    stopQueryMic();
+    stopAnswerMic();
+    var followEl = $("#answer-followup");
+    if (followEl) followEl.value = "";
+    hidePresentGiftLink();
     hideSpeakerPopup();
     hideProofPopup();
     var modal = $("#demo-modal");
@@ -2184,6 +3625,219 @@
 
   var activeScenario = null;
 
+  function speechRecognitionCtor() {
+    return window.SpeechRecognition || window.webkitSpeechRecognition;
+  }
+
+  function setMicBtnActive(btn, active) {
+    if (!btn) return;
+    if (active) btn.classList.add("active");
+    else btn.classList.remove("active");
+  }
+
+  function startFieldMic(field, btn, state) {
+    var Ctor = speechRecognitionCtor();
+    if (!Ctor) {
+      alert("Speech recognition is not supported in this browser. Try Chrome or Edge.");
+      return;
+    }
+    if (!field) return;
+    if (state.active) {
+      state.stop();
+      return;
+    }
+    state.baseText = field.value || "";
+    var finalTranscript = "";
+    var rec = new Ctor();
+    state.recognition = rec;
+    state.active = true;
+    setMicBtnActive(btn, true);
+    rec.lang = navigator.language || "en-US";
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.onresult = function (event) {
+      var interim = "";
+      for (var i = event.resultIndex; i < event.results.length; i++) {
+        var t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) finalTranscript += t + " ";
+        else interim += t;
+      }
+      var prefix = state.baseText ? state.baseText + " " : "";
+      field.value = (prefix + finalTranscript + interim).trim();
+    };
+    rec.onerror = function () {
+      state.stop();
+    };
+    rec.onend = function () {
+      if (state.active) state.stop();
+    };
+    try {
+      rec.start();
+    } catch (e) {
+      state.stop();
+    }
+  }
+
+  var queryMicState = {
+    active: false,
+    recognition: null,
+    baseText: "",
+    stop: function () {
+      if (this.recognition) {
+        try {
+          this.recognition.onresult = null;
+          this.recognition.onerror = null;
+          this.recognition.onend = null;
+          this.recognition.stop();
+        } catch (e) {
+          /* ignore */
+        }
+        this.recognition = null;
+      }
+      this.active = false;
+      this.baseText = "";
+      setMicBtnActive($("#query-mic-btn"), false);
+    },
+  };
+
+  var answerMicState = {
+    active: false,
+    recognition: null,
+    baseText: "",
+    stop: function () {
+      if (this.recognition) {
+        try {
+          this.recognition.onresult = null;
+          this.recognition.onerror = null;
+          this.recognition.onend = null;
+          this.recognition.stop();
+        } catch (e) {
+          /* ignore */
+        }
+        this.recognition = null;
+      }
+      this.active = false;
+      this.baseText = "";
+      setMicBtnActive($("#answer-mic-btn"), false);
+    },
+  };
+
+  function stopQueryMic() {
+    queryMicState.stop();
+  }
+
+  function stopAnswerMic() {
+    answerMicState.stop();
+  }
+
+  function toggleQueryMic() {
+    startFieldMic($("#custom-query"), $("#query-mic-btn"), queryMicState);
+  }
+
+  function toggleAnswerMic() {
+    startFieldMic($("#answer-followup"), $("#answer-mic-btn"), answerMicState);
+  }
+
+  function scrapeUrlIntoQuery() {
+    var ta = $("#custom-query");
+    var raw = (ta && ta.value) || "";
+    var urlMatch = raw.match(/https?:\/\/[^\s<>"']+/i);
+    var url = urlMatch ? urlMatch[0] : window.prompt("Paste URL to scrape into your question:");
+    if (!url) return;
+    var root = resolvePortfolioApiRoot();
+    if (!root) {
+      alert("URL scrape needs the live server. Run: python3 scripts/serve_portfolio_live.py");
+      return;
+    }
+    var btn = $("#query-scrape-btn");
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "…";
+    }
+    fetch(root + "/api/portfolio/scrape", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: url }),
+    })
+      .then(function (r) {
+        return r.json().then(function (j) {
+          return { ok: r.ok, body: j };
+        });
+      })
+      .then(function (res) {
+        if (!res.body || !res.body.ok) {
+          alert((res.body && res.body.error) || "Scrape failed");
+          return;
+        }
+        var header = "Source: " + (res.body.url || url) + "\n\n";
+        var chunk = (res.body.text || "").trim();
+        if (ta) {
+          var existing = ta.value.trim();
+          ta.value = existing ? existing + "\n\n---\n" + header + chunk : header + chunk;
+        }
+      })
+      .catch(function () {
+        alert("Scrape request failed — is serve_portfolio_live.py running?");
+      })
+      .finally(function () {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "⎘";
+        }
+      });
+  }
+
+  function speakLastArcheAnswer() {
+    if (!lastArcheAnswerText) {
+      setVoiceStatus("No ArchE answer yet");
+      return;
+    }
+    primeAudio();
+    voiceOn = true;
+    var vt = $("#voice-toggle");
+    if (vt) vt.textContent = "Voice: ON";
+    speakQueued(lastArcheAnswerText, "arche");
+  }
+
+  function initSpeechUi() {
+    var hasSTT = !!speechRecognitionCtor();
+    var qMic = $("#query-mic-btn");
+    var aMic = $("#answer-mic-btn");
+    if (qMic && !hasSTT) {
+      qMic.disabled = true;
+      qMic.title = "Speech-to-text not supported in this browser";
+    }
+    if (aMic && !hasSTT) {
+      aMic.disabled = true;
+      aMic.title = "Speech-to-text not supported in this browser";
+    }
+    if (qMic) qMic.addEventListener("click", toggleQueryMic);
+    if (aMic) aMic.addEventListener("click", toggleAnswerMic);
+    var clearBtn = $("#query-clear-btn");
+    if (clearBtn) {
+      clearBtn.addEventListener("click", function () {
+        stopQueryMic();
+        var ta = $("#custom-query");
+        if (ta) ta.value = "";
+      });
+    }
+    var scrapeBtn = $("#query-scrape-btn");
+    if (scrapeBtn) scrapeBtn.addEventListener("click", scrapeUrlIntoQuery);
+    var speakBtn = $("#answer-speak-btn");
+    if (speakBtn) speakBtn.addEventListener("click", speakLastArcheAnswer);
+    var followSubmit = $("#followup-submit");
+    if (followSubmit) followSubmit.addEventListener("click", submitFollowUp);
+    var followInput = $("#answer-followup");
+    if (followInput) {
+      followInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          submitFollowUp();
+        }
+      });
+    }
+  }
+
   function startScenario(key, customQuery) {
     if (key === "d" && !unlocked) {
       alert("Unlock consult preview (code from proposal) for the paid-media scenario and custom brief.");
@@ -2199,6 +3853,11 @@
 
     function runWithScenario(scenario) {
       activeScenario = scenario;
+      if (scenario.evidence_pack) {
+        setLiveEvidenceContext(scenario.evidence_pack, scenario.query || customQuery || "");
+      } else if (scenario.query) {
+        activeBriefQuery = scenario.query;
+      }
       if (titleEl) titleEl.textContent = activeScenario.title;
       loadManifest().then(function () {
         playScenario(activeScenario);
@@ -2207,12 +3866,24 @@
 
     if (customQuery != null) {
       if (titleEl) titleEl.textContent = "Your brief — calling live ArchE…";
-      setTimeline("Live brief: Cursor SDK or local LLM (when API is reachable)…");
+      setTimeline("Custom brief → POST /api/portfolio/brief (Cursor SDK or Ollama)…");
       fetchLiveBrief(customQuery).then(function (live) {
-        if (live) {
+        if (live && live.ok && live.beats) {
+          live.query = customQuery;
+          lastLiveBriefPayload = live;
+          setLiveEvidenceContext(live.evidence_pack, customQuery);
+          updateGrowthStrategy(live);
+          updateConversationFromScenario(live, customQuery);
+          setTimeline(
+            "Live ArchE brief — engine: " +
+              (live.engine || "live") +
+              (live.evidence_pack ? " · pack: " + live.evidence_pack.pack_id : "") +
+              (live.error ? " (" + live.error + ")" : "")
+          );
           runWithScenario(live);
         } else {
-          runWithScenario(buildCustomScenario(customQuery));
+          setTimeline("Live ArchE required — " + (live && live.error ? live.error : "unavailable"));
+          runWithScenario(buildLiveArchEUnavailableScenario(customQuery, live || { error: "unknown" }));
         }
       });
       return;
@@ -2270,8 +3941,22 @@
         var vt = $("#voice-toggle");
         if (vt) vt.textContent = "Voice: ON";
         var q = sanitizeQuery(($("#custom-query") || {}).value);
+        activeBuyerBusinessName = getBuyerBusinessName();
+        if (!q) {
+          alert("Type your question in the large box below the business name field, then Run preview.");
+          var ta = $("#custom-query");
+          if (ta) ta.focus();
+          return;
+        }
         if (q) startScenario(null, q);
       });
+
+    var sbs = $("#side-by-side-toggle");
+    if (sbs) {
+      sbs.addEventListener("change", function () {
+        updateSideBySide(lastLiveBriefPayload || activeScenario || null);
+      });
+    }
 
     $("#play-demo") &&
       $("#play-demo").addEventListener("click", function () {
@@ -2323,6 +4008,26 @@
     });
 
     voiceStatusEl = $("#voice-status");
+    initSpeechUi();
+    if (resolvePortfolioApiRoot()) {
+      fetch(resolvePortfolioApiRoot() + "/api/portfolio/health", { cache: "no-store" })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (h) {
+          if (h && h.ok) {
+            setVoiceStatus("Live API: OK · " + (h.llm_provider || "ollama"));
+            updateDataDisclosure({
+              disclosure:
+                "Live preview connected. Orchestration and answers run on ArchE; evidence HTML is generated on the fly from your brief (scrubbed demo rows — not your production vault).",
+            });
+          }
+        })
+        .catch(function () {
+          setVoiceStatus("Live API: down — run serve_portfolio_live.py");
+          updateDataDisclosure(null);
+        });
+    }
     loadManifest();
 
     if (window.speechSynthesis) {

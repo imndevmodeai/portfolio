@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" role="img" aria-label="Dealer reputation · Google + marketplace">
+  <rect width="900" height="560" rx="14" fill="#f8fafc" stroke="#cbd5e1"/>
+  <rect width="900" height="56" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="28" y="36" fill="#0f172a" font-family="system-ui,sans-serif" font-size="18" font-weight="700">Dealer reputation · Google + marketplace</text>
+  <rect x="28" y="80" width="844" height="120" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="48" y="130" fill="#f59e0b" font-size="28">★★★★★</text>
+  <text x="48" y="168" fill="#0f172a" font-size="22" font-weight="700">4.58</text>
+  <text x="200" y="168" fill="#64748b" font-size="14">387 reviews · 90 day window</text>
+  <rect x="28" y="220" width="844" height="72" rx="8" fill="#f1f5f9"/>
+  <text x="48" y="252" fill="#334155" font-size="14">"Fair pricing, transparent history report, no pressure on the lot."</text>
+  <text x="48" y="276" fill="#94a3b8" font-size="12">verified buyer · scrubbed</text>
+  <rect x="28" y="308" width="844" height="72" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="48" y="340" fill="#334155" font-size="14">"Trade-in value matched KBB retail band — closed same day."</text>
+  <rect x="28" y="400" width="844" height="120" rx="8" fill="#eff6ff" stroke="#93c5fd"/>
+  <text x="48" y="432" fill="#1e40af" font-size="13" font-weight="600">ArchE citation bundle</text>
+  <text x="48" y="458" fill="#1e3a8a" font-family="ui-monospace,monospace" font-size="12">https://reviews.demo/gbp/scrub-dealer-kz</text>
+  <text x="48" y="488" fill="#64748b" font-size="12">Synced to trace-reviews / trace-auto-reviews</text>
+</svg>

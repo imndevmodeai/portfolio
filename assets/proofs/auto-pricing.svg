@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" role="img" aria-label="Market pricing · your segment">
+  <rect width="900" height="560" rx="14" fill="#0c0c0f" stroke="#3f3f46"/>
+  <rect width="900" height="52" rx="14" fill="#18181b"/>
+  <text x="24" y="34" fill="#fafafa" font-family="system-ui,sans-serif" font-size="16" font-weight="700">Market pricing · your segment</text>
+  <text x="24" y="78" fill="#a1a1aa" font-family="system-ui,sans-serif" font-size="13">KBB/Manheim band vs your ask (scrubbed)</text>
+  <rect x="40" y="100" width="820" height="380" rx="10" fill="#18181b" stroke="#27272a"/>
+  <line x1="70" y1="420" x2="830" y2="420" stroke="#52525b" stroke-width="2"/>
+  <line x1="70" y1="130" x2="70" y2="420" stroke="#52525b" stroke-width="2"/>
+  <polyline fill="none" stroke="#4ade80" stroke-width="4" points="80,320 140,280 200,295 260,240 320,220 380,250 440,210 500,200 560,230"/>
+  <polyline fill="none" stroke="#3b82f6" stroke-width="3" stroke-dasharray="8 5" points="80,340 140,330 200,325 260,310 320,305 380,315 440,300 500,295 560,308"/>
+  <text x="90" y="450" fill="#71717a" font-size="11">Jan</text>
+  <text x="250" y="450" fill="#71717a" font-size="11">Apr</text>
+  <text x="410" y="450" fill="#71717a" font-size="11">Jul</text>
+  <text x="570" y="450" fill="#71717a" font-size="11">Oct</text>
+  <text x="720" y="160" fill="#4ade80" font-size="12">Your avg gross / unit</text>
+  <text x="720" y="182" fill="#3b82f6" font-size="12">Market median</text>
+  <rect x="40" y="500" width="820" height="44" rx="6" fill="#09090b" stroke="#3f3f46"/>
+  <text x="56" y="528" fill="#fde047" font-family="ui-monospace,monospace" font-size="12">cited: https://markets.demo/automotive/pricing/kz-used</text>
+</svg>

@@ -33,6 +33,15 @@ python3 scripts/serve_portfolio_live.py
 
 Open **http://127.0.0.1:17890/** → unlock → paste any question → **Run preview**.
 
+**Start on reboot (portfolio + ngrok):**
+
+```bash
+./scripts/install_portfolio_live_systemd_user.sh
+loginctl enable-linger "$USER"
+```
+
+Public URL lands in `memory/portfolio_tunnel_latest.json` and `.env.local` (`ARCHE_PORTFOLIO_INTERACTIVE_URL`). Requires `ngrok config add-authtoken …` once.
+
 For static Pages + remote API, set in the browser console:
 
 ```javascript

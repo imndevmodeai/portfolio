@@ -1,0 +1,26 @@
+{
+  "mdard-livestock-matrix": {
+    "file": "mdard-livestock-matrix.html",
+    "mime": "text/html",
+    "title": "MDARD / county permit matrix",
+    "subtitle": "Scrubbed spreadsheet-style export (demo — not live market feed)",
+    "traceAnchor": "trace-ag-regulatory",
+    "data_class": "synthetic_scrubbed"
+  },
+  "sw-mi-zoning-vetting": {
+    "file": "sw-mi-zoning-vetting.html",
+    "mime": "text/html",
+    "title": "Vetting bundle — zoning & regulatory",
+    "subtitle": "Scrubbed vetting HTML (demo — not a real PDF host)",
+    "traceAnchor": "trace-vetting",
+    "data_class": "synthetic_scrubbed"
+  },
+  "hog-capacity-sheet": {
+    "file": "hog-capacity.csv",
+    "mime": "text/csv",
+    "title": "Regional hog capacity sheet",
+    "subtitle": "Scrubbed CSV export (demo)",
+    "traceAnchor": "trace-ag-capacity",
+    "data_class": "synthetic_scrubbed"
+  }
+}

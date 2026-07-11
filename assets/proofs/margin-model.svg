@@ -1,11 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 280" role="img" aria-label="CALC · margin model">
-  <rect width="520" height="280" rx="12" fill="#09090b" stroke="#c4b5fd" stroke-width="2"/>
-  <rect x="0" y="0" width="520" height="36" rx="12" fill="#18181b"/>
-  <circle cx="18" cy="18" r="5" fill="#f87171"/><circle cx="34" cy="18" r="5" fill="#fde047"/><circle cx="50" cy="18" r="5" fill="#4ade80"/>
-  <text x="68" y="22" fill="#a1a1aa" font-family="ui-monospace,monospace" font-size="11">orchestration trace · proof</text>
-  <text x="20" y="48" fill="#c4b5fd" font-family="ui-monospace,monospace" font-size="12" font-weight="700">CALC · margin model</text>
-  <text x="20" y="52" fill="#e4e4e7" font-family="ui-monospace,monospace" font-size="11">[CALC] margin_model  target=18-22%</text>
-  <text x="20" y="74" fill="#e4e4e7" font-family="ui-monospace,monospace" font-size="11">surge_week=+4pt_max</text>
-  <text x="20" y="96" fill="#e4e4e7" font-family="ui-monospace,monospace" font-size="11">LINK → campaign_copy=lead_time_honesty</text>
-  <text x="20" y="262" fill="#71717a" font-family="ui-monospace,monospace" font-size="10">scrubbed demo · click syncs to trace line</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" role="img" aria-label="Margin vs review-risk model">
+  <rect width="900" height="560" rx="14" fill="#0c0c0f" stroke="#3f3f46"/>
+  <rect width="900" height="52" rx="14" fill="#18181b"/>
+  <text x="24" y="34" fill="#fafafa" font-family="system-ui,sans-serif" font-size="16" font-weight="700">Margin vs review-risk model</text>
+  <text x="24" y="78" fill="#a1a1aa" font-family="system-ui,sans-serif" font-size="13">Target band 18–22% with review guardrails</text>
+  <rect x="40" y="100" width="820" height="380" rx="10" fill="#18181b" stroke="#27272a"/>
+  <line x1="70" y1="420" x2="830" y2="420" stroke="#52525b" stroke-width="2"/>
+  <line x1="70" y1="130" x2="70" y2="420" stroke="#52525b" stroke-width="2"/>
+  <polyline fill="none" stroke="#4ade80" stroke-width="4" points="80,320 140,280 200,295 260,240 320,220 380,250 440,210 500,200 560,230"/>
+  <polyline fill="none" stroke="#8b5cf6" stroke-width="3" stroke-dasharray="8 5" points="80,340 140,330 200,325 260,310 320,305 380,315 440,300 500,295 560,308"/>
+  <text x="90" y="450" fill="#71717a" font-size="11">Jan</text>
+  <text x="250" y="450" fill="#71717a" font-size="11">Apr</text>
+  <text x="410" y="450" fill="#71717a" font-size="11">Jul</text>
+  <text x="570" y="450" fill="#71717a" font-size="11">Oct</text>
+  <text x="720" y="160" fill="#4ade80" font-size="12">Gross margin %</text>
+  <text x="720" y="182" fill="#8b5cf6" font-size="12">Review floor (90d)</text>
+  <rect x="40" y="500" width="820" height="44" rx="6" fill="#09090b" stroke="#3f3f46"/>
+  <text x="56" y="528" fill="#fde047" font-family="ui-monospace,monospace" font-size="12">cited: https://models.demo/local/margin-v3</text>
 </svg>
