@@ -11,6 +11,60 @@
     window.PORTFOLIO_LIVE_API ||
     (typeof localStorage !== "undefined" && localStorage.getItem("PORTFOLIO_LIVE_API")) ||
     "";
+  var liveApiConfigPromise = null;
+
+  function portfolioFetchHeaders() {
+    return { "ngrok-skip-browser-warning": "1" };
+  }
+
+  function applyLiveApiUrl(url) {
+    if (!url || typeof url !== "string") return;
+    PORTFOLIO_LIVE_API = url.replace(/\/+$/, "");
+    if (!/\/api\/portfolio\/brief\/?$/i.test(PORTFOLIO_LIVE_API)) {
+      PORTFOLIO_LIVE_API =
+        PORTFOLIO_LIVE_API.replace(/\/+$/, "") + "/api/portfolio/brief";
+    }
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem("PORTFOLIO_LIVE_API", PORTFOLIO_LIVE_API);
+        if (typeof location !== "undefined" && location.origin) {
+          localStorage.removeItem("PORTFOLIO_LIVE_API_PROBE_" + location.origin);
+        }
+      }
+    } catch (e) {}
+    if (typeof window !== "undefined") window.PORTFOLIO_LIVE_API = PORTFOLIO_LIVE_API;
+  }
+
+  function loadLiveApiConfig() {
+    if (PORTFOLIO_LIVE_API) return Promise.resolve(PORTFOLIO_LIVE_API);
+    if (liveApiConfigPromise) return liveApiConfigPromise;
+    if (typeof location === "undefined" || !/^https?:/.test(location.protocol)) {
+      return Promise.resolve("");
+    }
+    var host = (location.hostname || "").toLowerCase();
+    var needsConfig =
+      host.indexOf("github.io") !== -1 ||
+      host.indexOf("githubusercontent.com") !== -1;
+    if (!needsConfig) return Promise.resolve(resolveLiveApiUrl());
+    liveApiConfigPromise = fetch("live-api.json", {
+      method: "GET",
+      cache: "no-store",
+      headers: portfolioFetchHeaders(),
+    })
+      .then(function (r) {
+        if (!r.ok) throw new Error("live-api.json HTTP " + r.status);
+        return r.json();
+      })
+      .then(function (cfg) {
+        var url = (cfg && (cfg.brief_api || cfg.briefApi)) || "";
+        if (url) applyLiveApiUrl(url);
+        return PORTFOLIO_LIVE_API || "";
+      })
+      .catch(function () {
+        return "";
+      });
+    return liveApiConfigPromise;
+  }
   var voiceOn = true;
   var unlocked = false;
   var playToken = 0;
@@ -3170,7 +3224,7 @@
       fetch(location.origin + "/api/portfolio/health", {
         method: "GET",
         cache: "no-store",
-        headers: { "ngrok-skip-browser-warning": "1" },
+        headers: portfolioFetchHeaders(),
       })
         .then(function (r) {
           if (r.ok) {
@@ -3274,15 +3328,22 @@
 
   function fetchLiveBrief(query, opts) {
     opts = opts || {};
-    var url = resolveLiveApiUrl();
-    if (!url || !query) {
-      return Promise.resolve({
-        ok: false,
-        error: "no_live_api",
-        detail:
-          "Live ArchE is offline right now. Reload in a moment, or message the team for a guided run.",
-      });
-    }
+    return loadLiveApiConfig().then(function () {
+      var url = resolveLiveApiUrl();
+      if (!url || !query) {
+        return {
+          ok: false,
+          error: "no_live_api",
+          detail:
+            "Live ArchE is offline right now. Reload in a moment, or message the team for a guided run.",
+        };
+      }
+      return fetchLiveBriefWithUrl(url, query, opts);
+    });
+  }
+
+  function fetchLiveBriefWithUrl(url, query, opts) {
+    opts = opts || {};
     var root = url.replace(/\/api\/portfolio\/brief\/?$/i, "");
 
     function postBrief() {
@@ -3302,9 +3363,17 @@
         postBody.prior_query = opts.priorQuery || conversationState.priorQuery || "";
         postBody.prior_answer = opts.priorAnswer || conversationState.priorAnswer || lastArcheAnswerText || "";
       }
+      var postHeaders = {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      };
+      var pfh = portfolioFetchHeaders();
+      for (var hk in pfh) {
+        if (Object.prototype.hasOwnProperty.call(pfh, hk)) postHeaders[hk] = pfh[hk];
+      }
       return fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        headers: postHeaders,
         body: JSON.stringify(postBody),
         signal: ctrl ? ctrl.signal : undefined,
       })
@@ -3346,7 +3415,11 @@
     }
 
     function healthOk() {
-      return fetch(root + "/api/portfolio/health", { method: "GET", cache: "no-store" })
+      return fetch(root + "/api/portfolio/health", {
+        method: "GET",
+        cache: "no-store",
+        headers: portfolioFetchHeaders(),
+      })
         .then(function (r) {
           return r.ok;
         })
@@ -3420,6 +3493,38 @@
         },
       ],
     };
+  }
+
+  function refreshLiveApiHealthStatus() {
+    var root = resolvePortfolioApiRoot();
+    if (!root) {
+      setVoiceStatus("Live API: down — run serve_portfolio_live.py");
+      updateDataDisclosure(null);
+      return;
+    }
+    fetch(root + "/api/portfolio/health", {
+      cache: "no-store",
+      headers: portfolioFetchHeaders(),
+    })
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (h) {
+        if (h && h.ok) {
+          setVoiceStatus("Live API: OK · " + (h.llm_provider || "ollama"));
+          updateDataDisclosure({
+            disclosure:
+              "Live preview connected. Orchestration and answers run on ArchE; evidence HTML is generated on the fly from your brief (scrubbed demo rows — not your production vault).",
+          });
+        } else {
+          setVoiceStatus("Live API: down — run serve_portfolio_live.py");
+          updateDataDisclosure(null);
+        }
+      })
+      .catch(function () {
+        setVoiceStatus("Live API: down — run serve_portfolio_live.py");
+        updateDataDisclosure(null);
+      });
   }
 
   function setUnlocked(on) {
@@ -4009,25 +4114,9 @@
 
     voiceStatusEl = $("#voice-status");
     initSpeechUi();
-    if (resolvePortfolioApiRoot()) {
-      fetch(resolvePortfolioApiRoot() + "/api/portfolio/health", { cache: "no-store" })
-        .then(function (r) {
-          return r.json();
-        })
-        .then(function (h) {
-          if (h && h.ok) {
-            setVoiceStatus("Live API: OK · " + (h.llm_provider || "ollama"));
-            updateDataDisclosure({
-              disclosure:
-                "Live preview connected. Orchestration and answers run on ArchE; evidence HTML is generated on the fly from your brief (scrubbed demo rows — not your production vault).",
-            });
-          }
-        })
-        .catch(function () {
-          setVoiceStatus("Live API: down — run serve_portfolio_live.py");
-          updateDataDisclosure(null);
-        });
-    }
+    loadLiveApiConfig().then(function () {
+      refreshLiveApiHealthStatus();
+    });
     loadManifest();
 
     if (window.speechSynthesis) {
