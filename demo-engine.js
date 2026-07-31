@@ -1113,7 +1113,8 @@
           return;
         }
         return speakBrowserOnce(clean, roleId).then(function () {
-          setVoiceStatus(roleId === "arche" ? "Voice: browser (not Ryan)" : "Voice: browser TTS");
+          // Public-safe status — never expose Keyholder server paths to visitors.
+          setVoiceStatus(roleId === "arche" ? "Voice: ON (ArchE)" : "Voice: ON");
         });
       });
     }
@@ -1563,7 +1564,7 @@
     if (!el) return;
     if (!pack) {
       el.innerHTML =
-        "<strong>Data mode:</strong> Live preview offline — canned scenario only until the API reconnects.";
+        "<strong>Tip:</strong> Click a scenario card above for a guided demo. Custom live questions need the preview server — canned demos A–E work fully offline.";
       return;
     }
     var disclosure = pack.disclosure || "Evidence is tailored to your brief.";
