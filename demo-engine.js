@@ -605,6 +605,7 @@
           label: archeLabel,
           say: proofReply,
           pipeline: "answer",
+          tools: ["orchestrator", "causal", "abm", "vetting"],
           sources: [
             { label: "Jump to workforce snapshot fetch", traceAnchor: "trace-workforce" },
             { label: "Jump to causal lag estimates", traceAnchor: "trace-causal" },
@@ -639,7 +640,7 @@
     var beforeLine =
       "Here is the BEFORE Google screen — thin rating, unanswered one-stars. This is the starting screenshot we capture for you.";
     var afterLine =
-      "Here is the AFTER plan — stronger presence, owner replies, owned YouTube and Google Business posts. Demo scrub, not a live client claim. Human Publish gate stays on.";
+      "Here is the AFTER plan — stronger presence, owner replies, owned YouTube and Google Business posts. Demo scrub sample. Human Publish gate stays on.";
     var ytLine =
       "YouTube campaign storyboard — three clips, scripts, thumbnails. Status queued for your review. ArchE never auto-uploads.";
     var socialLine =
@@ -647,7 +648,7 @@
     var docsLine =
       "These are the documents you keep: reputation snapshot, before-after case study, campaign pack, and review-gated offer.";
     var planAnswer =
-      "Plain English: reputation management is making sure a Google search shows a fair, active presence — not silence or unanswered complaints. " +
+      "Plain English: reputation management is making sure a Google search shows a fair, active presence with owned replies and content. " +
       "You just saw the five payout screens. We never invent star ratings. You approve every public Publish.";
     var skeptic = "Good — keep those screens up. That is what I needed to see.";
     var proofReply =
@@ -1034,10 +1035,11 @@
     var t = cleanForSpeech(text);
     if (!t) return "";
     t = t.replace(/\s*[—–]\s*not\s+(?:a |an |the |just |merely |simply )?[^.!?;]+/gi, "");
-    t = t.replace(/,\s*not\s+(?:a |an |the |just |merely |simply )+[^.!?;]+/gi, "");
+    t = t.replace(/,\s*not\s+(?:a |an |the |just |merely |simply |agent )+[^.!?;]+/gi, "");
     t = t.replace(/\s+not\s+agent\s+black\s+box\.?/gi, "");
     t = t.replace(/\s+not\s+buried\s+[^.!?;]+/gi, "");
-    return t.replace(/\s{2,}/g, " ").replace(/\s+([,.!?])/g, "$1").trim();
+    t = t.replace(/\s{2,}/g, " ").replace(/\s+([,.!?])/g, "$1").replace(/,+/g, ",").replace(/,\s*$/g, "");
+    return t.trim();
   }
 
   var cueRotationTimer = null;
@@ -1077,16 +1079,18 @@
     } catch (e) {}
   }
 
-  function highlightSpeechCues(text, sources) {
+  function highlightSpeechCues(text, sources, toolIds) {
     clearDemoCues();
-    var seen = {};
     var queue = [];
 
+    function pushEl(el) {
+      if (!el || queue.indexOf(el) >= 0) return;
+      queue.push(el);
+    }
+
     function pushAnchor(anchorId) {
-      if (!anchorId || seen[anchorId]) return;
-      seen[anchorId] = true;
-      var row = document.getElementById(anchorId);
-      if (row) queue.push(row);
+      if (!anchorId) return;
+      pushEl(document.getElementById(anchorId));
     }
 
     if (sources && sources.length) {
@@ -1094,8 +1098,13 @@
         pushAnchor(s.traceAnchor);
         var label = (s.label || "").toLowerCase();
         document.querySelectorAll(".proof-link").forEach(function (a) {
-          if ((a.textContent || "").toLowerCase() === label || (s.label && a.textContent === s.label)) {
-            queue.push(a);
+          var aText = (a.textContent || "").toLowerCase();
+          if (
+            aText === label ||
+            (s.label && a.textContent === s.label) ||
+            (label && aText.indexOf(label.slice(0, 24)) >= 0)
+          ) {
+            pushEl(a);
           }
         });
       });
@@ -1106,18 +1115,23 @@
       if (cue.re.test(blob)) pushAnchor(cue.anchor);
     });
 
+    if (toolIds && toolIds.length) {
+      toolIds.forEach(function (id) {
+        document.querySelectorAll('.tool-chip[data-tool="' + id + '"]').forEach(pushEl);
+      });
+    }
+
     if (!queue.length) return;
 
-    var idx = 0;
-    pulseCueElement(queue[0]);
-    if (queue.length === 1) return;
+    /* Pulse every matching cue at once so clickable sources stand out while ArchE speaks. */
+    queue.forEach(pulseCueElement);
     cueRotationTimer = setInterval(function () {
-      document.querySelectorAll(".demo-cue-pulse").forEach(function (el) {
+      queue.forEach(function (el) {
         el.classList.remove("demo-cue-pulse");
+        void el.offsetWidth;
+        el.classList.add("demo-cue-pulse");
       });
-      idx = (idx + 1) % queue.length;
-      pulseCueElement(queue[idx]);
-    }, 2200);
+    }, 2400);
   }
 
   function speechChunks(text) {
@@ -1342,15 +1356,8 @@
           });
         }, Promise.resolve())
         .then(function () {
-          if (anyPlayed) return true;
-          /* Fall back: try unsanitized MP3 keys if contrast strip changed the slug. */
-          var raw = cleanForSpeech(text);
-          if (raw && raw !== clean) {
-            return playMp3(roleId, raw).then(function (ok) {
-              return ok;
-            });
-          }
-          return false;
+          /* Never fall back to unsanitized MP3 — those still speak "… not X" closers. */
+          return anyPlayed;
         });
     }
 
@@ -3993,7 +4000,7 @@
     if (beat.say && beat.terminalParallel && beat.terminalParallel.length) {
       appendBroadcast(role, label, beat.say, beat.sources);
       showSpeakerPopup(role, label);
-      highlightSpeechCues(beat.say, beat.sources);
+      highlightSpeechCues(beat.say, beat.sources, beat.tools);
       var speakP = speakQueued(beat.say, role);
       await drainTerminal(beat.terminalParallel, token, beat.termDelay);
       await speakP;
@@ -4010,7 +4017,7 @@
     if (beat.say) {
       appendBroadcast(role, label, beat.say, beat.sources);
       showSpeakerPopup(role, label);
-      highlightSpeechCues(beat.say, beat.sources);
+      highlightSpeechCues(beat.say, beat.sources, beat.tools);
       if (voiceOn) {
         await speakQueued(beat.say, role);
       } else {

@@ -124,12 +124,19 @@
     #speaker-popup-img { display: block; width: 100%; height: auto; max-height: 260px; object-fit: cover; object-position: center top; background: #0c0c0f; }
     #speaker-popup.arche-mode #speaker-popup-img { max-height: 200px; object-fit: contain; padding: 0.35rem; }
     .log-line.log-proof-anchor.demo-cue-pulse,
-    .proof-link.demo-cue-pulse {
+    .proof-link.demo-cue-pulse,
+    .tool-chip.demo-cue-pulse {
       outline: 3px solid #f97316 !important;
       outline-offset: 2px !important;
       background: rgba(249,115,22,0.22) !important;
       box-shadow: 0 0 18px rgba(249,115,22,0.45);
       animation: cue-pulse 1.1s ease-in-out infinite;
+      z-index: 2;
+      position: relative;
+    }
+    .tool-chip.demo-cue-pulse {
+      color: #fff !important;
+      border-color: #f97316 !important;
     }
     .proof-link {
       display: inline-block;
@@ -699,6 +706,6 @@
   }
 })();
 </script>
-<script src="demo-engine.js?v=suit-cue-20260731a"></script>
+<script src="demo-engine.js?v=suit-cue-20260731b"></script>
 </body>
 </html>
