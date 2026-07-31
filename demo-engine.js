@@ -605,7 +605,7 @@
           label: archeLabel,
           say: proofReply,
           pipeline: "answer",
-          tools: ["orchestrator", "causal", "abm", "vetting"],
+          tools: ["llm", "causal", "abm", "vetting"],
           sources: [
             { label: "Jump to workforce snapshot fetch", traceAnchor: "trace-workforce" },
             { label: "Jump to causal lag estimates", traceAnchor: "trace-causal" },
