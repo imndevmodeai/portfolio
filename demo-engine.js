@@ -634,9 +634,14 @@
   function buildScenarioR() {
     var owner = "Business owner";
     var archeLabel = "ArchE";
+    /* Emotional arc: concern → lift → buy-in → close (stakes won). */
     var ask =
       "When someone Googles my shop, they see a thin page and a couple of unanswered one-star reviews. " +
-      "What do you actually do for reputation — and what do I walk away with?";
+      "I need to know what you actually deliver for reputation — and what I walk away with.";
+    var liftLine =
+      "Okay — that AFTER screen already looks like a shop I would trust. Keep going. Show me the campaigns.";
+    var buyinLine =
+      "Those are the packets I would actually keep — snapshot, case study, campaign pack. This is starting to feel real.";
     var beforeLine =
       "Here is the BEFORE Google screen — thin rating, unanswered one-stars. This is the starting screenshot we capture for you.";
     var afterLine =
@@ -650,7 +655,8 @@
     var planAnswer =
       "Plain English: reputation management is making sure a Google search shows a fair, active presence with owned replies and content. " +
       "You just saw the five payout screens. We never invent star ratings. You approve every public Publish.";
-    var skeptic = "Good — keep those screens up. That is what I needed to see.";
+    var closeLine =
+      "Yes — leave those sources up. That is exactly what I needed my team to click through.";
     var proofReply =
       "Sources below reopen any screen — Google before, after plan, YouTube, social calendar, document stack. Same visuals as the storyboard above the demos.";
 
@@ -668,6 +674,7 @@
           role: "decision_guest",
           label: owner,
           say: ask,
+          speechEnergy: "concern",
           pipeline: "intake",
         },
         {
@@ -698,13 +705,21 @@
           label: archeLabel,
           say: afterLine,
           showProof: "trace-google-after",
-          pauseAfter: 900,
+          pauseAfter: 700,
           pipeline: "tools",
           tools: ["research"],
           terminal: [
             termEntry(runLog("PLAN", "serp_after_target  owned_listing=ON  review_responses=drafted", 5), "trace-google-after"),
           ],
           termDelay: 180,
+        },
+        {
+          role: "decision_guest",
+          label: owner,
+          say: liftLine,
+          speechEnergy: "lift",
+          pauseAfter: 500,
+          pipeline: "tools",
         },
         {
           role: "arche",
@@ -735,7 +750,7 @@
           label: archeLabel,
           say: docsLine,
           showProof: "trace-reputation-docs",
-          pauseAfter: 1000,
+          pauseAfter: 700,
           pipeline: "vet",
           tools: ["vetting", "research"],
           terminal: [
@@ -743,6 +758,14 @@
             termEntry(runLog("VETTING", "fake_stars=BLOCKED  publish_gate=REQUIRED  conf=0.90", 9), "trace-vetting"),
           ],
           termDelay: 180,
+        },
+        {
+          role: "decision_guest",
+          label: owner,
+          say: buyinLine,
+          speechEnergy: "buyin",
+          pauseAfter: 500,
+          pipeline: "vet",
         },
         {
           role: "arche",
@@ -755,7 +778,8 @@
         {
           role: "decision_guest",
           label: owner,
-          say: skeptic,
+          say: closeLine,
+          speechEnergy: "close",
           pipeline: "answer",
         },
         {
@@ -1280,7 +1304,7 @@
     return manifestPromise;
   }
 
-  function playMp3(role, text) {
+  function playMp3(role, text, playbackRate) {
     if (!audioManifest || !audioManifest.files) return Promise.resolve(false);
     var rel = audioManifest.files[audioKey(role, text)];
     if (!rel) return Promise.resolve(false);
@@ -1288,6 +1312,9 @@
       var a = new Audio(rel);
       a.preload = "auto";
       a.volume = 1;
+      try {
+        a.playbackRate = playbackRate && playbackRate > 0 ? playbackRate : 1;
+      } catch (e) {}
       activeAudios.push(a);
       var settled = false;
       function finish(ok) {
@@ -1321,28 +1348,73 @@
     });
   }
 
-  function speakBrowserOnce(clean, role) {
+  function speakBrowserOnce(clean, role, energy) {
     return new Promise(function (resolve) {
       if (!voiceOn || !window.speechSynthesis) {
         resolve();
         return;
       }
-      speechQueue.push({ clean: clean, role: role, resolve: resolve });
+      speechQueue.push({ clean: clean, role: role, energy: energy || "", resolve: resolve });
       pumpSpeechQueue();
     });
   }
 
-  function itemRate(role) {
-    if (role === "narrator") return 0.98;
-    if (role === "decision" || (role && role.indexOf("decision_") === 0)) return 0.92;
-    return 0.9;
+  /**
+   * Emotional arc for decision-makers (esp. Reputation owner):
+   * concern → lift → buyin → close. Raises rate/pitch as stakes are won.
+   */
+  function resolveSpeechProsody(role, energy) {
+    var e = String(energy || "").toLowerCase();
+    var isDecision = role === "decision" || (role && role.indexOf("decision_") === 0);
+    var rate = 0.96;
+    var pitch = 1;
+    var playbackRate = 1;
+    if (role === "narrator") {
+      rate = 1.0;
+      pitch = 1.05;
+    } else if (role === "arche") {
+      rate = 0.94;
+      pitch = 1;
+    } else if (isDecision) {
+      rate = 0.98;
+      pitch = 1.02;
+      playbackRate = 1.04;
+      if (e === "concern" || e === "low") {
+        rate = 0.96;
+        pitch = 0.98;
+        playbackRate = 1.02;
+      } else if (e === "lift" || e === "mid") {
+        rate = 1.05;
+        pitch = 1.08;
+        playbackRate = 1.08;
+      } else if (e === "buyin" || e === "high") {
+        rate = 1.1;
+        pitch = 1.14;
+        playbackRate = 1.12;
+      } else if (e === "close" || e === "peak") {
+        rate = 1.12;
+        pitch = 1.16;
+        playbackRate = 1.14;
+      } else if (role === "decision_guest") {
+        /* Default guest: slightly brighter than flat CFO cadence */
+        rate = 1.04;
+        pitch = 1.06;
+        playbackRate = 1.06;
+      }
+    }
+    return { rate: rate, pitch: pitch, playbackRate: playbackRate };
   }
 
-  function speakQueued(text, role) {
+  function itemRate(role, energy) {
+    return resolveSpeechProsody(role, energy).rate;
+  }
+
+  function speakQueued(text, role, energy) {
     if (!voiceOn) return Promise.resolve();
     var roleId = role || "arche";
     var clean = sanitizeSpokenContrast(text);
     if (!clean) return Promise.resolve();
+    var prosody = resolveSpeechProsody(roleId, energy);
     setVoiceStatus("Speaking…");
 
     function playChunks(chunks) {
@@ -1350,7 +1422,7 @@
       return chunks
         .reduce(function (chain, part) {
           return chain.then(function () {
-            return playMp3(roleId, part).then(function (ok) {
+            return playMp3(roleId, part, prosody.playbackRate).then(function (ok) {
               if (ok) anyPlayed = true;
             });
           });
@@ -1380,7 +1452,7 @@
           );
           return;
         }
-        return speakBrowserOnce(clean, roleId).then(function () {
+        return speakBrowserOnce(clean, roleId, energy).then(function () {
           // Public-safe status — never expose Keyholder server paths to visitors.
           setVoiceStatus(roleId === "arche" ? "Voice: ON (ArchE)" : "Voice: ON");
         });
@@ -1393,7 +1465,7 @@
           setVoiceStatus("Voice: Edge TTS · en-GB-RyanNeural");
           return;
         }
-        return playMp3(roleId, clean)
+        return playMp3(roleId, clean, prosody.playbackRate)
           .then(function (playedFull) {
             if (playedFull) return true;
             var chunks = speechChunks(clean);
@@ -1406,7 +1478,7 @@
       });
     }
 
-    return playMp3(roleId, clean)
+    return playMp3(roleId, clean, prosody.playbackRate)
       .then(function (playedFull) {
         if (playedFull) return true;
         var chunks = speechChunks(clean);
@@ -1426,16 +1498,10 @@
     if (!voicesReady && window.speechSynthesis) {
       window.speechSynthesis.getVoices();
     }
+    var prosody = resolveSpeechProsody(item.role, item.energy);
     var u = new SpeechSynthesisUtterance(item.clean);
-    u.rate = itemRate(item.role);
-    u.pitch =
-      item.role && item.role.indexOf("decision_") === 0
-        ? 0.92
-        : item.role === "decision"
-          ? 0.92
-          : item.role === "narrator"
-            ? 1.05
-            : 1;
+    u.rate = prosody.rate;
+    u.pitch = prosody.pitch;
     u.volume = 1;
     var v = pickVoice(item.role);
     if (v) u.voice = v;
@@ -2849,7 +2915,7 @@
     },
     {
       role: "decision_guest",
-      say: "When someone Googles my shop, they see a thin page and a couple of unanswered one-star reviews. What do you actually do for reputation — and what do I walk away with?",
+      say: "When someone Googles my shop, they see a thin page and a couple of unanswered one-star reviews. I need to know what you actually deliver for reputation — and what I walk away with.",
     },
     {
       role: "arche",
@@ -2857,7 +2923,11 @@
     },
     {
       role: "arche",
-      say: "Here is the AFTER plan — stronger presence, owner replies, owned YouTube and Google Business posts. Demo scrub, not a live client claim. Human Publish gate stays on.",
+      say: "Here is the AFTER plan — stronger presence, owner replies, owned YouTube and Google Business posts. Demo scrub sample. Human Publish gate stays on.",
+    },
+    {
+      role: "decision_guest",
+      say: "Okay — that AFTER screen already looks like a shop I would trust. Keep going. Show me the campaigns.",
     },
     {
       role: "arche",
@@ -2872,12 +2942,16 @@
       say: "These are the documents you keep: reputation snapshot, before-after case study, campaign pack, and review-gated offer.",
     },
     {
+      role: "decision_guest",
+      say: "Those are the packets I would actually keep — snapshot, case study, campaign pack. This is starting to feel real.",
+    },
+    {
       role: "arche",
-      say: "Plain English: reputation management is making sure a Google search shows a fair, active presence — not silence or unanswered complaints. You just saw the five payout screens. We never invent star ratings. You approve every public Publish.",
+      say: "Plain English: reputation management is making sure a Google search shows a fair, active presence with owned replies and content. You just saw the five payout screens. We never invent star ratings. You approve every public Publish.",
     },
     {
       role: "decision_guest",
-      say: "Good — keep those screens up. That is what I needed to see.",
+      say: "Yes — leave those sources up. That is exactly what I needed my team to click through.",
     },
     {
       role: "arche",
@@ -4001,7 +4075,7 @@
       appendBroadcast(role, label, beat.say, beat.sources);
       showSpeakerPopup(role, label);
       highlightSpeechCues(beat.say, beat.sources, beat.tools);
-      var speakP = speakQueued(beat.say, role);
+      var speakP = speakQueued(beat.say, role, beat.speechEnergy);
       await drainTerminal(beat.terminalParallel, token, beat.termDelay);
       await speakP;
       hideSpeakerPopup();
@@ -4019,7 +4093,7 @@
       showSpeakerPopup(role, label);
       highlightSpeechCues(beat.say, beat.sources, beat.tools);
       if (voiceOn) {
-        await speakQueued(beat.say, role);
+        await speakQueued(beat.say, role, beat.speechEnergy);
       } else {
         await delay(Math.min(4200, 900 + beat.say.length * 28));
       }
