@@ -120,7 +120,7 @@
 
   var TOOL_CATALOG = {
     llm: {
-      label: "Agent orchestration",
+      label: "Live orchestration",
       doing: "Decomposes the brief into parallel branches, assigns tools, and enforces evidence gates before any answer ships.",
       tie: "Maps VP RevOps question → three evidence branches with explicit ETAs.",
     },
@@ -1025,6 +1025,101 @@
       .trim();
   }
 
+  /**
+   * Spoken-only: drop trailing "A, not B" / "A — not B" contrast tags.
+   * Keeps real grammar ("does not", "I do not"). Display text stays full.
+   * Keyholder: say the positive phrase only — e.g. "real life demo" not "... not agent black box".
+   */
+  function sanitizeSpokenContrast(text) {
+    var t = cleanForSpeech(text);
+    if (!t) return "";
+    t = t.replace(/\s*[—–]\s*not\s+(?:a |an |the |just |merely |simply )?[^.!?;]+/gi, "");
+    t = t.replace(/,\s*not\s+(?:a |an |the |just |merely |simply )+[^.!?;]+/gi, "");
+    t = t.replace(/\s+not\s+agent\s+black\s+box\.?/gi, "");
+    t = t.replace(/\s+not\s+buried\s+[^.!?;]+/gi, "");
+    return t.replace(/\s{2,}/g, " ").replace(/\s+([,.!?])/g, "$1").trim();
+  }
+
+  var cueRotationTimer = null;
+  var SPEECH_ANCHOR_CUES = [
+    { re: /workforce/i, anchor: "trace-workforce" },
+    { re: /causal\s*lag|causal/i, anchor: "trace-causal" },
+    { re: /ABM|emergent|population/i, anchor: "trace-abm-emergent" },
+    { re: /vetting|PASS/i, anchor: "trace-vetting" },
+    { re: /billing|churn/i, anchor: "trace-billing-fetch" },
+    { re: /Google\s+before|BEFORE/i, anchor: "trace-google-before" },
+    { re: /Google\s+after|AFTER\s+plan/i, anchor: "trace-google-after" },
+    { re: /YouTube/i, anchor: "trace-youtube-campaign" },
+    { re: /social\s+calendar|Google Business/i, anchor: "trace-social-campaign" },
+    { re: /document\s+stack|documents you/i, anchor: "trace-reputation-docs" },
+    { re: /webhook|Vault/i, anchor: "trace-webhook" },
+    { re: /playbook|retriev/i, anchor: "trace-playbook" },
+  ];
+
+  function clearDemoCues() {
+    if (cueRotationTimer) {
+      clearInterval(cueRotationTimer);
+      cueRotationTimer = null;
+    }
+    document.querySelectorAll(".demo-cue-pulse").forEach(function (el) {
+      el.classList.remove("demo-cue-pulse");
+    });
+    document.querySelectorAll(".proof-link.proof-active").forEach(function (el) {
+      if (!activeProofLink || el !== activeProofLink) el.classList.remove("proof-active");
+    });
+  }
+
+  function pulseCueElement(el) {
+    if (!el) return;
+    el.classList.add("demo-cue-pulse");
+    try {
+      el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    } catch (e) {}
+  }
+
+  function highlightSpeechCues(text, sources) {
+    clearDemoCues();
+    var seen = {};
+    var queue = [];
+
+    function pushAnchor(anchorId) {
+      if (!anchorId || seen[anchorId]) return;
+      seen[anchorId] = true;
+      var row = document.getElementById(anchorId);
+      if (row) queue.push(row);
+    }
+
+    if (sources && sources.length) {
+      sources.forEach(function (s) {
+        pushAnchor(s.traceAnchor);
+        var label = (s.label || "").toLowerCase();
+        document.querySelectorAll(".proof-link").forEach(function (a) {
+          if ((a.textContent || "").toLowerCase() === label || (s.label && a.textContent === s.label)) {
+            queue.push(a);
+          }
+        });
+      });
+    }
+
+    var blob = text || "";
+    SPEECH_ANCHOR_CUES.forEach(function (cue) {
+      if (cue.re.test(blob)) pushAnchor(cue.anchor);
+    });
+
+    if (!queue.length) return;
+
+    var idx = 0;
+    pulseCueElement(queue[0]);
+    if (queue.length === 1) return;
+    cueRotationTimer = setInterval(function () {
+      document.querySelectorAll(".demo-cue-pulse").forEach(function (el) {
+        el.classList.remove("demo-cue-pulse");
+      });
+      idx = (idx + 1) % queue.length;
+      pulseCueElement(queue[idx]);
+    }, 2200);
+  }
+
   function speechChunks(text) {
     var clean = cleanForSpeech(text);
     if (!clean) return [];
@@ -1232,7 +1327,7 @@
   function speakQueued(text, role) {
     if (!voiceOn) return Promise.resolve();
     var roleId = role || "arche";
-    var clean = cleanForSpeech(text);
+    var clean = sanitizeSpokenContrast(text);
     if (!clean) return Promise.resolve();
     setVoiceStatus("Speaking…");
 
@@ -1247,7 +1342,15 @@
           });
         }, Promise.resolve())
         .then(function () {
-          return anyPlayed;
+          if (anyPlayed) return true;
+          /* Fall back: try unsanitized MP3 keys if contrast strip changed the slug. */
+          var raw = cleanForSpeech(text);
+          if (raw && raw !== clean) {
+            return playMp3(roleId, raw).then(function (ok) {
+              return ok;
+            });
+          }
+          return false;
         });
     }
 
@@ -1355,42 +1458,43 @@
     hideSpeakerPopup();
   }
 
-  /** Portrait / φ-shell shown while a role is speaking (must match Edge TTS cast gender). */
+  /** Portrait shown while a role is speaking (photoreal business attire — not cartoon SVGs). */
+  var SPEAKER_ASSET_V = "suit-20260731a";
   var SPEAKER_VISUALS = {
     arche: {
       src: "assets/arche-phi-shell.png",
       title: "ArchE",
-      subtitle: "φ-shell 2D knowledge layout",
+      subtitle: "Live orchestration · scrubbed demo",
       arche: true,
     },
     decision_jim: {
-      src: "assets/speakers/jim-cfo.png",
+      src: "assets/speakers/jim-cfo.png?v=" + SPEAKER_ASSET_V,
       title: "Jim · CFO",
       subtitle: "Midwest subscription finance",
     },
     decision_chro: {
-      src: "assets/speakers/chro.svg",
+      src: "assets/speakers/chro.png?v=" + SPEAKER_ASSET_V,
       title: "Chief People Officer",
       subtitle: "HR policy simulation",
     },
     decision_ops: {
-      src: "assets/speakers/ops-director.svg",
+      src: "assets/speakers/ops-director.png?v=" + SPEAKER_ASSET_V,
       title: "Director of Operations",
       subtitle: "Internal playbook owner",
     },
     decision_media: {
-      src: "assets/speakers/media-lead.png",
+      src: "assets/speakers/media-lead.png?v=" + SPEAKER_ASSET_V,
       title: "Head of Performance Marketing",
       subtitle: "Paid media · closed loop",
     },
     decision_jordan: {
-      src: "assets/speakers/jordan.svg",
+      src: "assets/speakers/jordan.png?v=" + SPEAKER_ASSET_V,
       title: "Jordan · job seeker",
       subtitle: "SMS · Vault RAG coach",
     },
     decision_guest: {
-      src: "assets/speakers/guest.svg",
-      title: "Decision maker",
+      src: "assets/speakers/guest.png?v=" + SPEAKER_ASSET_V,
+      title: "Business owner",
       subtitle: "Your brief · executive portrait",
     },
   };
@@ -1416,7 +1520,7 @@
     }
     if (role && role.indexOf("decision_") === 0) {
       return {
-        src: "assets/speakers/jim-cfo.png",
+        src: "assets/speakers/guest.png?v=" + SPEAKER_ASSET_V,
         title: label || "Decision maker",
         subtitle: "Executive portrait (scrubbed demo)",
       };
@@ -2623,6 +2727,7 @@
     lastArcheAnswerText = "";
     hideSpeakerPopup();
     hideProofPopup();
+    clearDemoCues();
     highlightTools([]);
     showToolSpotlight(null);
     setForecast(null);
@@ -3888,10 +3993,12 @@
     if (beat.say && beat.terminalParallel && beat.terminalParallel.length) {
       appendBroadcast(role, label, beat.say, beat.sources);
       showSpeakerPopup(role, label);
+      highlightSpeechCues(beat.say, beat.sources);
       var speakP = speakQueued(beat.say, role);
       await drainTerminal(beat.terminalParallel, token, beat.termDelay);
       await speakP;
       hideSpeakerPopup();
+      clearDemoCues();
       await delay(beat.pauseAfter || 550);
       return;
     }
@@ -3903,12 +4010,14 @@
     if (beat.say) {
       appendBroadcast(role, label, beat.say, beat.sources);
       showSpeakerPopup(role, label);
+      highlightSpeechCues(beat.say, beat.sources);
       if (voiceOn) {
         await speakQueued(beat.say, role);
       } else {
         await delay(Math.min(4200, 900 + beat.say.length * 28));
       }
       hideSpeakerPopup();
+      clearDemoCues();
       await delay(beat.pauseAfter || 700);
     } else {
       hideSpeakerPopup();
