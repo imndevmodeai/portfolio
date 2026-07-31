@@ -629,6 +629,145 @@
     };
   }
 
+  /** Scenario R — layman reputation: Google before/after, campaigns, documents you receive. */
+  function buildScenarioR() {
+    var owner = "Business owner";
+    var archeLabel = "ArchE";
+    var ask =
+      "When someone Googles my shop, they see a thin page and a couple of unanswered one-star reviews. " +
+      "What do you actually do for reputation — and what do I walk away with?";
+    var planAnswer =
+      "Plain English: reputation management is making sure a Google search shows a fair, active presence — not silence or unanswered complaints. " +
+      "We start with a before snapshot of search and reviews, then draft answered review language, a YouTube storyboard, and a thirty-day social calendar. " +
+      "You approve every public Publish. We never invent star ratings. " +
+      "You receive documents: a reputation snapshot, a before-after case study for your market, campaign packs, and a review-gated offer — all queued for your sign-off.";
+    var skeptic =
+      "Show me the screens. I need to see the Google before and after, not just agent jargon.";
+    var proofReply =
+      "Click the sources below — Google before, Google after plan, YouTube pack, social calendar, and the document stack. " +
+      "Those are the same visuals on the page above the demos. Trace lines on the left scroll to each proof. This is a scrubbed demo plan, not a claim about a live client.";
+
+    return {
+      title: "Reputation — Google before → after (what you get)",
+      beats: [
+        {
+          role: "narrator",
+          label: "Play-by-play",
+          say:
+            "Reputation demo for a layperson. We show what a customer sees on Google today, the target presence plan, campaign screens, and the documents you receive — with a human publish gate.",
+          pipeline: "intake",
+        },
+        {
+          role: "decision_guest",
+          label: owner,
+          say: ask,
+          pipeline: "intake",
+        },
+        {
+          terminal: [
+            termEntry(runLog("SESSION", "run_id=" + DEMO_RUN_ID + "  job=reputation_before_after  tenant=scrub_local", 0), "trace-session"),
+            termEntry(runLog("MAP", "problem=thin_or_damaged_serp  goal=owned_presence_with_human_gate", 1), "trace-map-problem"),
+            termEntry(runLog("INVOKE", "workflow=reputation_flywheel  step=snapshot_serp_reviews", 2)),
+          ],
+          termDelay: 260,
+          pipeline: "plan",
+          tools: ["llm", "workflow"],
+        },
+        {
+          role: "arche",
+          label: archeLabel,
+          say: "Got it. I am pulling a scrubbed Google snapshot and review panel first — then I will show the after plan and the documents you keep.",
+          pipeline: "plan",
+          terminalParallel: [
+            termEntry(runLog("FETCH", "google_serp_before  window=today  status=thin_or_damaged", 3), "trace-google-before"),
+            termEntry(runLog("FETCH", "gbp_reviews  unanswered_detractors=2  sla=open", 4), "trace-auto-reviews"),
+          ],
+          termDelay: 240,
+        },
+        {
+          toolFocus: {
+            tool: "research",
+            doing: "Building the after-state plan — owned listings, answered reviews, video and social packets.",
+            tie: "Lines tagged Google after, YouTube, social, and documents below.",
+            also: ["research", "vetting"],
+            forecast: "Human publish gate stays ON for every public post.",
+          },
+          terminal: [
+            termEntry(runLog("PLAN", "serp_after_target  owned_listing=ON  review_responses=drafted", 5), "trace-google-after"),
+            termEntry(runLog("PLAN", "youtube_storyboard  clips=3  publish=human_gate", 6), "trace-youtube-campaign"),
+            termEntry(runLog("PLAN", "social_calendar  days=30  composers=fill_only", 7), "trace-social-campaign"),
+            termEntry(runLog("DOC", "packet=snapshot+case_study+campaigns+offer  queue=keyholder_review", 8), "trace-reputation-docs"),
+          ],
+          termDelay: 240,
+          pipeline: "tools",
+          tools: ["research", "workflow"],
+          forecast: {
+            title: "Deliverables queued",
+            rows: [
+              { label: "Google presence plan", pct: 88, value: "after SERP" },
+              { label: "Campaign packs", pct: 84, value: "YT + social" },
+              { label: "Human Publish gate", pct: 100, value: "ON" },
+            ],
+            note: "Demo scrub — not a live client claim.",
+          },
+        },
+        {
+          role: "arche",
+          label: archeLabel,
+          say: planAnswer,
+          pipeline: "vet",
+          tools: ["vetting", "research"],
+        },
+        {
+          role: "narrator",
+          label: "Play-by-play",
+          say: "Vetting checks honesty — no fabricated ratings, every public action needs your approval.",
+          pipeline: "vet",
+        },
+        {
+          terminal: [
+            termEntry(runLog("VETTING", "fake_stars=BLOCKED  publish_gate=REQUIRED  conf=0.90", 9), "trace-vetting"),
+            termEntry(runLog("SRC", "evidence_bundle=EB-REP-01  visuals=5  check=PASS", 10), "trace-vetting"),
+          ],
+          termDelay: 220,
+          pipeline: "vet",
+          tools: ["vetting"],
+        },
+        {
+          role: "decision_guest",
+          label: owner,
+          say: skeptic,
+          pipeline: "answer",
+        },
+        {
+          role: "arche",
+          label: archeLabel,
+          say: proofReply,
+          pipeline: "answer",
+          sources: [
+            { label: "Google search — BEFORE", traceAnchor: "trace-google-before" },
+            { label: "Google search — AFTER (plan)", traceAnchor: "trace-google-after" },
+            { label: "YouTube campaign storyboard", traceAnchor: "trace-youtube-campaign" },
+            { label: "Social + Google Business calendar", traceAnchor: "trace-social-campaign" },
+            { label: "Documents you receive", traceAnchor: "trace-reputation-docs" },
+          ],
+        },
+        {
+          timeline: "T+0 snapshot  ·  T+2d drafts for review  ·  T+7d first human Publish",
+          pipeline: "answer",
+        },
+        {
+          terminal: [
+            termEntry(runLog("ANSWER", "payout=docs+campaigns+serp_plan  human_gate=ON  conf=0.90", 11), "trace-answer"),
+            termEntry(runLog("SESSION", "complete  run_id=" + DEMO_RUN_ID, 12)),
+          ],
+          termDelay: 200,
+          pipeline: "answer",
+        },
+      ],
+    };
+  }
+
   /** Scenario D — paid media: thousands of levers, automated closed loop (RESONANT-VIEW). */
   function buildScenarioD(userQuery) {
     var perfLead = "Head of Performance Marketing";
@@ -1535,6 +1674,31 @@
       subtitle: "Automotive brief — evidence gate PASS",
       citation: "https://vetting.demo/bundles/EB-AUTO-07",
     },
+    "trace-google-before": {
+      src: "assets/proofs/google-search-before.svg",
+      title: "Google search — BEFORE",
+      subtitle: "Thin or damaged presence a customer sees today",
+    },
+    "trace-google-after": {
+      src: "assets/proofs/google-search-after.svg",
+      title: "Google search — AFTER (plan)",
+      subtitle: "Target presence — demo plan, not a client claim",
+    },
+    "trace-youtube-campaign": {
+      src: "assets/proofs/youtube-campaign.svg",
+      title: "YouTube campaign storyboard",
+      subtitle: "Review-gated video packet",
+    },
+    "trace-social-campaign": {
+      src: "assets/proofs/social-campaign.svg",
+      title: "Social + Google Business calendar",
+      subtitle: "Fill composers · human Publish",
+    },
+    "trace-reputation-docs": {
+      src: "assets/proofs/reputation-docs.svg",
+      title: "Documents created for review",
+      subtitle: "Snapshot · case study · campaigns · offer",
+    },
   };
 
   var activeProofLink = null;
@@ -1969,6 +2133,11 @@
     "trace-auto-pricing": true,
     "trace-auto-comp": true,
     "trace-auto-reviews": true,
+    "trace-google-before": true,
+    "trace-google-after": true,
+    "trace-youtube-campaign": true,
+    "trace-social-campaign": true,
+    "trace-reputation-docs": true,
   };
 
   /** Extra lines shown under the synced trace row in the HTML proof terminal */
@@ -2530,6 +2699,34 @@
       role: "decision_ops",
       say: "Make this playbook queryable in chat. Small context, fast answers — escalation paths must stay human.",
     },
+    {
+      role: "narrator",
+      say: "Reputation demo for a layperson. We show what a customer sees on Google today, the target presence plan, campaign screens, and the documents you receive — with a human publish gate.",
+    },
+    {
+      role: "decision_guest",
+      say: "When someone Googles my shop, they see a thin page and a couple of unanswered one-star reviews. What do you actually do for reputation — and what do I walk away with?",
+    },
+    {
+      role: "arche",
+      say: "Got it. I am pulling a scrubbed Google snapshot and review panel first — then I will show the after plan and the documents you keep.",
+    },
+    {
+      role: "arche",
+      say: "Plain English: reputation management is making sure a Google search shows a fair, active presence — not silence or unanswered complaints. We start with a before snapshot of search and reviews, then draft answered review language, a YouTube storyboard, and a thirty-day social calendar. You approve every public Publish. We never invent star ratings. You receive documents: a reputation snapshot, a before-after case study for your market, campaign packs, and a review-gated offer — all queued for your sign-off.",
+    },
+    {
+      role: "narrator",
+      say: "Vetting checks honesty — no fabricated ratings, every public action needs your approval.",
+    },
+    {
+      role: "decision_guest",
+      say: "Show me the screens. I need to see the Google before and after, not just agent jargon.",
+    },
+    {
+      role: "arche",
+      say: "Click the sources below — Google before, Google after plan, YouTube pack, social calendar, and the document stack. Those are the same visuals on the page above the demos. Trace lines on the left scroll to each proof. This is a scrubbed demo plan, not a claim about a live client.",
+    },
   ];
 
   function buildScenarioE(userQuery) {
@@ -2661,6 +2858,8 @@
     d: null,
     /* Scenario B built at runtime via buildScenarioB() — mapper-depth trace + dual-layer answer */
     b: null,
+    /* Scenario R — reputation before/after for layperson buyers */
+    r: null,
     e: null,
     c: {
       title: "Ops playbook — queryable in minutes",
@@ -4075,7 +4274,9 @@
             ? buildScenarioD()
             : key === "e"
               ? buildScenarioE()
-              : JSON.parse(JSON.stringify(SCENARIOS[key]));
+              : key === "r"
+                ? buildScenarioR()
+                : JSON.parse(JSON.stringify(SCENARIOS[key]));
     runWithScenario(activeScenario);
   }
 
@@ -4142,6 +4343,131 @@
         console.warn("Adaptive proof surface unavailable:", error);
         return null;
       });
+  }
+
+  function clearTourHighlight() {
+    document.querySelectorAll(".tour-target-pulse").forEach(function (el) {
+      el.classList.remove("tour-target-pulse");
+    });
+    var banner = $("#tour-highlight-banner");
+    if (banner) {
+      banner.classList.add("hidden");
+      banner.textContent = "";
+    }
+  }
+
+  function highlightTourTarget(selector, bannerText) {
+    clearTourHighlight();
+    var el = selector ? document.querySelector(selector) : null;
+    if (el) {
+      el.classList.add("tour-target-pulse");
+      try {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      } catch (e) {}
+    }
+    var banner = $("#tour-highlight-banner");
+    if (banner && bannerText) {
+      banner.textContent = bannerText;
+      banner.classList.remove("hidden");
+    }
+  }
+
+  function guidedTourSleep(ms) {
+    return new Promise(function (resolve) {
+      setTimeout(resolve, ms);
+    });
+  }
+
+  /**
+   * ~12–15s orange-highlight tour: storyboard → featured demo → how to open.
+   * Skip persists in sessionStorage so return visitors are not forced.
+   */
+  function runGuidedTour() {
+    var bar = $("#guided-tour-bar");
+    var prevVoice = voiceOn;
+    voiceOn = true;
+    primeAudio();
+    var steps = [
+      {
+        sel: "#reputation-storyboard",
+        banner: "1 · These pictures = the payout (Google before/after)",
+        say: "Start here. These pictures show what reputation work looks like — Google before and after, campaigns, and documents you get.",
+        wait: 4200,
+      },
+      {
+        sel: "#demo-theater-heading",
+        banner: "2 · Live demos sit right under the pictures",
+        say: "Live demos are right under those pictures — not buried halfway down the page.",
+        wait: 2800,
+      },
+      {
+        sel: "#demo-card-r",
+        banner: "3 · Click the blue card: Reputation before → after",
+        say: "Click the blue reputation card for a short walkthrough with the same screens. Orange highlights mark what to click.",
+        wait: 4500,
+      },
+    ];
+    var chain = Promise.resolve();
+    steps.forEach(function (step) {
+      chain = chain.then(function () {
+        highlightTourTarget(step.sel, step.banner);
+        return speakQueued(step.say, "narrator").then(function () {
+          return guidedTourSleep(Math.max(0, step.wait - 800));
+        });
+      });
+    });
+    return chain
+      .then(function () {
+        clearTourHighlight();
+        if (bar) bar.classList.add("hidden");
+        try {
+          sessionStorage.setItem("arche_portfolio_tour_done", "1");
+        } catch (e) {}
+        voiceOn = prevVoice;
+        setVoiceStatus(prevVoice ? "Voice: ON" : "Voice: OFF");
+      })
+      .catch(function () {
+        clearTourHighlight();
+        voiceOn = prevVoice;
+      });
+  }
+
+  function initGuidedTourUi() {
+    var bar = $("#guided-tour-bar");
+    var startBtn = $("#guided-tour-start");
+    var skipBtn = $("#guided-tour-skip");
+    var done = false;
+    try {
+      done = sessionStorage.getItem("arche_portfolio_tour_done") === "1";
+    } catch (e) {}
+    if (done && bar) bar.classList.add("hidden");
+    if (startBtn) {
+      startBtn.addEventListener("click", function () {
+        primeAudio();
+        runGuidedTour();
+      });
+    }
+    if (skipBtn) {
+      skipBtn.addEventListener("click", function () {
+        clearTourHighlight();
+        if (bar) bar.classList.add("hidden");
+        try {
+          sessionStorage.setItem("arche_portfolio_tour_done", "1");
+        } catch (e) {}
+      });
+    }
+    /* Auto-offer once per session after a short beat (skip if already done). */
+    if (!done) {
+      setTimeout(function () {
+        var still = $("#guided-tour-bar");
+        if (!still || still.classList.contains("hidden")) return;
+        /* Do not auto-speak without a click (browser autoplay); pulse the bar only. */
+        still.classList.add("tour-target-pulse");
+        setTimeout(function () {
+          still.classList.remove("tour-target-pulse");
+        }, 2200);
+      }, 900);
+    }
   }
 
   function init() {
@@ -4252,6 +4578,7 @@
 
     voiceStatusEl = $("#voice-status");
     initSpeechUi();
+    initGuidedTourUi();
     loadLiveApiConfig().then(function () {
       refreshLiveApiHealthStatus();
     });

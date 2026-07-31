@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" role="img" aria-label="Social and Google Business campaign calendar">
+  <rect width="900" height="560" rx="14" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="28" y="36" fill="#7c3aed" font-family="system-ui,sans-serif" font-size="14" font-weight="700">SOCIAL + GOOGLE BUSINESS · 30-day motion</text>
+  <text x="28" y="62" fill="#0f172a" font-family="system-ui,sans-serif" font-size="18" font-weight="600">What gets drafted · what a human still taps Publish on</text>
+  <rect x="28" y="90" width="200" height="140" rx="10" fill="#fff" stroke="#e2e8f0"/>
+  <text x="48" y="122" fill="#64748b" font-size="12">WEEK 1</text>
+  <text x="48" y="152" fill="#0f172a" font-size="14" font-weight="700">Audit + reply</text>
+  <text x="48" y="180" fill="#475569" font-size="12">Map Google/Yelp</text>
+  <text x="48" y="202" fill="#475569" font-size="12">Draft owner replies</text>
+  <rect x="244" y="90" width="200" height="140" rx="10" fill="#fff" stroke="#e2e8f0"/>
+  <text x="264" y="122" fill="#64748b" font-size="12">WEEK 2</text>
+  <text x="264" y="152" fill="#0f172a" font-size="14" font-weight="700">Proof posts</text>
+  <text x="264" y="180" fill="#475569" font-size="12">GBP posts ×3</text>
+  <text x="264" y="202" fill="#475569" font-size="12">Auth Gate each</text>
+  <rect x="460" y="90" width="200" height="140" rx="10" fill="#fff" stroke="#e2e8f0"/>
+  <text x="480" y="122" fill="#64748b" font-size="12">WEEK 3</text>
+  <text x="480" y="152" fill="#0f172a" font-size="14" font-weight="700">YouTube drop</text>
+  <text x="480" y="180" fill="#475569" font-size="12">Storyboard ’ cut</text>
+  <text x="480" y="202" fill="#475569" font-size="12">Review queue</text>
+  <rect x="676" y="90" width="196" height="140" rx="10" fill="#fff" stroke="#e2e8f0"/>
+  <text x="696" y="122" fill="#64748b" font-size="12">WEEK 4</text>
+  <text x="696" y="152" fill="#0f172a" font-size="14" font-weight="700">Measure</text>
+  <text x="696" y="180" fill="#475569" font-size="12">Reply SLA</text>
+  <text x="696" y="202" fill="#475569" font-size="12">Review velocity</text>
+  <rect x="28" y="260" width="844" height="160" rx="10" fill="#111827"/>
+  <text x="48" y="300" fill="#67e8f9" font-size="13" font-weight="700">Composer preview (automation fills · human posts)</text>
+  <text x="48" y="336" fill="#e5e7eb" font-size="14">&quot;New patient FAQ  what insurance we accept this month&quot;</text>
+  <text x="48" y="368" fill="#9ca3af" font-size="12">Status: FILLED · awaiting Keyholder authorization · Post blocked</text>
+  <text x="48" y="396" fill="#fbbf24" font-size="12">Orange handoff: Review this post  tap Done to authorize Publish</text>
+  <rect x="28" y="444" width="844" height="92" rx="10" fill="#fef3c7" stroke="#fcd34d"/>
+  <text x="48" y="480" fill="#92400e" font-size="14" font-weight="700">Not fake reviews. Not silent auto-posting.</text>
+  <text x="48" y="510" fill="#78350f" font-size="13">Reputation = truthful presence + fast honest replies + owned media with proof.</text>
+</svg>

@@ -309,61 +309,135 @@
     #strategy-panel h3 { font-size: 0.9rem; margin: 0.75rem 0 0.35rem; color: #a5f3fc; }
     #strategy-panel p { margin: 0.35rem 0 0.65rem; line-height: 1.45; }
     #strategy-panel .strategy-lead { font-size: 0.88rem; color: #e4e4e7; margin-bottom: 0.65rem; }
+    .layman-lead { font-size: 1.02rem; color: #e4e4e7; max-width: 46rem; line-height: 1.45; margin: 0.65rem 0 0; }
+    .guided-tour-bar {
+      display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center;
+      margin: 1rem 0; padding: 0.75rem 1rem; border-radius: 12px;
+      border: 1px solid rgba(249,115,22,0.55); background: rgba(154,52,18,0.25);
+      font-size: 0.88rem;
+    }
+    .tour-highlight-banner {
+      position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 10050;
+      background: #ea580c; color: #fff; padding: 10px 16px; border-radius: 10px;
+      font: 600 14px system-ui, sans-serif; box-shadow: 0 8px 24px rgba(0,0,0,.45);
+      max-width: 92vw; text-align: center;
+    }
+    .tour-highlight-banner.hidden { display: none; }
+    .tour-target-pulse {
+      outline: 4px solid #f97316 !important; outline-offset: 4px !important;
+      box-shadow: 0 0 28px rgba(249,115,22,0.55) !important;
+    }
+    .reputation-storyboard { margin: 1rem 0 1.25rem; }
+    .storyboard-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
+    }
+    .storyboard-grid figure {
+      margin: 0; border: 1px solid #27272a; border-radius: 12px; overflow: hidden;
+      background: rgba(0,0,0,0.35);
+    }
+    .storyboard-grid img { display: block; width: 100%; height: auto; }
+    .storyboard-grid figcaption {
+      padding: 0.45rem 0.65rem; font-size: 0.78rem; color: #a1a1aa; line-height: 1.35;
+    }
+    .storyboard-wide { grid-column: 1 / -1; }
+    .featured-card {
+      border-color: rgba(34,211,238,0.65) !important;
+      box-shadow: 0 0 0 1px rgba(34,211,238,0.25), 0 12px 32px rgba(14,116,144,0.25);
+    }
+    .featured-card h3 { color: #67e8f9; }
+    .access-gate-compact {
+      margin: 0.75rem 0; padding: 0.55rem 0.75rem; border: 1px dashed #3f3f46; border-radius: 8px;
+      font-size: 0.82rem; color: #a1a1aa;
+    }
+    .access-gate-compact input { max-width: 11rem; margin: 0 0.35rem; }
+    @media (max-width: 800px) {
+      .storyboard-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <h1>Portfolio — Cognitive AI Architecture</h1>
-  <p><span class="tag">ResonantiA · ArchE</span> Public showcase of a <strong>private production</strong> system — built and operated solo by <strong>B. L.</strong></p>
+  <header class="portfolio-top">
+    <h1>ArchE · what you actually get</h1>
+    <p><span class="tag">ResonantiA</span> Built by <strong>B. J. Lewis</strong> —
+      <a href="tel:+12698883503">(269) 888-3503</a> ·
+      <a href="sms:+12698883503">SMS</a> ·
+      <a href="mailto:imndevmodeai@gmail.com">email</a>
+    </p>
+    <p class="layman-lead">Not a ChatGPT wrapper. We show <strong>before → after</strong> on Google, reviews, YouTube/social, and the documents you receive — then you can click a live demo.</p>
+  </header>
 
-  <h2>What This Is</h2>
-  <p><strong>ArchE</strong> is the agentic layer: tool-using workflows, live retrieval, evidence vetting, and forward projections — not a ChatGPT sidebar. <strong>ResonantiA</strong> is the full stack behind it. This page is the buyer-safe window in.</p>
+  <div id="guided-tour-bar" class="guided-tour-bar" role="region" aria-label="15-second tour">
+    <strong>First visit?</strong>
+    <span id="guided-tour-copy">15-second tour: orange highlights show where to click.</span>
+    <button type="button" class="btn" id="guided-tour-start">Play tour</button>
+    <button type="button" class="btn secondary" id="guided-tour-skip">Skip</button>
+  </div>
+  <div id="tour-highlight-banner" class="tour-highlight-banner hidden" aria-live="polite"></div>
 
-  <figure class="hero-visual">
-    <img src="assets/architecture-diagram.svg" width="920" height="320" alt="Diagram: Keyholder intent through workflow engine, search, causal and ABM tools, vetting gate, to answer and trace; knowledge layer below." loading="eager" decoding="async" />
-    <figcaption>Sanitized architecture map — matches the pipeline stages in the interactive demo (Intake → Plan → Tools → Vetting → Answer).</figcaption>
-  </figure>
-
-  <section id="portfolio-contact" class="portfolio-contact-strip" aria-label="Direct contact">
-    <h2>Contact (Upwork-safe)</h2>
-    <p style="color:#e4e4e7;margin:0.35rem 0"><strong>B. J. Lewis · ArchE / ResonantiA</strong></p>
-    <p style="margin:0.35rem 0">Text or call: <a href="tel:+12698883503">(269) 888-3503</a> · <a href="sms:+12698883503">Send SMS</a></p>
-    <p style="margin:0.35rem 0">Email: <a href="mailto:imndevmodeai@gmail.com">imndevmodeai@gmail.com</a></p>
-    <p class="contact-note">Upwork blocks direct contact in proposals — use this page after you unlock <strong>RESONANT-VIEW</strong> or open your preview gift link.</p>
+  <section id="reputation-storyboard" class="reputation-storyboard" aria-label="Reputation before and after">
+    <h2>Reputation management — the payout (demo scrubbed)</h2>
+    <p class="disclaimer" style="margin:0.35rem 0 0.75rem">
+      <strong>What it means in plain English:</strong> when someone Googles you, we want them to see a fair, active presence —
+      answered reviews, owned video/posts, and honest documents — not silence or unanswered complaints.
+      We draft the work; <strong>you</strong> approve every public Publish. No fake star ratings.
+    </p>
+    <div class="storyboard-grid">
+      <figure>
+        <img src="assets/proofs/google-search-before.svg" width="900" height="560" alt="Google search before: low rating and unanswered reviews" loading="eager" />
+        <figcaption>1 · Before — thin Google presence or bad unanswered reviews</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/proofs/google-search-after.svg" width="900" height="560" alt="Google search after: stronger rating and owned content" loading="eager" />
+        <figcaption>2 · After — target presence plan (demo, not a client claim)</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/proofs/youtube-campaign.svg" width="900" height="560" alt="YouTube campaign storyboard with human publish gate" loading="lazy" />
+        <figcaption>3 · YouTube campaign storyboard — review gate before publish</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/proofs/social-campaign.svg" width="900" height="560" alt="Social and Google Business thirty day calendar" loading="lazy" />
+        <figcaption>4 · Social / Google Business calendar — automation fills, human posts</figcaption>
+      </figure>
+      <figure class="storyboard-wide">
+        <img src="assets/proofs/reputation-docs.svg" width="900" height="560" alt="Documents created for keyholder review" loading="lazy" />
+        <figcaption>5 · Documents you receive — snapshot, case study, campaigns, offer (queued for your review)</figcaption>
+      </figure>
+    </div>
   </section>
 
-  <h2>Interactive demo theater</h2>
-  <p class="agentic-lead"><strong>Agentic orchestration, not a ChatGPT wrapper.</strong> Enterprise pilots often ship a chat box on a model API. ArchE runs plans, invokes tools, cites sources, and replans when live intel lands — click a scenario to open the presentation.</p>
-  <p class="disclaimer"><strong>Simulation only.</strong> Trace lines are styled after real production runs with identifiers scrubbed. No client PII, no production keys.</p>
+  <h2 id="demo-theater-heading">Click a live demo</h2>
+  <p class="agentic-lead">Orange tour will point here. Each card opens a short presentation — conversation on the right, tool trace on the left.</p>
+  <p class="disclaimer"><strong>Simulation only.</strong> Scrubbed demo businesses. No client PII.</p>
 
-  <div id="access-gate">
-    <strong>Consult preview</strong> — code from proposal unlocks your question + paid-media scenario.
-    <div style="margin-top:0.5rem">
-      <input id="access-code" type="text" placeholder="RESONANT-VIEW" autocomplete="off" />
-      <button type="button" id="access-unlock">Unlock</button>
-      <span id="unlock-badge"></span>
-    </div>
+  <div id="access-gate" class="access-gate-compact">
+    <strong>Optional unlock</strong> for custom questions:
+    <input id="access-code" type="text" placeholder="RESONANT-VIEW" autocomplete="off" />
+    <button type="button" id="access-unlock">Unlock</button>
+    <span id="unlock-badge"></span>
   </div>
   <div id="unlock-reward-banner" class="hidden" role="status" aria-live="polite">
-    <strong>RESONANT-VIEW unlocked.</strong> Next: 48-hour local comp map + ad-spend carve-out for your city —
-    run your brief below, then save your <a href="#" id="unlock-gift-inline" style="color:#c4b5fd">preview gift</a> or text to book pilot.
+    <strong>RESONANT-VIEW unlocked.</strong> Custom brief panel unlocked below the cards.
   </div>
 
   <div id="demo-chooser">
-    <p>Pick a scenario — a <strong>centered presentation</strong> opens. Left: orchestration trace (tools + data sources). Right: executive ↔ ArchE conversation only.</p>
     <div class="demo-cards">
+      <div class="demo-card featured-card" data-demo="r" role="button" tabindex="0" id="demo-card-r">
+        <h3>R. Reputation before → after</h3>
+        <p>Google search · reviews · YouTube/social · documents you get.</p>
+      </div>
       <div class="demo-card" data-demo="a" role="button" tabindex="0"><h3>A. One source of truth</h3><p>CFO asks ArchE · live billing proof.</p></div>
-      <div class="demo-card" data-demo="b" role="button" tabindex="0"><h3>B. Policy in 18 months</h3><p>Causal lag + ABM trace · expert answer with plain-language gloss.</p></div>
-      <div class="demo-card" data-demo="c" role="button" tabindex="0"><h3>C. Doc → queryable</h3><p>Indexed playbook retrieval.</p></div>
-      <div class="demo-card" data-demo="e" role="button" tabindex="0"><h3>E. SMS job coach</h3><p>Twilio-class webhook · Vault RAG · per-phone memory · STOP/opt-out.</p></div>
-      <div class="demo-card locked-card" data-demo="d" role="button" tabindex="0"><h3>D. Paid ads — automated closed loop</h3><p>Thousands of levers · orchestration plane · shadow → canary → autopilot.</p></div>
+      <div class="demo-card" data-demo="b" role="button" tabindex="0"><h3>B. Policy in 18 months</h3><p>HR simulation · plain-language answer.</p></div>
+      <div class="demo-card" data-demo="e" role="button" tabindex="0"><h3>E. SMS job coach</h3><p>Text-in coach · Vault knowledge · STOP.</p></div>
+      <div class="demo-card" data-demo="c" role="button" tabindex="0"><h3>C. Doc → queryable</h3><p>Playbook answers without shipping the PDF.</p></div>
+      <div class="demo-card locked-card" data-demo="d" role="button" tabindex="0"><h3>D. Paid ads loop</h3><p>Unlock with RESONANT-VIEW.</p></div>
     </div>
     <div id="custom-demo-panel" class="locked">
       <h3 style="font-size:1rem;color:var(--accent2)">Your question (after unlock)</h3>
-      <p class="disclaimer" style="margin:0.35rem 0 0.5rem"><strong>Ask ArchE anything (live preview).</strong> Type or use the <strong>mic</strong> to dictate your question, <strong>×</strong> to clear, or <strong>scrape</strong> to pull text from a public URL into the box, then <strong>Run preview</strong>. You will see a real orchestration trace and an executive-style answer — with vetting gates and human-approve-before-send patterns, not a canned chatbot script.</p>
-      <p id="data-disclosure-banner" class="disclaimer" style="margin:0.25rem 0 0.5rem;font-size:0.78rem"><strong>Data mode:</strong> Checking live preview server… Evidence sheets regenerate from your question when the API is online; each document states whether it is demo-scrubbed or live-backed.</p>
+      <p class="disclaimer" style="margin:0.35rem 0 0.5rem"><strong>Ask ArchE anything (live preview).</strong> Type or use the <strong>mic</strong>, then <strong>Run preview</strong>.</p>
+      <p id="data-disclosure-banner" class="disclaimer" style="margin:0.25rem 0 0.5rem;font-size:0.78rem"><strong>Data mode:</strong> Checking live preview server…</p>
       <div id="strategy-panel" class="hidden" aria-live="polite" aria-label="Dealership growth strategy">
         <strong style="color:#67e8f9">Your growth strategy (personalized)</strong>
-        <p style="margin:0.35rem 0 0;font-size:0.78rem;color:#a1a1aa">Sales-manager playbook — service-to-sales, 24/7 BDC, CRM reactivation, hyper-local events — grounded in live dealer listings near your market.</p>
+        <p style="margin:0.35rem 0 0;font-size:0.78rem;color:#a1a1aa">Sales-manager playbook grounded in live dealer listings near your market.</p>
         <div id="pilot-scope-controls" style="margin:0.55rem 0 0.35rem;display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center">
           <label style="display:flex;align-items:center;gap:0.35rem;font-size:0.74rem;color:#e4e4e7">
             <input type="checkbox" id="side-by-side-toggle" />
@@ -375,46 +449,62 @@
         <div id="side-by-side-panel" class="hidden" style="margin:0.5rem 0 0.75rem;border-top:1px dashed rgba(34,211,238,0.35);padding-top:0.65rem">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem">
             <div style="border:1px solid rgba(161,161,170,0.35);border-radius:10px;background:rgba(0,0,0,0.25);overflow:hidden">
-              <div style="padding:0.45rem 0.65rem;border-bottom:1px solid rgba(161,161,170,0.25);font-size:0.68rem;color:#a1a1aa;text-transform:uppercase;letter-spacing:0.08em">Ungrounded (no live local intel)</div>
+              <div style="padding:0.45rem 0.65rem;border-bottom:1px solid rgba(161,161,170,0.25);font-size:0.68rem;color:#a1a1aa;text-transform:uppercase;letter-spacing:0.08em">Ungrounded</div>
               <div id="side-by-side-left" style="padding:0.55rem 0.65rem"></div>
             </div>
             <div style="border:1px solid rgba(34,211,238,0.4);border-radius:10px;background:rgba(14,116,144,0.14);overflow:hidden">
-              <div style="padding:0.45rem 0.65rem;border-bottom:1px solid rgba(34,211,238,0.25);font-size:0.68rem;color:#67e8f9;text-transform:uppercase;letter-spacing:0.08em">Grounded (live local intel + ranked plan)</div>
+              <div style="padding:0.45rem 0.65rem;border-bottom:1px solid rgba(34,211,238,0.25);font-size:0.68rem;color:#67e8f9;text-transform:uppercase;letter-spacing:0.08em">Grounded</div>
               <div id="side-by-side-right" style="padding:0.55rem 0.65rem"></div>
             </div>
           </div>
-          <p style="margin:0.55rem 0 0;font-size:0.74rem;color:#a1a1aa">Left is what you can get from a general model without your market’s data. Right is the same playbook plus live competitor names and a ranked action plan.</p>
         </div>
         <div id="strategy-body"></div>
       </div>
       <div id="action-plan-panel" class="hidden" aria-live="polite" aria-label="Local SEO action plan">
         <strong style="color:#c4b5fd">Your local SEO action plan</strong>
-        <p style="margin:0.35rem 0 0;font-size:0.78rem;color:#a1a1aa">Rank verdict + top 10 competitors with clickable Google Maps and Yelp links — aggregated from your brief, not a URL dump.</p>
         <div id="action-plan-body"></div>
       </div>
       <details id="keyholder-tech-note" class="disclaimer" style="margin:0.35rem 0 0.5rem;font-size:0.72rem;opacity:0.85">
         <summary style="cursor:pointer;color:#c4b5fd">Technical note (Keyholder / engineering)</summary>
-        <p style="margin:0.4rem 0 0">Custom brief uses <code>POST /api/portfolio/brief</code> (Ollama or Cursor SDK). Run <code>python3 scripts/serve_portfolio_live.py</code> locally on port 17890; public tunnel via ngrok or Cloudflare. Evidence at <code>/api/portfolio/evidence/&lt;slug&gt;</code>.</p>
+        <p style="margin:0.4rem 0 0">Custom brief uses <code>POST /api/portfolio/brief</code>. Run <code>serve_portfolio_live.py</code> on port 17890.</p>
       </details>
-      <p id="ngrok-visitor-hint" class="disclaimer hidden" style="margin:0.35rem 0 0;font-size:0.78rem;border-left-color:#22d3ee"><strong>First visit on this link?</strong> If a security page appears before this site, click <strong>Visit Site</strong> once — that is normal for developer preview links. You will not need to do it again on this browser for about a week.</p>
+      <p id="ngrok-visitor-hint" class="disclaimer hidden" style="margin:0.35rem 0 0;font-size:0.78rem;border-left-color:#22d3ee"><strong>First visit on this link?</strong> If a security page appears, click <strong>Visit Site</strong> once.</p>
       <div class="business-name-field">
-        <label for="buyer-business-name">Your business name <span style="color:#71717a;font-weight:normal">(optional — for Google/Yelp top-10 rank check)</span></label>
+        <label for="buyer-business-name">Your business name <span style="color:#71717a;font-weight:normal">(optional)</span></label>
         <input type="text" id="buyer-business-name" placeholder="e.g. Custom Auto Retail Sales" maxlength="80" autocomplete="organization" />
       </div>
       <div class="query-input-wrap">
         <textarea id="custom-query" placeholder="Your question — e.g. used car lot in Kalamazoo MI — how do I rank on Google and Yelp?"></textarea>
         <div class="query-icon-rail" aria-label="Query speech tools">
-          <button type="button" class="icon-btn" id="query-mic-btn" title="Speak your question (speech-to-text)" aria-label="Microphone">
+          <button type="button" class="icon-btn" id="query-mic-btn" title="Speak your question" aria-label="Microphone">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
           </button>
-          <button type="button" class="icon-btn" id="query-clear-btn" title="Clear question" aria-label="Clear">×</button>
-          <button type="button" class="icon-btn" id="query-scrape-btn" title="Scrape URL into question" aria-label="Scrape URL">⎘</button>
+          <button type="button" class="icon-btn" id="query-clear-btn" title="Clear" aria-label="Clear">×</button>
+          <button type="button" class="icon-btn" id="query-scrape-btn" title="Scrape URL" aria-label="Scrape URL">⎘</button>
         </div>
       </div>
       <div style="margin-top:0.5rem"><button type="button" class="btn" id="run-custom">Run preview</button></div>
     </div>
   </div>
 
+  <details class="below-fold-tech" style="margin:1.5rem 0">
+    <summary style="cursor:pointer;color:#a1a1aa;font-size:0.9rem">Architecture diagram &amp; engineer detail (optional)</summary>
+    <h2>What This Is</h2>
+    <p><strong>ArchE</strong> is the agentic layer: tool-using workflows, live retrieval, evidence vetting, and forward projections. <strong>ResonantiA</strong> is the full stack behind it.</p>
+    <figure class="hero-visual">
+      <img src="assets/architecture-diagram.svg" width="920" height="320" alt="Architecture diagram" loading="lazy" decoding="async" />
+      <figcaption>Sanitized architecture map — Intake → Plan → Tools → Vetting → Answer.</figcaption>
+    </figure>
+  </details>
+
+  <section id="portfolio-contact" class="portfolio-contact-strip" aria-label="Direct contact">
+    <h2>Contact</h2>
+    <p style="color:#e4e4e7;margin:0.35rem 0"><strong>B. J. Lewis · ArchE / ResonantiA</strong></p>
+    <p style="margin:0.35rem 0">Text or call: <a href="tel:+12698883503">(269) 888-3503</a> · <a href="sms:+12698883503">Send SMS</a></p>
+    <p style="margin:0.35rem 0">Email: <a href="mailto:imndevmodeai@gmail.com">imndevmodeai@gmail.com</a></p>
+  </section>
+
+  <!-- DEMO_MODAL_ANCHOR: keep modal markup next -->
   <div id="demo-modal" aria-hidden="true" role="dialog" aria-modal="true">
     <div class="modal-backdrop" id="modal-backdrop"></div>
     <div class="modal-panel">
@@ -550,7 +640,7 @@
   </section>
 
   <h2>Work samples (public — safe for Upwork)</h2>
-  <p>All links are on the <strong>public</strong> repo <a href="https://github.com/imndevmodeai/portfolio" style="color:var(--accent2)">github.com/imndevmodeai/portfolio</a>. Interactive demo: scenario <strong>E</strong> above.</p>
+  <p>All links are on the <strong>public</strong> repo <a href="https://github.com/imndevmodeai/portfolio" style="color:var(--accent2)">github.com/imndevmodeai/portfolio</a>. Start with demo <strong>R</strong> (reputation before → after) or scenario <strong>E</strong> (SMS coach).</p>
   <table>
     <tr><th>Sample</th><th>What it proves</th></tr>
     <tr><td><a href="https://github.com/imndevmodeai/portfolio/blob/main/case-studies/01-sms-rag-job-coach-mvp.md" style="color:var(--accent2)">01 — SMS RAG job coach MVP</a></td><td>Twilio webhook loop, Vault KB, OpenAI, memory, opt-out, admin log</td></tr>
@@ -582,6 +672,6 @@
   }
 })();
 </script>
-<script src="demo-engine.js?v=troy-cast-20260731c"></script>
+<script src="demo-engine.js?v=layman-rep-20260731d"></script>
 </body>
 </html>

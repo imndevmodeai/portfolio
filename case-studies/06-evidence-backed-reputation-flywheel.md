@@ -2,6 +2,19 @@
 
 > First-party material. Virtual-team role names are **disclosed AI functions**, not human employees. Campaign artifacts default to **review-only** — nothing publishes externally without Keyholder approval.
 
+## Plain English (what reputation management means here)
+When someone **Googles** your business, they should see a **fair, active presence** — answered reviews, owned video/posts, and honest documents — not silence or unanswered one-star complaints.
+
+**What you walk away with (the payout):**
+1. **Before snapshot** — what Google / reviews look like today (thin presence *or* unanswered detractors).
+2. **After plan** — target search presence (demo visuals on the portfolio hub — not a live client claim).
+3. **Campaign packs** — YouTube storyboard + social / Google Business calendar (composers filled; **you** Publish).
+4. **Documents** — reputation snapshot, before→after case study for your market, campaign drafts, review-gated offer.
+
+We **never invent star ratings**. Public posts require human approval.
+
+**See it:** https://imndevmodeai.github.io/portfolio/ — storyboard at the top + live demo **R. Reputation before → after**.
+
 ## Buyer problem
 Online reputation work often collapses into vanity metrics, ghostwritten reviews, or AI copy that cannot be audited. Buyers (systems engineers, agency owners, brand operators) need a **governed** way to turn real engineering proof into public claims — with counterevidence, confidence scores, and human gates.
 
