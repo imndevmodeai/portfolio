@@ -636,16 +636,22 @@
     var ask =
       "When someone Googles my shop, they see a thin page and a couple of unanswered one-star reviews. " +
       "What do you actually do for reputation — and what do I walk away with?";
+    var beforeLine =
+      "Here is the BEFORE Google screen — thin rating, unanswered one-stars. This is the starting screenshot we capture for you.";
+    var afterLine =
+      "Here is the AFTER plan — stronger presence, owner replies, owned YouTube and Google Business posts. Demo scrub, not a live client claim. Human Publish gate stays on.";
+    var ytLine =
+      "YouTube campaign storyboard — three clips, scripts, thumbnails. Status queued for your review. ArchE never auto-uploads.";
+    var socialLine =
+      "Thirty-day social and Google Business calendar — composers filled, you click Publish. No silent brand posts.";
+    var docsLine =
+      "These are the documents you keep: reputation snapshot, before-after case study, campaign pack, and review-gated offer.";
     var planAnswer =
       "Plain English: reputation management is making sure a Google search shows a fair, active presence — not silence or unanswered complaints. " +
-      "We start with a before snapshot of search and reviews, then draft answered review language, a YouTube storyboard, and a thirty-day social calendar. " +
-      "You approve every public Publish. We never invent star ratings. " +
-      "You receive documents: a reputation snapshot, a before-after case study for your market, campaign packs, and a review-gated offer — all queued for your sign-off.";
-    var skeptic =
-      "Show me the screens. I need to see the Google before and after, not just agent jargon.";
+      "You just saw the five payout screens. We never invent star ratings. You approve every public Publish.";
+    var skeptic = "Good — keep those screens up. That is what I needed to see.";
     var proofReply =
-      "Click the sources below — Google before, Google after plan, YouTube pack, social calendar, and the document stack. " +
-      "Those are the same visuals on the page above the demos. Trace lines on the left scroll to each proof. This is a scrubbed demo plan, not a claim about a live client.";
+      "Sources below reopen any screen — Google before, after plan, YouTube, social calendar, document stack. Same visuals as the storyboard above the demos.";
 
     return {
       title: "Reputation — Google before → after (what you get)",
@@ -654,7 +660,7 @@
           role: "narrator",
           label: "Play-by-play",
           say:
-            "Reputation demo for a layperson. We show what a customer sees on Google today, the target presence plan, campaign screens, and the documents you receive — with a human publish gate.",
+            "Reputation demo. Watch the large document panels — Google before, Google after, YouTube, social calendar, then the document stack you receive.",
           pipeline: "intake",
         },
         {
@@ -669,67 +675,79 @@
             termEntry(runLog("MAP", "problem=thin_or_damaged_serp  goal=owned_presence_with_human_gate", 1), "trace-map-problem"),
             termEntry(runLog("INVOKE", "workflow=reputation_flywheel  step=snapshot_serp_reviews", 2)),
           ],
-          termDelay: 260,
+          termDelay: 220,
           pipeline: "plan",
           tools: ["llm", "workflow"],
         },
         {
           role: "arche",
           label: archeLabel,
-          say: "Got it. I am pulling a scrubbed Google snapshot and review panel first — then I will show the after plan and the documents you keep.",
+          say: beforeLine,
+          showProof: "trace-google-before",
+          pauseAfter: 900,
           pipeline: "plan",
           terminalParallel: [
             termEntry(runLog("FETCH", "google_serp_before  window=today  status=thin_or_damaged", 3), "trace-google-before"),
             termEntry(runLog("FETCH", "gbp_reviews  unanswered_detractors=2  sla=open", 4), "trace-auto-reviews"),
           ],
-          termDelay: 240,
+          termDelay: 200,
         },
         {
-          toolFocus: {
-            tool: "research",
-            doing: "Building the after-state plan — owned listings, answered reviews, video and social packets.",
-            tie: "Lines tagged Google after, YouTube, social, and documents below.",
-            also: ["research", "vetting"],
-            forecast: "Human publish gate stays ON for every public post.",
-          },
+          role: "arche",
+          label: archeLabel,
+          say: afterLine,
+          showProof: "trace-google-after",
+          pauseAfter: 900,
+          pipeline: "tools",
+          tools: ["research"],
           terminal: [
             termEntry(runLog("PLAN", "serp_after_target  owned_listing=ON  review_responses=drafted", 5), "trace-google-after"),
-            termEntry(runLog("PLAN", "youtube_storyboard  clips=3  publish=human_gate", 6), "trace-youtube-campaign"),
-            termEntry(runLog("PLAN", "social_calendar  days=30  composers=fill_only", 7), "trace-social-campaign"),
-            termEntry(runLog("DOC", "packet=snapshot+case_study+campaigns+offer  queue=keyholder_review", 8), "trace-reputation-docs"),
           ],
-          termDelay: 240,
+          termDelay: 180,
+        },
+        {
+          role: "arche",
+          label: archeLabel,
+          say: ytLine,
+          showProof: "trace-youtube-campaign",
+          pauseAfter: 800,
           pipeline: "tools",
-          tools: ["research", "workflow"],
-          forecast: {
-            title: "Deliverables queued",
-            rows: [
-              { label: "Google presence plan", pct: 88, value: "after SERP" },
-              { label: "Campaign packs", pct: 84, value: "YT + social" },
-              { label: "Human Publish gate", pct: 100, value: "ON" },
-            ],
-            note: "Demo scrub — not a live client claim.",
-          },
+          terminal: [
+            termEntry(runLog("PLAN", "youtube_storyboard  clips=3  publish=human_gate", 6), "trace-youtube-campaign"),
+          ],
+          termDelay: 160,
+        },
+        {
+          role: "arche",
+          label: archeLabel,
+          say: socialLine,
+          showProof: "trace-social-campaign",
+          pauseAfter: 800,
+          pipeline: "tools",
+          terminal: [
+            termEntry(runLog("PLAN", "social_calendar  days=30  composers=fill_only", 7), "trace-social-campaign"),
+          ],
+          termDelay: 160,
+        },
+        {
+          role: "arche",
+          label: archeLabel,
+          say: docsLine,
+          showProof: "trace-reputation-docs",
+          pauseAfter: 1000,
+          pipeline: "vet",
+          tools: ["vetting", "research"],
+          terminal: [
+            termEntry(runLog("DOC", "packet=snapshot+case_study+campaigns+offer  queue=keyholder_review", 8), "trace-reputation-docs"),
+            termEntry(runLog("VETTING", "fake_stars=BLOCKED  publish_gate=REQUIRED  conf=0.90", 9), "trace-vetting"),
+          ],
+          termDelay: 180,
         },
         {
           role: "arche",
           label: archeLabel,
           say: planAnswer,
-          pipeline: "vet",
-          tools: ["vetting", "research"],
-        },
-        {
-          role: "narrator",
-          label: "Play-by-play",
-          say: "Vetting checks honesty — no fabricated ratings, every public action needs your approval.",
-          pipeline: "vet",
-        },
-        {
-          terminal: [
-            termEntry(runLog("VETTING", "fake_stars=BLOCKED  publish_gate=REQUIRED  conf=0.90", 9), "trace-vetting"),
-            termEntry(runLog("SRC", "evidence_bundle=EB-REP-01  visuals=5  check=PASS", 10), "trace-vetting"),
-          ],
-          termDelay: 220,
+          showProof: "trace-reputation-docs",
           pipeline: "vet",
           tools: ["vetting"],
         },
@@ -743,6 +761,7 @@
           role: "arche",
           label: archeLabel,
           say: proofReply,
+          showProof: "trace-google-after",
           pipeline: "answer",
           sources: [
             { label: "Google search — BEFORE", traceAnchor: "trace-google-before" },
@@ -761,7 +780,7 @@
             termEntry(runLog("ANSWER", "payout=docs+campaigns+serp_plan  human_gate=ON  conf=0.90", 11), "trace-answer"),
             termEntry(runLog("SESSION", "complete  run_id=" + DEMO_RUN_ID, 12)),
           ],
-          termDelay: 200,
+          termDelay: 180,
           pipeline: "answer",
         },
       ],
@@ -2237,12 +2256,24 @@
         "auto-pricing",
         "auto-comp-set",
         "auto-reviews",
+        "google-search",
+        "youtube-campaign",
+        "social-campaign",
+        "reputation-docs",
       ];
       for (var i = 0; i < docFragments.length; i++) {
         if (visual.src.indexOf(docFragments[i]) >= 0) return true;
       }
     }
     return false;
+  }
+
+  /** Bust CDN / Pages cache so replaced SVGs actually load (never fall back to default.svg). */
+  var PROOF_ASSET_V = "phd-ux-20260731a";
+  function withProofCacheBust(src) {
+    if (!src || src.indexOf("data:") === 0) return src;
+    if (src.indexOf("?") >= 0) return src;
+    return src + "?v=" + PROOF_ASSET_V;
   }
 
   function collectTerminalProofLines(source, visual) {
@@ -2350,6 +2381,7 @@
         citation: "",
       };
     }
+    if (base && base.src) base.src = withProofCacheBust(base.src);
     if (source.evidenceSlug) base.evidenceSlug = source.evidenceSlug;
     if (source.evidenceUrl && evidenceEmbedAllowed(source.evidenceUrl)) {
       base.evidenceUrl = source.evidenceUrl;
@@ -2701,7 +2733,7 @@
     },
     {
       role: "narrator",
-      say: "Reputation demo for a layperson. We show what a customer sees on Google today, the target presence plan, campaign screens, and the documents you receive — with a human publish gate.",
+      say: "Reputation demo. Watch the large document panels — Google before, Google after, YouTube, social calendar, then the document stack you receive.",
     },
     {
       role: "decision_guest",
@@ -2709,23 +2741,35 @@
     },
     {
       role: "arche",
-      say: "Got it. I am pulling a scrubbed Google snapshot and review panel first — then I will show the after plan and the documents you keep.",
+      say: "Here is the BEFORE Google screen — thin rating, unanswered one-stars. This is the starting screenshot we capture for you.",
     },
     {
       role: "arche",
-      say: "Plain English: reputation management is making sure a Google search shows a fair, active presence — not silence or unanswered complaints. We start with a before snapshot of search and reviews, then draft answered review language, a YouTube storyboard, and a thirty-day social calendar. You approve every public Publish. We never invent star ratings. You receive documents: a reputation snapshot, a before-after case study for your market, campaign packs, and a review-gated offer — all queued for your sign-off.",
+      say: "Here is the AFTER plan — stronger presence, owner replies, owned YouTube and Google Business posts. Demo scrub, not a live client claim. Human Publish gate stays on.",
     },
     {
-      role: "narrator",
-      say: "Vetting checks honesty — no fabricated ratings, every public action needs your approval.",
+      role: "arche",
+      say: "YouTube campaign storyboard — three clips, scripts, thumbnails. Status queued for your review. ArchE never auto-uploads.",
+    },
+    {
+      role: "arche",
+      say: "Thirty-day social and Google Business calendar — composers filled, you click Publish. No silent brand posts.",
+    },
+    {
+      role: "arche",
+      say: "These are the documents you keep: reputation snapshot, before-after case study, campaign pack, and review-gated offer.",
+    },
+    {
+      role: "arche",
+      say: "Plain English: reputation management is making sure a Google search shows a fair, active presence — not silence or unanswered complaints. You just saw the five payout screens. We never invent star ratings. You approve every public Publish.",
     },
     {
       role: "decision_guest",
-      say: "Show me the screens. I need to see the Google before and after, not just agent jargon.",
+      say: "Good — keep those screens up. That is what I needed to see.",
     },
     {
       role: "arche",
-      say: "Click the sources below — Google before, Google after plan, YouTube pack, social calendar, and the document stack. Those are the same visuals on the page above the demos. Trace lines on the left scroll to each proof. This is a scrubbed demo plan, not a claim about a live client.",
+      say: "Sources below reopen any screen — Google before, after plan, YouTube, social calendar, document stack. Same visuals as the storyboard above the demos.",
     },
   ];
 
@@ -3828,6 +3872,16 @@
     if (beat.forecast) setForecast(beat.forecast);
     if (beat.timeline) setTimeline(beat.timeline);
 
+    /* Auto-open customer payout visuals (Scenario R and any beat with showProof). */
+    if (beat.showProof) {
+      openProofEvidence(
+        typeof beat.showProof === "string"
+          ? proofFromAnchor(beat.showProof)
+          : beat.showProof,
+        null
+      );
+    }
+
     var role = beat.role || "narrator";
     var label = beat.label || defaultLabel(role);
 
@@ -3860,6 +3914,8 @@
       hideSpeakerPopup();
       await delay(beat.pauseAfter || 450);
     }
+
+    if (beat.hideProofAfter) hideProofPopup();
   }
 
   async function playFollowUpBeats(beats) {
@@ -3964,6 +4020,13 @@
   }
 
   function openModal() {
+    /* Never leave the landing tour banner over the theater. */
+    clearTourHighlight();
+    var tourBar = $("#guided-tour-bar");
+    if (tourBar) tourBar.classList.add("hidden");
+    try {
+      sessionStorage.setItem("arche_portfolio_tour_done", "1");
+    } catch (e) {}
     var modal = $("#demo-modal");
     if (modal) {
       modal.classList.add("open");

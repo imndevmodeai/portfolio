@@ -135,12 +135,12 @@
     .evidence-links a.proof-active { color: #fde047; font-weight: 700; }
 
     /* Evidence doc popup (spreadsheet / chart / UI mock + citation) */
-    #proof-popup { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(0.96); z-index: 55; pointer-events: auto; opacity: 0; transition: opacity 0.26s ease, transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1); width: min(920px, 94vw); max-height: 88vh; }
+    #proof-popup { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(0.96); z-index: 10120; pointer-events: auto; opacity: 0; transition: opacity 0.26s ease, transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1); width: min(980px, 96vw); max-height: 92vh; }
     #proof-popup.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     #proof-popup.hidden { display: none; }
-    .proof-popup-card { background: linear-gradient(165deg, rgba(24,24,27,0.99), rgba(9,9,11,0.99)); border: 1px solid rgba(253,224,71,0.5); border-radius: 14px; box-shadow: 0 24px 64px rgba(0,0,0,0.75), 0 0 32px rgba(253,224,71,0.15); overflow: hidden; display: flex; flex-direction: column; max-height: 88vh; }
-    #proof-popup-img { display: block; width: 100%; height: auto; max-height: min(62vh, 520px); object-fit: contain; background: #f8fafc; }
-    #proof-popup-frame { display: none; width: 100%; height: min(62vh, 520px); border: 0; background: #f8fafc; }
+    .proof-popup-card { background: linear-gradient(165deg, rgba(24,24,27,0.99), rgba(9,9,11,0.99)); border: 2px solid rgba(34,211,238,0.65); border-radius: 14px; box-shadow: 0 28px 80px rgba(0,0,0,0.85), 0 0 40px rgba(34,211,238,0.2); overflow: hidden; display: flex; flex-direction: column; max-height: 92vh; }
+    #proof-popup-img { display: block; width: 100%; height: auto; max-height: min(72vh, 640px); object-fit: contain; background: #f8fafc; }
+    #proof-popup-frame { display: none; width: 100%; height: min(72vh, 640px); border: 0; background: #f8fafc; }
     .proof-mode-terminal #proof-popup-img,
     .proof-mode-terminal #proof-popup-frame { display: none !important; }
     .proof-mode-document #proof-popup-terminal { display: none !important; }
@@ -322,6 +322,9 @@
       font: 600 14px system-ui, sans-serif; box-shadow: 0 8px 24px rgba(0,0,0,.45);
       max-width: 92vw; text-align: center;
     }
+    /* While a demo is open, never let the tour banner cover the document viewer */
+    #demo-modal.open ~ #tour-highlight-banner,
+    body:has(#demo-modal.open) #tour-highlight-banner { display: none !important; }
     .tour-highlight-banner.hidden { display: none; }
     .tour-target-pulse {
       outline: 4px solid #f97316 !important; outline-offset: 4px !important;
@@ -383,23 +386,23 @@
     </p>
     <div class="storyboard-grid">
       <figure>
-        <img src="assets/proofs/google-search-before.svg" width="900" height="560" alt="Google search before: low rating and unanswered reviews" loading="eager" />
+        <img src="assets/proofs/google-search-before.svg?v=phd-ux-20260731a" width="900" height="560" alt="Google search before: low rating and unanswered reviews" loading="eager" />
         <figcaption>1 · Before — thin Google presence or bad unanswered reviews</figcaption>
       </figure>
       <figure>
-        <img src="assets/proofs/google-search-after.svg" width="900" height="560" alt="Google search after: stronger rating and owned content" loading="eager" />
+        <img src="assets/proofs/google-search-after.svg?v=phd-ux-20260731a" width="900" height="560" alt="Google search after: stronger rating and owned content" loading="eager" />
         <figcaption>2 · After — target presence plan (demo, not a client claim)</figcaption>
       </figure>
       <figure>
-        <img src="assets/proofs/youtube-campaign.svg" width="900" height="560" alt="YouTube campaign storyboard with human publish gate" loading="lazy" />
+        <img src="assets/proofs/youtube-campaign.svg?v=phd-ux-20260731a" width="900" height="560" alt="YouTube campaign storyboard with human publish gate" loading="lazy" />
         <figcaption>3 · YouTube campaign storyboard — review gate before publish</figcaption>
       </figure>
       <figure>
-        <img src="assets/proofs/social-campaign.svg" width="900" height="560" alt="Social and Google Business thirty day calendar" loading="lazy" />
+        <img src="assets/proofs/social-campaign.svg?v=phd-ux-20260731a" width="900" height="560" alt="Social and Google Business thirty day calendar" loading="lazy" />
         <figcaption>4 · Social / Google Business calendar — automation fills, human posts</figcaption>
       </figure>
       <figure class="storyboard-wide">
-        <img src="assets/proofs/reputation-docs.svg" width="900" height="560" alt="Documents created for keyholder review" loading="lazy" />
+        <img src="assets/proofs/reputation-docs.svg?v=phd-ux-20260731a" width="900" height="560" alt="Documents created for keyholder review" loading="lazy" />
         <figcaption>5 · Documents you receive — snapshot, case study, campaigns, offer (queued for your review)</figcaption>
       </figure>
     </div>
@@ -672,6 +675,6 @@
   }
 })();
 </script>
-<script src="demo-engine.js?v=layman-rep-20260731e"></script>
+<script src="demo-engine.js?v=phd-ux-20260731a"></script>
 </body>
 </html>

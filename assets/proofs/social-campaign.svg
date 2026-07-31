@@ -1,33 +1,68 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" role="img" aria-label="Social and Google Business campaign calendar">
-  <rect width="900" height="560" rx="14" fill="#f8fafc" stroke="#cbd5e1"/>
-  <text x="28" y="36" fill="#7c3aed" font-family="system-ui,sans-serif" font-size="14" font-weight="700">SOCIAL + GOOGLE BUSINESS · 30-day motion</text>
-  <text x="28" y="62" fill="#0f172a" font-family="system-ui,sans-serif" font-size="18" font-weight="600">What gets drafted · what a human still taps Publish on</text>
-  <rect x="28" y="90" width="200" height="140" rx="10" fill="#fff" stroke="#e2e8f0"/>
-  <text x="48" y="122" fill="#64748b" font-size="12">WEEK 1</text>
-  <text x="48" y="152" fill="#0f172a" font-size="14" font-weight="700">Audit + reply</text>
-  <text x="48" y="180" fill="#475569" font-size="12">Map Google/Yelp</text>
-  <text x="48" y="202" fill="#475569" font-size="12">Draft owner replies</text>
-  <rect x="244" y="90" width="200" height="140" rx="10" fill="#fff" stroke="#e2e8f0"/>
-  <text x="264" y="122" fill="#64748b" font-size="12">WEEK 2</text>
-  <text x="264" y="152" fill="#0f172a" font-size="14" font-weight="700">Proof posts</text>
-  <text x="264" y="180" fill="#475569" font-size="12">GBP posts ×3</text>
-  <text x="264" y="202" fill="#475569" font-size="12">Auth Gate each</text>
-  <rect x="460" y="90" width="200" height="140" rx="10" fill="#fff" stroke="#e2e8f0"/>
-  <text x="480" y="122" fill="#64748b" font-size="12">WEEK 3</text>
-  <text x="480" y="152" fill="#0f172a" font-size="14" font-weight="700">YouTube drop</text>
-  <text x="480" y="180" fill="#475569" font-size="12">Storyboard ’ cut</text>
-  <text x="480" y="202" fill="#475569" font-size="12">Review queue</text>
-  <rect x="676" y="90" width="196" height="140" rx="10" fill="#fff" stroke="#e2e8f0"/>
-  <text x="696" y="122" fill="#64748b" font-size="12">WEEK 4</text>
-  <text x="696" y="152" fill="#0f172a" font-size="14" font-weight="700">Measure</text>
-  <text x="696" y="180" fill="#475569" font-size="12">Reply SLA</text>
-  <text x="696" y="202" fill="#475569" font-size="12">Review velocity</text>
-  <rect x="28" y="260" width="844" height="160" rx="10" fill="#111827"/>
-  <text x="48" y="300" fill="#67e8f9" font-size="13" font-weight="700">Composer preview (automation fills · human posts)</text>
-  <text x="48" y="336" fill="#e5e7eb" font-size="14">&quot;New patient FAQ  what insurance we accept this month&quot;</text>
-  <text x="48" y="368" fill="#9ca3af" font-size="12">Status: FILLED · awaiting Keyholder authorization · Post blocked</text>
-  <text x="48" y="396" fill="#fbbf24" font-size="12">Orange handoff: Review this post  tap Done to authorize Publish</text>
-  <rect x="28" y="444" width="844" height="92" rx="10" fill="#fef3c7" stroke="#fcd34d"/>
-  <text x="48" y="480" fill="#92400e" font-size="14" font-weight="700">Not fake reviews. Not silent auto-posting.</text>
-  <text x="48" y="510" fill="#78350f" font-size="13">Reputation = truthful presence + fast honest replies + owned media with proof.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" role="img" aria-label="Social and Google Business thirty day calendar">
+  <rect width="960" height="640" fill="#f8fafc"/>
+  <rect width="960" height="56" fill="#0f172a"/>
+  <text x="28" y="36" fill="#ffffff" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="700">30-day social + Google Business calendar</text>
+  <rect x="700" y="14" width="232" height="28" rx="14" fill="#7c2d12" stroke="#fb923c"/>
+  <text x="718" y="33" fill="#ffedd5" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="700">Fill composers Â· YOU post</text>
+
+  <text x="28" y="90" fill="#475569" font-family="Arial,Helvetica,sans-serif" font-size="13">Channels: Google Business Â· Facebook Page Â· Instagram (optional) Â· LinkedIn local</text>
+
+  <!-- Calendar header -->
+  <rect x="28" y="110" width="600" height="40" rx="8" fill="#1e293b"/>
+  <text x="48" y="136" fill="#e2e8f0" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="700">Week of Mar 3 Â· Kalamazoo market (scrubbed)</text>
+
+  <!-- Day cells -->
+  <g font-family="Arial,Helvetica,sans-serif" font-size="11">
+    <rect x="28" y="160" width="110" height="88" rx="8" fill="#fff" stroke="#cbd5e1"/>
+    <text x="40" y="182" fill="#0f172a" font-weight="700">Mon 3</text>
+    <text x="40" y="204" fill="#0369a1">GBP: hours FAQ</text>
+    <text x="40" y="224" fill="#64748b">draft ready</text>
+
+    <rect x="150" y="160" width="110" height="88" rx="8" fill="#fff" stroke="#cbd5e1"/>
+    <text x="162" y="182" fill="#0f172a" font-weight="700">Tue 4</text>
+    <text x="162" y="204" fill="#7c3aed">FB: team photo</text>
+    <text x="162" y="224" fill="#64748b">awaiting you</text>
+
+    <rect x="272" y="160" width="110" height="88" rx="8" fill="#ecfdf5" stroke="#34d399"/>
+    <text x="284" y="182" fill="#065f46" font-weight="700">Wed 5</text>
+    <text x="284" y="204" fill="#047857">Review reply</text>
+    <text x="284" y="224" fill="#059669">approved</text>
+
+    <rect x="394" y="160" width="110" height="88" rx="8" fill="#fff" stroke="#cbd5e1"/>
+    <text x="406" y="182" fill="#0f172a" font-weight="700">Thu 6</text>
+    <text x="406" y="204" fill="#db2777">IG: reel cut</text>
+    <text x="406" y="224" fill="#64748b">in packet</text>
+
+    <rect x="516" y="160" width="112" height="88" rx="8" fill="#fff" stroke="#cbd5e1"/>
+    <text x="528" y="182" fill="#0f172a" font-weight="700">Fri 7</text>
+    <text x="528" y="204" fill="#0369a1">GBP: offer</text>
+    <text x="528" y="224" fill="#64748b">human gate</text>
+  </g>
+
+  <!-- Composer preview -->
+  <rect x="28" y="270" width="600" height="220" rx="12" fill="#ffffff" stroke="#94a3b8"/>
+  <text x="48" y="305" fill="#0f172a" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="700">Composer preview â€” Google Business (filled, not posted)</text>
+  <rect x="48" y="325" width="560" height="120" rx="8" fill="#f1f5f9" stroke="#cbd5e1"/>
+  <text x="64" y="355" fill="#334155" font-family="Arial,Helvetica,sans-serif" font-size="13">"New patients: we publish wait-time updates every Friday.</text>
+  <text x="64" y="378" fill="#334155" font-family="Arial,Helvetica,sans-serif" font-size="13">If something went wrong on a visit, message us â€” we reply</text>
+  <text x="64" y="401" fill="#334155" font-family="Arial,Helvetica,sans-serif" font-size="13">on Google within one business day."</text>
+  <text x="64" y="430" fill="#b45309" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="700">Status: FILLED Â· awaiting Keyholder Publish</text>
+  <rect x="48" y="460" width="160" height="18" rx="4" fill="#e2e8f0"/>
+  <text x="56" y="473" fill="#64748b" font-family="Arial,Helvetica,sans-serif" font-size="10">photo slot Â· map pin Â· CTA</text>
+
+  <!-- Right rail -->
+  <rect x="652" y="110" width="280" height="380" rx="12" fill="#0f172a"/>
+  <text x="672" y="150" fill="#67e8f9" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="700">What you receive</text>
+  <text x="672" y="190" fill="#e2e8f0" font-family="Arial,Helvetica,sans-serif" font-size="13">1. 30-day calendar CSV/PDF</text>
+  <text x="672" y="220" fill="#e2e8f0" font-family="Arial,Helvetica,sans-serif" font-size="13">2. Post copy per day</text>
+  <text x="672" y="250" fill="#e2e8f0" font-family="Arial,Helvetica,sans-serif" font-size="13">3. Review-reply bank</text>
+  <text x="672" y="280" fill="#e2e8f0" font-family="Arial,Helvetica,sans-serif" font-size="13">4. Hashtag / CTA sheet</text>
+  <text x="672" y="310" fill="#e2e8f0" font-family="Arial,Helvetica,sans-serif" font-size="13">5. Claim ledger links</text>
+  <rect x="672" y="340" width="240" height="110" rx="8" fill="#14532d" stroke="#22c55e"/>
+  <text x="688" y="375" fill="#bbf7d0" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="700">Automation fills.</text>
+  <text x="688" y="400" fill="#dcfce7" font-family="Arial,Helvetica,sans-serif" font-size="13">You click Publish.</text>
+  <text x="688" y="425" fill="#86efac" font-family="Arial,Helvetica,sans-serif" font-size="12">No silent brand posts.</text>
+
+  <rect x="28" y="555" width="904" height="60" rx="10" fill="#111827"/>
+  <text x="48" y="592" fill="#fde68a" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="700">Customer payout screen: calendar + filled composers â€” ready for your approval.</text>
 </svg>

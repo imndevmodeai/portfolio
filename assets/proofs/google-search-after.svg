@@ -1,21 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" role="img" aria-label="Google search AFTER  governed reputation presence">
-  <rect width="900" height="560" rx="14" fill="#f8fafc" stroke="#cbd5e1"/>
-  <rect width="900" height="64" fill="#fff" stroke="#e2e8f0"/>
-  <text x="28" y="28" fill="#059669" font-family="system-ui,sans-serif" font-size="13" font-weight="700">AFTER · target presence (demo plan  not a client claim)</text>
-  <text x="28" y="50" fill="#0f172a" font-family="system-ui,sans-serif" font-size="16" font-weight="600">Google · &quot;Acme Dental Kalamazoo reviews&quot;</text>
-  <rect x="28" y="84" width="640" height="40" rx="20" fill="#fff" stroke="#dadce0"/>
-  <text x="48" y="110" fill="#3c4043" font-family="system-ui,sans-serif" font-size="15">Acme Dental Kalamazoo reviews</text>
-  <rect x="28" y="170" width="844" height="96" rx="8" fill="#ecfdf5" stroke="#6ee7b7"/>
-  <text x="48" y="202" fill="#047857" font-family="system-ui,sans-serif" font-size="15" font-weight="700"> 4.6 · 48 Google reviews · owner replies &lt; 24h</text>
-  <text x="48" y="228" fill="#065f46" font-family="system-ui,sans-serif" font-size="13">&quot;Same-day new-patient slot · clear pricing · kind staff.&quot;</text>
-  <text x="48" y="250" fill="#047857" font-family="system-ui,sans-serif" font-size="12">Owner reply logged · Keyholder approved · scrubbed demo</text>
-  <rect x="28" y="284" width="844" height="64" rx="8" fill="#fff" stroke="#e2e8f0"/>
-  <text x="48" y="312" fill="#1a0dab" font-family="system-ui,sans-serif" font-size="15">YouTube · &quot;Meet the Acme Dental team&quot; (owned channel)</text>
-  <text x="48" y="334" fill="#4d5156" font-family="system-ui,sans-serif" font-size="12">Campaign packet ’ storyboard ’ review gate ’ publish</text>
-  <rect x="28" y="362" width="844" height="64" rx="8" fill="#fff" stroke="#e2e8f0"/>
-  <text x="48" y="390" fill="#1a0dab" font-family="system-ui,sans-serif" font-size="15">Google Business posts · weekly proof + FAQs</text>
-  <text x="48" y="412" fill="#4d5156" font-family="system-ui,sans-serif" font-size="12">No fake reviews  evidence-backed claims only</text>
-  <rect x="28" y="444" width="844" height="92" rx="8" fill="#eff6ff" stroke="#93c5fd"/>
-  <text x="48" y="478" fill="#1e40af" font-family="system-ui,sans-serif" font-size="14" font-weight="700">Deliverable: searchable presence + reply SLA + content calendar</text>
-  <text x="48" y="506" fill="#1e3a8a" font-family="system-ui,sans-serif" font-size="13">Human still approves every public post. ArchE drafts, tracks, and proves.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" role="img" aria-label="Google search AFTER - target governed presence plan">
+  <rect width="960" height="640" fill="#ffffff"/>
+  <rect width="960" height="52" fill="#ecfdf5" stroke="#a7f3d0"/>
+  <text x="24" y="34" fill="#047857" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="700">AFTER - target presence plan (demo scrub â€” not a client claim)</text>
+  <text x="680" y="34" fill="#065f46" font-family="Arial,Helvetica,sans-serif" font-size="12">human Publish gate ON</text>
+
+  <text x="48" y="110" font-family="Arial,Helvetica,sans-serif" font-size="36" font-weight="700">
+    <tspan fill="#4285F4">G</tspan><tspan fill="#EA4335">o</tspan><tspan fill="#FBBC05">o</tspan><tspan fill="#4285F4">g</tspan><tspan fill="#34A853">l</tspan><tspan fill="#EA4335">e</tspan>
+  </text>
+
+  <rect x="48" y="130" width="720" height="48" rx="24" fill="#fff" stroke="#dfe1e5" stroke-width="1.5"/>
+  <text x="72" y="161" fill="#202124" font-family="Arial,Helvetica,sans-serif" font-size="16">Acme Dental Kalamazoo reviews</text>
+  <circle cx="730" cy="154" r="10" fill="none" stroke="#4285F4" stroke-width="2"/>
+  <line x1="737" y1="161" x2="748" y2="172" stroke="#4285F4" stroke-width="2"/>
+
+  <text x="48" y="210" fill="#1a73e8" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="600">All</text>
+  <text x="90" y="210" fill="#5f6368" font-family="Arial,Helvetica,sans-serif" font-size="13">Maps</text>
+  <text x="145" y="210" fill="#5f6368" font-family="Arial,Helvetica,sans-serif" font-size="13">Videos</text>
+  <line x1="48" y1="218" x2="72" y2="218" stroke="#1a73e8" stroke-width="3"/>
+  <line x1="48" y1="226" x2="912" y2="226" stroke="#e8eaed"/>
+
+  <text x="48" y="255" fill="#70757a" font-family="Arial,Helvetica,sans-serif" font-size="13">About 62 results (0.28 seconds)</text>
+
+  <rect x="48" y="275" width="560" height="150" rx="8" fill="#fff" stroke="#34d399" stroke-width="2"/>
+  <text x="68" y="310" fill="#202124" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700">Acme Dental</text>
+  <text x="68" y="340" fill="#188038" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="600">4.6 stars Â· 48 Google reviews Â· Open Â· New patients</text>
+  <text x="68" y="368" fill="#5f6368" font-family="Arial,Helvetica,sans-serif" font-size="14">Dentist Â· Kalamazoo, MI Â· Same-day emergency slots</text>
+  <text x="68" y="396" fill="#047857" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="600">Owner replies under 24h Â· photos + FAQ posts weekly</text>
+
+  <rect x="640" y="275" width="272" height="150" rx="8" fill="#ecfdf5" stroke="#6ee7b7"/>
+  <text x="660" y="310" fill="#065f46" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="700">What changed</text>
+  <text x="660" y="340" fill="#047857" font-family="Arial,Helvetica,sans-serif" font-size="13">Answered reviews</text>
+  <text x="660" y="362" fill="#047857" font-family="Arial,Helvetica,sans-serif" font-size="13">Owned YouTube result</text>
+  <text x="660" y="384" fill="#047857" font-family="Arial,Helvetica,sans-serif" font-size="13">Google Business posts</text>
+  <text x="660" y="406" fill="#047857" font-family="Arial,Helvetica,sans-serif" font-size="13">No fake star ratings</text>
+
+  <rect x="48" y="445" width="560" height="72" rx="8" fill="#fff" stroke="#dadce0"/>
+  <text x="68" y="475" fill="#1a0dab" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="600">YouTube Â· Meet the Acme Dental team (owned)</text>
+  <text x="68" y="500" fill="#4d5156" font-family="Arial,Helvetica,sans-serif" font-size="13">Campaign packet Â· storyboard Â· Keyholder Publish gate</text>
+
+  <rect x="628" y="445" width="284" height="72" rx="8" fill="#fff" stroke="#dadce0"/>
+  <text x="648" y="475" fill="#1a0dab" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="600">Google Business post</text>
+  <text x="648" y="500" fill="#4d5156" font-family="Arial,Helvetica,sans-serif" font-size="12">"New-patient FAQ â€” wait times"</text>
+
+  <rect x="48" y="535" width="864" height="80" rx="8" fill="#eff6ff" stroke="#93c5fd"/>
+  <text x="68" y="570" fill="#1e40af" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="700">Deliverable you keep: before screenshot + after plan + reply drafts + calendar</text>
+  <text x="68" y="598" fill="#1e3a8a" font-family="Arial,Helvetica,sans-serif" font-size="13">ArchE drafts and proves. You approve every public post. No fabricated reviews.</text>
 </svg>
