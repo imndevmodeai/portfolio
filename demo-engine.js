@@ -630,7 +630,7 @@
     };
   }
 
-  /** Scenario R — PhD flywheel: agents, experience capture (stars), YouTube harvest, social agent, scoreboard. */
+  /** Scenario R — SKU flywheel: roster + scoreboard first; SERP as evidence only. */
   function buildScenarioR() {
     var owner = "Business owner";
     var archeLabel = "ArchE";
@@ -644,30 +644,30 @@
     var closeLine =
       "Yes — leave the scoreboard and sources up. That is what I would show my team.";
     var narrate =
-      "Reputation flywheel demo. Watch diagnosis, agents assigned, experience capture for authentic stars, YouTube harvest, Social Media Agent, then the scoreboard you keep.";
-    var beforeLine =
-      "Diagnosis first. Here is the BEFORE Google screen — thin rating, unanswered one-stars. This is the starting snapshot we capture for you.";
+      "Reputation flywheel demo. Product first: agent roster and scoreboard. Experience Capture and Social Media Agent as SKUs. Google screens are evidence of the stake — not the whole story.";
     var agentsLine =
-      "We assign agents to your business. Experience Capture creates stars without inventing them. Social Media Agent harvests already-positive experience for brand solidification. YouTube Harvest queues owned proof. Review Desk answers. Auditor blocks fake stars. You approve every Publish.";
+      "Here is what you buy — an agent roster. Experience Capture Agent creates authentic stars without inventing them. Social Media Agent turns already-positive experience into Google Business and social drafts. YouTube Harvest queues owned proof. Review Desk answers. Auditor blocks fake stars. You approve every Publish.";
+    var beforeLine =
+      "Evidence of the stake — not the product. BEFORE Google screen: thin rating, unanswered one-stars. We capture this snapshot so the scoreboard has a starting line.";
     var captureLine =
-      "Experience Capture this week — twelve happy moments detected, four authentic review asks queued, three real stars posted. We refuse to invent praise. We refuse to leave real praise unpublished.";
+      "SKU — Experience Capture Agent. This week: twelve happy moments detected, four authentic review asks queued, three real stars posted. We refuse to invent praise. We refuse to leave real praise unpublished.";
+    var socialLine =
+      "SKU — Social Media Agent. Sole purpose: already-positive experience into Google Business and social drafts for brand solidification and market capture. Composers filled. Your click.";
     var ytLine =
       "YouTube Harvest — seven publishable proof moments from real work, scripts and thumbnails queued. ArchE never auto-uploads. You click Publish.";
-    var socialLine =
-      "Social Media Agent — already-positive experience transformed into Google Business and social drafts. Sole purpose: brand solidification and market capture. Composers filled. Your click.";
     var afterLine =
-      "AFTER plan — stronger presence from owned replies, authentic stars, and content you approved. Demo scrub sample. Human Publish gate stays on.";
+      "Evidence again — AFTER plan from owned replies, authentic stars, and content you approved. Demo scrub sample. Human Publish gate stays on.";
     var scoreLine =
-      "Scoreboard — moments, asks, authentic stars, YouTube clips, social drafts, and presence trajectory. This is how a ten thousand dollar engagement can still be cheap against captured demand.";
+      "Scoreboard is the product spine — moments, asks, authentic stars, YouTube clips, social drafts, presence trajectory. Pricing narrative: diagnostic two thousand five hundred to seven thousand five hundred, then monthly flywheel where one incremental booked job or Maps recovery can exceed the fee.";
     var docsLine =
-      "Documents you keep — reputation snapshot, before-after case study, campaign pack, and review-gated offer. Same packet your team can open later.";
+      "Documents you keep — reputation snapshot, before-after case study, Experience Capture and Social Media offer sheets, campaign pack, review-gated offer. Same packet your team can open later.";
     var planAnswer =
-      "Plain English: we staff a reputation flywheel. Capture goodwill. Ask for authentic stars. Harvest YouTube and social proof. Answer detractors. You approve every public Publish. We never invent star ratings.";
+      "We don’t invent stars. We refuse to waste the positive experiences your business already creates — and we staff agents whose only job is to turn those into Google, YouTube, and social proof you approve.";
     var proofReply =
-      "Sources below reopen every panel — diagnosis, agents, experience capture, YouTube, social agent, scoreboard, documents. Outcomes you can click. Recipes stay private.";
+      "Sources below — roster, Capture SKU, Social Media SKU, scoreboard first. SERP before and after are evidence panels. Outcomes you can click. Recipes stay private.";
 
     return {
-      title: "Reputation — agents + star capture flywheel (what you get)",
+      title: "Reputation — roster + scoreboard (SKUs you buy)",
       beats: [
         {
           role: "narrator",
@@ -684,26 +684,13 @@
         },
         {
           terminal: [
-            termEntry(runLog("SESSION", "run_id=" + DEMO_RUN_ID + "  job=reputation_flywheel_v2  tenant=scrub_local", 0), "trace-session"),
-            termEntry(runLog("MAP", "problem=thin_serp+latent_goodwill  goal=capture_to_public_proof", 1), "trace-map-problem"),
-            termEntry(runLog("INVOKE", "workflow=reputation_flywheel  step=diagnose_presence", 2)),
+            termEntry(runLog("SESSION", "run_id=" + DEMO_RUN_ID + "  job=reputation_flywheel_sku  tenant=scrub_local", 0), "trace-session"),
+            termEntry(runLog("MAP", "problem=latent_goodwill+thin_serp  goal=roster+scoreboard+skus", 1), "trace-map-problem"),
+            termEntry(runLog("INVOKE", "workflow=reputation_flywheel  step=assign_agent_roster", 2)),
           ],
           termDelay: 200,
           pipeline: "plan",
           tools: ["llm", "workflow"],
-        },
-        {
-          role: "arche",
-          label: archeLabel,
-          say: beforeLine,
-          showProof: "trace-google-before",
-          pauseAfter: 800,
-          pipeline: "plan",
-          terminalParallel: [
-            termEntry(runLog("FETCH", "google_serp_before  window=today  status=thin_or_damaged", 3), "trace-google-before"),
-            termEntry(runLog("FETCH", "gbp_reviews  unanswered_detractors=2  sla=open", 4), "trace-auto-reviews"),
-          ],
-          termDelay: 180,
         },
         {
           role: "arche",
@@ -714,17 +701,17 @@
           pipeline: "tools",
           tools: ["llm", "workflow"],
           forecast: {
-            title: "Agent roster — missions",
+            title: "Agent roster — SKUs",
             rows: [
-              { label: "Experience Capture", pct: 90, value: "Stars" },
-              { label: "Social Media Agent", pct: 88, value: "Capture" },
+              { label: "Experience Capture", pct: 90, value: "Stars SKU" },
+              { label: "Social Media Agent", pct: 88, value: "Drafts SKU" },
               { label: "YouTube Harvest", pct: 85, value: "Proof" },
               { label: "Review Desk + Auditor", pct: 92, value: "Gates" },
             ],
             note: "Named agents · one job each · human Publish ON",
           },
           terminal: [
-            termEntry(runLog("ASSIGN", "agents=experience_capture,social_media,youtube_harvest,review_desk,auditor", 5), "trace-agent-roster"),
+            termEntry(runLog("ASSIGN", "skus=experience_capture,social_media  support=youtube_harvest,review_desk,auditor", 3), "trace-agent-roster"),
           ],
           termDelay: 160,
         },
@@ -739,13 +726,26 @@
         {
           role: "arche",
           label: archeLabel,
+          say: beforeLine,
+          showProof: "trace-google-before",
+          pauseAfter: 700,
+          pipeline: "plan",
+          terminalParallel: [
+            termEntry(runLog("EVIDENCE", "google_serp_before  role=stake_proof_not_product", 4), "trace-google-before"),
+            termEntry(runLog("FETCH", "gbp_reviews  unanswered_detractors=2  sla=open", 5), "trace-auto-reviews"),
+          ],
+          termDelay: 160,
+        },
+        {
+          role: "arche",
+          label: archeLabel,
           say: captureLine,
           showProof: "trace-experience-capture",
           pauseAfter: 900,
           pipeline: "tools",
           tools: ["live", "vetting"],
           terminalParallel: [
-            termEntry(runLog("CAPTURE", "happy_moments=12  review_asks_queued=4  authentic_stars=3", 6), "trace-experience-capture"),
+            termEntry(runLog("SKU", "experience_capture  happy_moments=12  asks=4  authentic_stars=3", 6), "trace-experience-capture"),
             termEntry(runLog("POLICY", "fake_stars=BLOCKED  ask_requires_human_gate=YES", 7), "trace-vetting"),
           ],
           termDelay: 160,
@@ -761,26 +761,26 @@
         {
           role: "arche",
           label: archeLabel,
-          say: ytLine,
-          showProof: "trace-youtube-campaign",
-          pauseAfter: 750,
+          say: socialLine,
+          showProof: "trace-social-campaign",
+          pauseAfter: 800,
           pipeline: "tools",
-          tools: ["research"],
+          tools: ["research", "compress"],
           terminal: [
-            termEntry(runLog("HARVEST", "youtube_clips=7  publish=human_gate  auto_upload=NEVER", 8), "trace-youtube-campaign"),
+            termEntry(runLog("SKU", "social_media_agent  drafts=18  gbp=ON  purpose=brand_solidification", 8), "trace-social-campaign"),
           ],
           termDelay: 150,
         },
         {
           role: "arche",
           label: archeLabel,
-          say: socialLine,
-          showProof: "trace-social-campaign",
-          pauseAfter: 750,
+          say: ytLine,
+          showProof: "trace-youtube-campaign",
+          pauseAfter: 700,
           pipeline: "tools",
-          tools: ["research", "compress"],
+          tools: ["research"],
           terminal: [
-            termEntry(runLog("SOCIAL", "agent=social_media  drafts=18  gbp=ON  purpose=brand_solidification", 9), "trace-social-campaign"),
+            termEntry(runLog("HARVEST", "youtube_clips=7  publish=human_gate  auto_upload=NEVER", 9), "trace-youtube-campaign"),
           ],
           termDelay: 150,
         },
@@ -789,20 +789,20 @@
           label: archeLabel,
           say: afterLine,
           showProof: "trace-google-after",
-          pauseAfter: 700,
+          pauseAfter: 650,
           pipeline: "vet",
           tools: ["vetting"],
           terminal: [
-            termEntry(runLog("PLAN", "serp_after_target  owned_listing=ON  authentic_stars=compounding", 10), "trace-google-after"),
+            termEntry(runLog("EVIDENCE", "serp_after_plan  owned_listing=ON  role=trajectory_proof", 10), "trace-google-after"),
           ],
-          termDelay: 150,
+          termDelay: 140,
         },
         {
           role: "arche",
           label: archeLabel,
           say: scoreLine,
           showProof: "trace-reputation-scoreboard",
-          pauseAfter: 900,
+          pauseAfter: 950,
           pipeline: "vet",
           tools: ["vetting", "live"],
           forecast: {
@@ -814,11 +814,11 @@
               { label: "YouTube queued", pct: 75, value: "7" },
               { label: "Social drafts", pct: 85, value: "18" },
             ],
-            note: "Illustrative scrub — sell captured demand, not posts/week.",
+            note: "Diagnostic $2.5–7.5k → monthly; one job can exceed fee.",
           },
           terminal: [
             termEntry(runLog("SCORE", "moments=12  asks=4  stars=3  yt=7  social=18  gate=human_publish", 11), "trace-reputation-scoreboard"),
-            termEntry(runLog("VETTING", "fake_stars=BLOCKED  publish_gate=REQUIRED  conf=0.91", 12), "trace-vetting"),
+            termEntry(runLog("PRICE", "diagnostic=2500-7500  monthly=one_job_can_exceed_fee", 12), "trace-vetting"),
           ],
           termDelay: 160,
         },
@@ -830,7 +830,7 @@
           pauseAfter: 650,
           pipeline: "vet",
           terminal: [
-            termEntry(runLog("DOC", "packet=snapshot+case_study+campaigns+offer  queue=owner_review", 13), "trace-reputation-docs"),
+            termEntry(runLog("DOC", "packet=snapshot+skus+case_study+campaigns+offer  queue=owner_review", 13), "trace-reputation-docs"),
           ],
           termDelay: 140,
         },
@@ -856,24 +856,24 @@
           showProof: "trace-reputation-scoreboard",
           pipeline: "answer",
           sources: [
-            { label: "Google diagnosis — BEFORE", traceAnchor: "trace-google-before" },
-            { label: "Agents assigned", traceAnchor: "trace-agent-roster" },
-            { label: "Experience Capture (stars)", traceAnchor: "trace-experience-capture" },
-            { label: "YouTube Harvest", traceAnchor: "trace-youtube-campaign" },
-            { label: "Social Media Agent", traceAnchor: "trace-social-campaign" },
-            { label: "AFTER plan", traceAnchor: "trace-google-after" },
+            { label: "Agent roster (product)", traceAnchor: "trace-agent-roster" },
+            { label: "Experience Capture SKU", traceAnchor: "trace-experience-capture" },
+            { label: "Social Media Agent SKU", traceAnchor: "trace-social-campaign" },
             { label: "Reputation scoreboard", traceAnchor: "trace-reputation-scoreboard" },
-            { label: "Documents you receive", traceAnchor: "trace-reputation-docs" },
+            { label: "YouTube Harvest", traceAnchor: "trace-youtube-campaign" },
+            { label: "SERP evidence — BEFORE", traceAnchor: "trace-google-before" },
+            { label: "SERP evidence — AFTER plan", traceAnchor: "trace-google-after" },
+            { label: "Documents + offer sheets", traceAnchor: "trace-reputation-docs" },
           ],
         },
         {
-          timeline: "T+0 diagnose  ·  T+0 agents  ·  T+2d capture/harvest  ·  T+7d first human Publish",
+          timeline: "T+0 roster  ·  T+0 scoreboard baseline  ·  T+2d Capture/Social SKUs  ·  T+7d first human Publish",
           pipeline: "answer",
         },
         {
           terminal: [
-            termEntry(runLog("ANSWER", "payout=agents+stars+yt+social+scoreboard+docs  human_gate=ON  conf=0.91", 14), "trace-answer"),
-            termEntry(runLog("SESSION", "complete  job=reputation_flywheel_v2  run_id=" + DEMO_RUN_ID, 15)),
+            termEntry(runLog("ANSWER", "payout=roster+skus+scoreboard  serp=evidence  human_gate=ON  conf=0.92", 14), "trace-answer"),
+            termEntry(runLog("SESSION", "complete  job=reputation_flywheel_sku  run_id=" + DEMO_RUN_ID, 15)),
           ],
           termDelay: 160,
           pipeline: "answer",
@@ -3002,7 +3002,7 @@
     },
     {
       role: "narrator",
-      say: "Reputation flywheel demo. Watch diagnosis, agents assigned, experience capture for authentic stars, YouTube harvest, Social Media Agent, then the scoreboard you keep.",
+      say: "Reputation flywheel demo. Product first: agent roster and scoreboard. Experience Capture and Social Media Agent as SKUs. Google screens are evidence of the stake — not the whole story.",
     },
     {
       role: "decision_guest",
@@ -3010,11 +3010,7 @@
     },
     {
       role: "arche",
-      say: "Diagnosis first. Here is the BEFORE Google screen — thin rating, unanswered one-stars. This is the starting snapshot we capture for you.",
-    },
-    {
-      role: "arche",
-      say: "We assign agents to your business. Experience Capture creates stars without inventing them. Social Media Agent harvests already-positive experience for brand solidification. YouTube Harvest queues owned proof. Review Desk answers. Auditor blocks fake stars. You approve every Publish.",
+      say: "Here is what you buy — an agent roster. Experience Capture Agent creates authentic stars without inventing them. Social Media Agent turns already-positive experience into Google Business and social drafts. YouTube Harvest queues owned proof. Review Desk answers. Auditor blocks fake stars. You approve every Publish.",
     },
     {
       role: "decision_guest",
@@ -3022,7 +3018,11 @@
     },
     {
       role: "arche",
-      say: "Experience Capture this week — twelve happy moments detected, four authentic review asks queued, three real stars posted. We refuse to invent praise. We refuse to leave real praise unpublished.",
+      say: "Evidence of the stake — not the product. BEFORE Google screen: thin rating, unanswered one-stars. We capture this snapshot so the scoreboard has a starting line.",
+    },
+    {
+      role: "arche",
+      say: "SKU — Experience Capture Agent. This week: twelve happy moments detected, four authentic review asks queued, three real stars posted. We refuse to invent praise. We refuse to leave real praise unpublished.",
     },
     {
       role: "decision_guest",
@@ -3030,27 +3030,27 @@
     },
     {
       role: "arche",
+      say: "SKU — Social Media Agent. Sole purpose: already-positive experience into Google Business and social drafts for brand solidification and market capture. Composers filled. Your click.",
+    },
+    {
+      role: "arche",
       say: "YouTube Harvest — seven publishable proof moments from real work, scripts and thumbnails queued. ArchE never auto-uploads. You click Publish.",
     },
     {
       role: "arche",
-      say: "Social Media Agent — already-positive experience transformed into Google Business and social drafts. Sole purpose: brand solidification and market capture. Composers filled. Your click.",
+      say: "Evidence again — AFTER plan from owned replies, authentic stars, and content you approved. Demo scrub sample. Human Publish gate stays on.",
     },
     {
       role: "arche",
-      say: "AFTER plan — stronger presence from owned replies, authentic stars, and content you approved. Demo scrub sample. Human Publish gate stays on.",
+      say: "Scoreboard is the product spine — moments, asks, authentic stars, YouTube clips, social drafts, presence trajectory. Pricing narrative: diagnostic two thousand five hundred to seven thousand five hundred, then monthly flywheel where one incremental booked job or Maps recovery can exceed the fee.",
     },
     {
       role: "arche",
-      say: "Scoreboard — moments, asks, authentic stars, YouTube clips, social drafts, and presence trajectory. This is how a ten thousand dollar engagement can still be cheap against captured demand.",
+      say: "Documents you keep — reputation snapshot, before-after case study, Experience Capture and Social Media offer sheets, campaign pack, review-gated offer. Same packet your team can open later.",
     },
     {
       role: "arche",
-      say: "Documents you keep — reputation snapshot, before-after case study, campaign pack, and review-gated offer. Same packet your team can open later.",
-    },
-    {
-      role: "arche",
-      say: "Plain English: we staff a reputation flywheel. Capture goodwill. Ask for authentic stars. Harvest YouTube and social proof. Answer detractors. You approve every public Publish. We never invent star ratings.",
+      say: "We don’t invent stars. We refuse to waste the positive experiences your business already creates — and we staff agents whose only job is to turn those into Google, YouTube, and social proof you approve.",
     },
     {
       role: "decision_guest",
@@ -3058,7 +3058,7 @@
     },
     {
       role: "arche",
-      say: "Sources below reopen every panel — diagnosis, agents, experience capture, YouTube, social agent, scoreboard, documents. Outcomes you can click. Recipes stay private.",
+      say: "Sources below — roster, Capture SKU, Social Media SKU, scoreboard first. SERP before and after are evidence panels. Outcomes you can click. Recipes stay private.",
     },
   ];
 
@@ -4746,24 +4746,24 @@
     var steps = [
       {
         role: "narrator",
-        sel: "#reputation-storyboard",
-        banner: "1 · These pictures = the flywheel (agents + stars + scoreboard)",
-        say: "Start here. These pictures show the reputation flywheel — diagnosis, agents, star capture, YouTube harvest, social agent, and the scoreboard.",
-        wait: 4200,
+        sel: "#sku-offers",
+        banner: "1 · SKUs you buy: Capture + Social Media Agent",
+        say: "Start with the offer cards. Experience Capture creates authentic stars. Social Media Agent turns praise into drafts you approve. Price ladder sits under the cards.",
+        wait: 4500,
       },
       {
         role: "narrator",
-        sel: "#demo-theater-heading",
-        banner: "2 · Live demos sit right under the pictures",
-        say: "Live demos are right under those pictures — not buried halfway down the page.",
-        wait: 2800,
+        sel: "#reputation-storyboard",
+        banner: "2 · Roster + scoreboard first · SERP = evidence",
+        say: "Pictures next — agent roster and scoreboard are the product. Google screens are labeled evidence, not the whole story.",
+        wait: 4000,
       },
       {
         role: "narrator",
         sel: "#demo-card-r",
-        banner: "3 · Click the blue card: Reputation flywheel",
-        say: "Click the blue Reputation flywheel card — agents, authentic stars, YouTube harvest, scoreboard. Orange highlights mark what to click.",
-        wait: 4500,
+        banner: "3 · Click blue card: Reputation flywheel",
+        say: "Click the blue Reputation flywheel card for the live walkthrough — roster, SKUs, scoreboard, Troy pitch line at the close.",
+        wait: 4200,
       },
     ];
     var chain = Promise.resolve();

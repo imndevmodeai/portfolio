@@ -377,11 +377,40 @@
       padding: 0.45rem 0.65rem; font-size: 0.78rem; color: #a1a1aa; line-height: 1.35;
     }
     .storyboard-wide { grid-column: 1 / -1; }
+    .storyboard-evidence figcaption::before {
+      content: "Evidence · ";
+      color: #f97316;
+      font-weight: 600;
+    }
+    .sku-section { margin: 1.25rem 0 1.5rem; }
+    .troy-pitch {
+      margin: 0.5rem 0 1rem; padding: 0.85rem 1rem;
+      border-left: 3px solid #22d3ee; background: rgba(34,211,238,0.08);
+      border-radius: 0 10px 10px 0; font-size: 1.02rem; line-height: 1.45; color: #e4e4e7;
+    }
+    .sku-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-top: 0.75rem;
+    }
+    .sku-card {
+      margin: 0; padding: 1rem 1.1rem; border: 1px solid #3f3f46; border-radius: 12px;
+      background: linear-gradient(165deg, rgba(14,116,144,0.18), rgba(0,0,0,0.35));
+    }
+    .sku-card h3 { margin: 0 0 0.4rem; font-size: 1.05rem; color: #67e8f9; }
+    .sku-card p { margin: 0.35rem 0; font-size: 0.88rem; color: #d4d4d8; line-height: 1.4; }
+    .sku-card .sku-meta { font-size: 0.78rem; color: #a1a1aa; margin-top: 0.65rem; }
+    .price-ladder {
+      margin: 1rem 0 0; padding: 0.85rem 1rem; border: 1px dashed rgba(249,115,22,0.45);
+      border-radius: 10px; font-size: 0.88rem; color: #d4d4d8; line-height: 1.45;
+    }
+    .price-ladder strong { color: #fdba74; }
     .featured-card {
       border-color: rgba(34,211,238,0.65) !important;
       box-shadow: 0 0 0 1px rgba(34,211,238,0.25), 0 12px 32px rgba(14,116,144,0.25);
     }
     .featured-card h3 { color: #67e8f9; }
+    @media (max-width: 800px) {
+      .sku-grid { grid-template-columns: 1fr; }
+    }
     .access-gate-compact {
       margin: 0.75rem 0; padding: 0.55rem 0.75rem; border: 1px dashed #3f3f46; border-radius: 8px;
       font-size: 0.82rem; color: #a1a1aa;
@@ -400,7 +429,7 @@
       <a href="sms:+12698883503">SMS</a> ·
       <a href="mailto:imndevmodeai@gmail.com">email</a>
     </p>
-    <p class="layman-lead">Not a ChatGPT wrapper. We show <strong>before → after</strong> on Google, reviews, YouTube/social, and the documents you receive — then you can click a live demo.</p>
+    <p class="layman-lead">Not a ChatGPT wrapper. We staff <strong>named agents</strong> (Experience Capture · Social Media) and a <strong>scoreboard</strong> — Google SERP screens are evidence, not the whole product.</p>
   </header>
 
   <div id="guided-tour-bar" class="guided-tour-bar" role="region" aria-label="15-second tour">
@@ -411,37 +440,61 @@
   </div>
   <div id="tour-highlight-banner" class="tour-highlight-banner hidden" aria-live="polite"></div>
 
+  <section id="sku-offers" class="sku-section" aria-label="Reputation agent SKUs">
+    <h2>First-class agents (what you buy)</h2>
+    <blockquote class="troy-pitch" cite="https://imndevmodeai.github.io/portfolio/">
+      We don’t invent stars. We refuse to waste the positive experiences your business already creates —
+      and we staff agents whose only job is to turn those into Google, YouTube, and social proof you approve.
+    </blockquote>
+    <div class="sku-grid">
+      <article class="sku-card" id="sku-experience-capture">
+        <h3>Experience Capture Agent</h3>
+        <p><strong>Job:</strong> create authentic Google stars without inventing them — catch praise that already happened, queue the review ask, attribute the star on the scoreboard.</p>
+        <p class="sku-meta">Offer sheet · <a href="offers/experience-capture-agent.md">experience-capture-agent.md</a> · Auditor blocks fake stars · human Publish ON</p>
+      </article>
+      <article class="sku-card" id="sku-social-media">
+        <h3>Social Media Agent</h3>
+        <p><strong>Sole purpose:</strong> already-positive experience → Google Business / social drafts for brand solidification and market capture. Composers filled; you click Publish.</p>
+        <p class="sku-meta">Offer sheet · <a href="offers/social-media-agent.md">social-media-agent.md</a> · pairs with YouTube Harvest · never invents testimonials</p>
+      </article>
+    </div>
+    <div class="price-ladder" id="price-narrative">
+      <strong>Price narrative:</strong> diagnostic / setup often <strong>$2,500–$7,500</strong> after discovery → monthly flywheel
+      priced so <strong>one incremental booked job or Maps recovery</strong> can exceed the fee.
+      Not a ranking or revenue guarantee. Full ladder: <a href="offers/reputation-flywheel-pricing.md">reputation-flywheel-pricing.md</a>.
+    </div>
+  </section>
+
   <section id="reputation-storyboard" class="reputation-storyboard" aria-label="Reputation flywheel payout">
-    <h2>Reputation management — the flywheel (demo scrubbed)</h2>
+    <h2>Agent roster + scoreboard (SERP = evidence)</h2>
     <p class="disclaimer" style="margin:0.35rem 0 0.75rem">
-      <strong>What it means in plain English:</strong> we staff agents that turn goodwill you already earned into
-      authentic Google stars, YouTube proof, and social/GBP drafts — then you approve every public Publish.
-      No fake star ratings. Outcomes you can click; recipes stay private.
+      <strong>Product story:</strong> named agents and a measurable scoreboard. Google before/after screens prove the stake —
+      they are not the whole offer. No fake star ratings. Outcomes you can click; recipes stay private.
     </p>
     <div class="storyboard-grid">
       <figure>
-        <img src="assets/proofs/google-search-before.svg?v=r2-20260731a" width="900" height="560" alt="Google search before: low rating and unanswered reviews" loading="eager" />
-        <figcaption>1 · Diagnosis — thin Google presence or unanswered one-stars</figcaption>
+        <img src="assets/proofs/agent-roster.svg?v=sku-20260731b" width="900" height="560" alt="Agents assigned to your business" loading="eager" />
+        <figcaption>1 · Agent roster — Capture, Social, YouTube, Review Desk, Auditor</figcaption>
       </figure>
       <figure>
-        <img src="assets/proofs/agent-roster.svg?v=r2-20260731a" width="900" height="560" alt="Agents assigned to your business" loading="eager" />
-        <figcaption>2 · Agents assigned — Capture, Social, YouTube, Review Desk, Auditor</figcaption>
+        <img src="assets/proofs/reputation-scoreboard.svg?v=sku-20260731b" width="900" height="560" alt="Reputation scoreboard" loading="eager" />
+        <figcaption>2 · Scoreboard — moments → asks → stars → content → presence</figcaption>
       </figure>
       <figure>
-        <img src="assets/proofs/experience-capture.svg?v=r2-20260731a" width="900" height="560" alt="Experience Capture creates authentic stars" loading="lazy" />
-        <figcaption>3 · Experience Capture — create stars without inventing them</figcaption>
+        <img src="assets/proofs/experience-capture.svg?v=sku-20260731b" width="900" height="560" alt="Experience Capture creates authentic stars" loading="lazy" />
+        <figcaption>3 · SKU · Experience Capture — authentic stars</figcaption>
       </figure>
       <figure>
-        <img src="assets/proofs/youtube-campaign.svg?v=r2-20260731a" width="900" height="560" alt="YouTube Harvest queue" loading="lazy" />
-        <figcaption>4 · YouTube Harvest — proof moments queued for your Publish</figcaption>
+        <img src="assets/proofs/social-campaign.svg?v=sku-20260731b" width="900" height="560" alt="Social Media Agent drafts" loading="lazy" />
+        <figcaption>4 · SKU · Social Media Agent — brand drafts</figcaption>
       </figure>
       <figure>
-        <img src="assets/proofs/social-campaign.svg?v=r2-20260731a" width="900" height="560" alt="Social Media Agent drafts" loading="lazy" />
-        <figcaption>5 · Social Media Agent — positive experience → brand drafts</figcaption>
+        <img src="assets/proofs/youtube-campaign.svg?v=sku-20260731b" width="900" height="560" alt="YouTube Harvest queue" loading="lazy" />
+        <figcaption>5 · YouTube Harvest — proof moments for your Publish</figcaption>
       </figure>
-      <figure class="storyboard-wide">
-        <img src="assets/proofs/reputation-scoreboard.svg?v=r2-20260731a" width="900" height="560" alt="Reputation scoreboard" loading="lazy" />
-        <figcaption>6 · Scoreboard — moments → asks → stars → content → presence</figcaption>
+      <figure class="storyboard-evidence">
+        <img src="assets/proofs/google-search-before.svg?v=sku-20260731b" width="900" height="560" alt="Google search before: thin presence" loading="lazy" />
+        <figcaption>SERP before — stake proof (not the product)</figcaption>
       </figure>
     </div>
   </section>
@@ -464,7 +517,7 @@
     <div class="demo-cards">
       <div class="demo-card featured-card" data-demo="r" role="button" tabindex="0" id="demo-card-r">
         <h3>R. Reputation flywheel</h3>
-        <p>Agents · authentic stars · YouTube harvest · scoreboard.</p>
+        <p>Roster + scoreboard · Capture &amp; Social SKUs · SERP as evidence.</p>
       </div>
       <div class="demo-card" data-demo="a" role="button" tabindex="0"><h3>A. One source of truth</h3><p>CFO asks ArchE · live billing proof.</p></div>
       <div class="demo-card" data-demo="b" role="button" tabindex="0"><h3>B. Policy in 18 months</h3><p>HR simulation · plain-language answer.</p></div>
@@ -689,7 +742,7 @@
     <tr><td><a href="https://github.com/imndevmodeai/portfolio/blob/main/case-studies/03-knowledge-base-rag-assistant.md" style="color:var(--accent2)">03 — Knowledge-base RAG</a></td><td>Indexed content, not generic LLM advice</td></tr>
     <tr><td><a href="https://github.com/imndevmodeai/portfolio/blob/main/case-studies/04-openai-automation-governance.md" style="color:var(--accent2)">04 — OpenAI automation governance</a></td><td>Vetting, confidence, audit traces</td></tr>
     <tr><td><a href="https://github.com/imndevmodeai/portfolio/blob/main/case-studies/05-multi-channel-outreach-orchestration.md" style="color:var(--accent2)">05 — Multi-channel outreach orchestration</a></td><td>Parallel CDP channels · Post Auth Gate · proof-before-claim</td></tr>
-    <tr><td><a href="https://github.com/imndevmodeai/portfolio/blob/main/case-studies/06-evidence-backed-reputation-flywheel.md" style="color:var(--accent2)">06 — Evidence-backed reputation flywheel</a></td><td>Claim ledger · disclosed AI roles · review-only publish gates</td></tr>
+    <tr><td><a href="https://github.com/imndevmodeai/portfolio/blob/main/case-studies/06-evidence-backed-reputation-flywheel.md" style="color:var(--accent2)">06 — Evidence-backed reputation flywheel</a></td><td>Capture + Social SKUs · roster/scoreboard · $2.5–7.5k diagnostic ladder</td></tr>
     <tr><td><a href="https://imndevmodeai.github.io/portfolio/work-samples.html" style="color:var(--accent2)">Hub — work samples (browser)</a></td><td>One page, all six studies</td></tr>
   </table>
   <p style="font-size:0.8rem">Live demo: <a href="https://imndevmodeai.github.io/portfolio/" style="color:var(--accent2)">imndevmodeai.github.io/portfolio</a> · unlock <strong>RESONANT-VIEW</strong> for custom brief routing.</p>
@@ -713,6 +766,6 @@
   }
 })();
 </script>
-<script src="demo-engine.js?v=scenario-r2-20260731a"></script>
+<script src="demo-engine.js?v=sku-roster-20260731b"></script>
 </body>
 </html>
