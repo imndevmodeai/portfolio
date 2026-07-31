@@ -2543,61 +2543,11 @@
   }
 
   /** Bust CDN / Pages cache so replaced SVGs actually load (never fall back to default.svg). */
-  var PROOF_ASSET_V = "svg-xml-fix-20260731e";
-  /** Monotonic token so aborted/stale img loads cannot overwrite a newer proof with default.svg. */
-  var proofImgLoadGen = 0;
-
-  /** Scenario R (+ related) proof stems — never silent-swap these to EB-DEMO default.svg. */
-  var PROTECTED_PROOF_STEMS = [
-    "reputation-scoreboard",
-    "agent-roster",
-    "experience-capture",
-    "google-search-before",
-    "google-search-after",
-    "youtube-campaign",
-    "social-campaign",
-    "reputation-docs",
-  ];
-
-  function proofSrcStem(src) {
-    if (!src) return "";
-    var path = String(src).split("?")[0];
-    var base = path.split("/").pop() || "";
-    return base.replace(/\.svg$/i, "");
-  }
-
-  function isProtectedProofSrc(src) {
-    var stem = proofSrcStem(src);
-    if (!stem || stem === "default") return false;
-    for (var i = 0; i < PROTECTED_PROOF_STEMS.length; i++) {
-      var needle = PROTECTED_PROOF_STEMS[i];
-      if (stem === needle || stem.indexOf(needle) === 0) return true;
-    }
-    return false;
-  }
-
-  function withProofCacheBust(src, extraToken) {
+  var PROOF_ASSET_V = "svg-xml-fix-20260731d";
+  function withProofCacheBust(src) {
     if (!src || src.indexOf("data:") === 0) return src;
-    var bust = PROOF_ASSET_V + (extraToken ? "-" + extraToken : "");
-    if (src.indexOf("?") >= 0) {
-      // Replace prior v= or append retry token so retries are not no-ops.
-      if (/[?&]v=/.test(src)) {
-        return src.replace(/([?&]v=)[^&]*/, "$1" + bust);
-      }
-      return src + "&v=" + bust;
-    }
-    return src + "?v=" + bust;
-  }
-
-  function setProofLoadErrorCaption(citeEl, visual, detail) {
-    if (!citeEl) return;
-    var title = (visual && visual.title) || "Proof visual";
-    citeEl.textContent =
-      title +
-      " — visual failed to load (" +
-      (detail || "network/decode") +
-      "). Title above is correct; try hard-refresh.";
-    citeEl.style.display = "block";
+    if (src.indexOf("?") >= 0) return src;
+    return src + "?v=" + PROOF_ASSET_V;
   }
 
   function collectTerminalProofLines(source, visual) {
@@ -2751,62 +2701,6 @@
     return row;
   }
 
-  function bindProofImage(img, visual, citeEl) {
-    proofImgLoadGen += 1;
-    var gen = proofImgLoadGen;
-    var primarySrc = visual.src || "";
-    var attemptedRetry = false;
-    var protectedAsset = isProtectedProofSrc(primarySrc);
-
-    // Clear prior handlers before touching src so aborted loads cannot call stale onerror.
-    img.onload = null;
-    img.onerror = null;
-
-    function applySrc(src) {
-      if (gen !== proofImgLoadGen) return;
-      img.src = src;
-    }
-
-    img.onload = function () {
-      if (gen !== proofImgLoadGen) return;
-      img.dataset.proofLoadOk = "1";
-    };
-
-    img.onerror = function () {
-      if (gen !== proofImgLoadGen) return;
-      // Aborted / superseded navigations: ignore if a newer popup already owns the img.
-      if (!primarySrc || primarySrc.indexOf("default.svg") >= 0) return;
-
-      if (!attemptedRetry) {
-        attemptedRetry = true;
-        var retrySrc = withProofCacheBust(
-          primarySrc.split("?")[0],
-          "retry" + Date.now()
-        );
-        applySrc(retrySrc);
-        return;
-      }
-
-      img.onerror = null;
-      if (protectedAsset) {
-        // Never silent-swap Scenario R / known demos to EB-DEMO default.svg.
-        img.removeAttribute("src");
-        img.alt = (visual.title || "Proof") + " (failed to load)";
-        img.dataset.proofLoadOk = "0";
-        setProofLoadErrorCaption(citeEl, visual, proofSrcStem(primarySrc) + " missing/corrupt");
-        return;
-      }
-
-      img.src = withProofCacheBust("assets/proofs/default.svg");
-      setProofLoadErrorCaption(citeEl, visual, "fell back to default export");
-    };
-
-    img.style.display = "block";
-    img.alt = visual.title || "Evidence document";
-    img.dataset.proofLoadOk = "";
-    applySrc(primarySrc || withProofCacheBust("assets/proofs/default.svg"));
-  }
-
   function showProofPopup(source) {
     var visual = resolveProofVisual(source);
     var pop = $("#proof-popup");
@@ -2831,11 +2725,6 @@
       card.classList.toggle("proof-mode-terminal", !useDocument);
     }
 
-    // Invalidate any in-flight img handlers from the previous proof (Scenario R swaps fast).
-    proofImgLoadGen += 1;
-    img.onload = null;
-    img.onerror = null;
-
     if (useDocument) {
       if (termWrap) termWrap.hidden = true;
       if (visual.evidenceUrl && frame && evidenceEmbedAllowed(visual.evidenceUrl)) {
@@ -2848,7 +2737,13 @@
           frame.style.display = "none";
           frame.removeAttribute("src");
         }
-        bindProofImage(img, visual, citeEl);
+        img.style.display = "block";
+        img.onerror = function () {
+          img.onerror = null;
+          img.src = "assets/proofs/default.svg";
+        };
+        img.src = visual.src || "assets/proofs/default.svg";
+        img.alt = visual.title;
       }
     } else {
       if (frame) {
@@ -2877,12 +2772,6 @@
   function hideProofPopup() {
     var pop = $("#proof-popup");
     if (!pop) return;
-    proofImgLoadGen += 1;
-    var img = $("#proof-popup-img");
-    if (img) {
-      img.onload = null;
-      img.onerror = null;
-    }
     var termWrap = $("#proof-popup-terminal");
     if (termWrap) termWrap.hidden = true;
     var frame = $("#proof-popup-frame");
