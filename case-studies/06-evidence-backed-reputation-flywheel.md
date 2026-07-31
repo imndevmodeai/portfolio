@@ -2,7 +2,7 @@
 
 > First-party material. Virtual-team role names are **disclosed AI functions**, not human employees. Campaign artifacts default to **review-only** — nothing publishes externally without Keyholder approval.
 
-## Troy pitch line (canonical)
+## Customer offer line (canonical)
 > We don’t invent stars. We refuse to waste the positive experiences your business already creates — and we staff agents whose only job is to turn those into Google, YouTube, and social proof you approve.
 
 ## First-class SKUs

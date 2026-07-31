@@ -6,7 +6,7 @@
 2. **Monthly flywheel** — ongoing Experience Capture + Social Media Agent + YouTube Harvest + Review Desk, human Publish on.  
    Priced where **one incremental booked job or Maps recovery** can exceed the fee.
 
-## Troy-safe pitch line (approved wording)
+## Customer offer line (approved wording)
 > We don’t invent stars. We refuse to waste the positive experiences your business already creates — and we staff agents whose only job is to turn those into Google, YouTube, and social proof you approve.
 
 ## Guardrails

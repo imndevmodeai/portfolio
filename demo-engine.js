@@ -3177,6 +3177,18 @@
       role: "arche",
       say: "Sources below — roster, Capture SKU, Social Media SKU, scoreboard first. SERP before and after are evidence panels. Outcomes you can click. Recipes stay private.",
     },
+    {
+      role: "narrator",
+      say: "ArchE is the orchestration system — intake, plan, tools, vetting, answer. Named agents and scoreboards are outcomes of that stack. This is not a one-feature product.",
+    },
+    {
+      role: "narrator",
+      say: "Click any card to open a live walkthrough. Conversation on the right, tool trace on the left. Start wherever you like.",
+    },
+    {
+      role: "narrator",
+      say: "One concrete example — the blue Reputation flywheel card. Roster, scoreboard, and proof you approve. Same spine as the other demos.",
+    },
   ];
 
   function buildScenarioE(userQuery) {
@@ -4852,7 +4864,7 @@
   }
 
   /**
-   * ~12–15s orange-highlight tour: storyboard → featured demo → how to open.
+   * ~12–15s orange-highlight tour: architecture → how to open demos → one example.
    * Skip persists in sessionStorage so return visitors are not forced.
    */
   function runGuidedTour() {
@@ -4863,23 +4875,23 @@
     var steps = [
       {
         role: "narrator",
-        sel: "#sku-offers",
-        banner: "1 · SKUs you buy: Capture + Social Media Agent",
-        say: "Start with the offer cards. Experience Capture creates authentic stars. Social Media Agent turns praise into drafts you approve. Price ladder sits under the cards.",
-        wait: 4500,
+        sel: "#system-architecture",
+        banner: "1 · What this system is",
+        say: "ArchE is the orchestration system — intake, plan, tools, vetting, answer. Named agents and scoreboards are outcomes of that stack. This is not a one-feature product.",
+        wait: 4800,
       },
       {
         role: "narrator",
-        sel: "#reputation-storyboard",
-        banner: "2 · Roster + scoreboard first · SERP = evidence",
-        say: "Pictures next — agent roster and scoreboard are the product. Google screens are labeled evidence, not the whole story.",
+        sel: "#demo-chooser",
+        banner: "2 · How to open a walkthrough",
+        say: "Click any card to open a live walkthrough. Conversation on the right, tool trace on the left. Start wherever you like.",
         wait: 4000,
       },
       {
         role: "narrator",
         sel: "#demo-card-r",
-        banner: "3 · Click blue card: Reputation flywheel",
-        say: "Click the blue Reputation flywheel card for the live walkthrough — roster, SKUs, scoreboard, Troy pitch line at the close.",
+        banner: "3 · Example: Reputation flywheel",
+        say: "One concrete example — the blue Reputation flywheel card. Roster, scoreboard, and proof you approve. Same spine as the other demos.",
         wait: 4200,
       },
     ];

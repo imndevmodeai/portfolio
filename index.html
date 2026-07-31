@@ -383,11 +383,19 @@
       font-weight: 600;
     }
     .sku-section { margin: 1.25rem 0 1.5rem; }
-    .troy-pitch {
+    .offer-pitch {
       margin: 0.5rem 0 1rem; padding: 0.85rem 1rem;
       border-left: 3px solid #22d3ee; background: rgba(34,211,238,0.08);
       border-radius: 0 10px 10px 0; font-size: 1.02rem; line-height: 1.45; color: #e4e4e7;
     }
+    .system-architecture {
+      margin: 1rem 0 1.35rem; padding: 1rem 1.1rem 1.15rem;
+      border: 1px solid rgba(34,211,238,0.35); border-radius: 14px;
+      background: linear-gradient(165deg, rgba(14,116,144,0.16), rgba(0,0,0,0.32));
+    }
+    .system-architecture h2 { margin: 0 0 0.45rem; font-size: 1.2rem; color: #67e8f9; }
+    .system-architecture p { margin: 0.35rem 0; color: #d4d4d8; line-height: 1.45; font-size: 0.95rem; }
+    .system-architecture .hero-visual { margin: 0.85rem 0 0; }
     .sku-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-top: 0.75rem;
     }
@@ -429,20 +437,30 @@
       <a href="sms:+12698883503">SMS</a> ·
       <a href="mailto:imndevmodeai@gmail.com">email</a>
     </p>
-    <p class="layman-lead">Not a ChatGPT wrapper. We staff <strong>named agents</strong> (Experience Capture · Social Media) and a <strong>scoreboard</strong> — Google SERP screens are evidence, not the whole product.</p>
+    <p class="layman-lead">Not a ChatGPT wrapper. <strong>ArchE</strong> is an orchestration system — intake, plan, tools, vetting, answer — with live demos you can click. Named agents and scoreboards are outcomes of that stack, not the whole story.</p>
   </header>
 
   <div id="guided-tour-bar" class="guided-tour-bar" role="region" aria-label="15-second tour">
     <strong>First visit?</strong>
-    <span id="guided-tour-copy">15-second tour: orange highlights show where to click.</span>
+    <span id="guided-tour-copy">15-second tour: system → how to open a demo → one example.</span>
     <button type="button" class="btn" id="guided-tour-start">Play tour</button>
     <button type="button" class="btn secondary" id="guided-tour-skip">Skip</button>
   </div>
   <div id="tour-highlight-banner" class="tour-highlight-banner hidden" aria-live="polite"></div>
 
-  <section id="sku-offers" class="sku-section" aria-label="Reputation agent SKUs">
-    <h2>First-class agents (what you buy)</h2>
-    <blockquote class="troy-pitch" cite="https://imndevmodeai.github.io/portfolio/">
+  <section id="system-architecture" class="system-architecture" aria-label="What this system is">
+    <h2>What this system is</h2>
+    <p><strong>ArchE</strong> runs tool-using workflows: intake → plan → tools → vetting → answer. <strong>ResonantiA</strong> is the stack behind it. You get outcomes you can click in the demos below — recipes stay private.</p>
+    <p>Reputation agents, finance briefs, SMS coaching, and the other cards are <em>examples</em> of the same orchestration spine — not a one-feature product.</p>
+    <figure class="hero-visual">
+      <img src="assets/architecture-diagram.svg?v=arch-first-20260731f" width="920" height="320" alt="Architecture diagram: Intake to Plan to Tools to Vetting to Answer" loading="eager" decoding="async" />
+      <figcaption>Sanitized architecture map — Intake → Plan → Tools → Vetting → Answer.</figcaption>
+    </figure>
+  </section>
+
+  <section id="sku-offers" class="sku-section" aria-label="Example agents you can buy">
+    <h2>Example agents (one offer path)</h2>
+    <blockquote class="offer-pitch" cite="https://imndevmodeai.github.io/portfolio/">
       We don’t invent stars. We refuse to waste the positive experiences your business already creates —
       and we staff agents whose only job is to turn those into Google, YouTube, and social proof you approve.
     </blockquote>
@@ -500,7 +518,7 @@
   </section>
 
   <h2 id="demo-theater-heading">Click a live demo</h2>
-  <p class="agentic-lead">Orange tour will point here. Each card opens a short presentation — conversation on the right, tool trace on the left.</p>
+  <p class="agentic-lead">Each card opens a short walkthrough — conversation on the right, tool trace on the left. Start anywhere; Reputation flywheel (R) is one concrete example.</p>
   <p class="disclaimer"><strong>Simulation only.</strong> Scrubbed demo businesses. No client PII.</p>
 
   <div id="access-gate" class="access-gate-compact">
@@ -582,13 +600,8 @@
   </div>
 
   <details class="below-fold-tech" style="margin:1.5rem 0">
-    <summary style="cursor:pointer;color:#a1a1aa;font-size:0.9rem">Architecture diagram &amp; engineer detail (optional)</summary>
-    <h2>What This Is</h2>
-    <p><strong>ArchE</strong> is the agentic layer: tool-using workflows, live retrieval, evidence vetting, and forward projections. <strong>ResonantiA</strong> is the full stack behind it.</p>
-    <figure class="hero-visual">
-      <img src="assets/architecture-diagram.svg" width="920" height="320" alt="Architecture diagram" loading="lazy" decoding="async" />
-      <figcaption>Sanitized architecture map — Intake → Plan → Tools → Vetting → Answer.</figcaption>
-    </figure>
+    <summary style="cursor:pointer;color:#a1a1aa;font-size:0.9rem">Engineer detail (optional)</summary>
+    <p><strong>ArchE</strong> is the agentic layer: tool-using workflows, live retrieval, evidence vetting, and forward projections. <strong>ResonantiA</strong> is the full stack behind it. The diagram at the top of this page is the buyer-facing map; this note is for technical readers.</p>
   </details>
 
   <section id="portfolio-contact" class="portfolio-contact-strip" aria-label="Direct contact">
@@ -766,6 +779,6 @@
   }
 })();
 </script>
-<script src="demo-engine.js?v=svg-xml-fix-20260731e"></script>
+<script src="demo-engine.js?v=arch-first-20260731f"></script>
 </body>
 </html>
