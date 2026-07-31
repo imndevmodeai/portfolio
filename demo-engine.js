@@ -2528,6 +2528,9 @@
         "youtube-campaign",
         "social-campaign",
         "reputation-docs",
+        "agent-roster",
+        "experience-capture",
+        "reputation-scoreboard",
       ];
       for (var i = 0; i < docFragments.length; i++) {
         if (visual.src.indexOf(docFragments[i]) >= 0) return true;
@@ -2537,7 +2540,7 @@
   }
 
   /** Bust CDN / Pages cache so replaced SVGs actually load (never fall back to default.svg). */
-  var PROOF_ASSET_V = "phd-ux-20260731a";
+  var PROOF_ASSET_V = "svg-xml-fix-20260731c";
   function withProofCacheBust(src) {
     if (!src || src.indexOf("data:") === 0) return src;
     if (src.indexOf("?") >= 0) return src;
