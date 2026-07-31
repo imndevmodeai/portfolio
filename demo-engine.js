@@ -438,9 +438,9 @@
   function buildScenarioB(ctx) {
     var chro = "Chief People Officer";
     var archeLabel = "ArchE → CHRO";
+    // Fixed greeting so Edge-TTS manifest clips match (temporal clock still shown in trace).
     var pleasantries =
-      ctx.greet +
-      ". Before I quote attrition curves — I am loading your last hybrid pilot notes and the workforce snapshot we tagged in March. " +
+      "Good morning. Before I quote attrition curves — I am loading your last hybrid pilot notes and the workforce snapshot we tagged in March. " +
       "Give me ninety seconds to lock the problem frame and spin baseline versus full remote-with-visits in the population model.";
     var expertAnswer =
       "CHRO — three layers, then the recommendation. " +
