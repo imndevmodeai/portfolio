@@ -1949,12 +1949,12 @@
       subtitle: "Thin or damaged presence a customer sees today",
     },
     "trace-agent-roster": {
-      src: "assets/proofs/agent-roster.svg",
+      src: "assets/proofs/agent-roster-v2.svg",
       title: "Agents assigned",
       subtitle: "Experience Capture · Social Media · YouTube · Review Desk · Auditor",
     },
     "trace-experience-capture": {
-      src: "assets/proofs/experience-capture.svg",
+      src: "assets/proofs/experience-capture-v2.svg",
       title: "Experience Capture",
       subtitle: "Create authentic stars — no fabricated ratings",
     },
@@ -1974,7 +1974,7 @@
       subtitle: "Positive experience → brand solidification drafts",
     },
     "trace-reputation-scoreboard": {
-      src: "assets/proofs/reputation-scoreboard.svg",
+      src: "assets/proofs/reputation-scoreboard-v2.svg",
       title: "Reputation scoreboard",
       subtitle: "Moments → asks → stars → content → presence",
     },
@@ -2531,6 +2531,9 @@
         "agent-roster",
         "experience-capture",
         "reputation-scoreboard",
+        "agent-roster-v2",
+        "experience-capture-v2",
+        "reputation-scoreboard-v2",
       ];
       for (var i = 0; i < docFragments.length; i++) {
         if (visual.src.indexOf(docFragments[i]) >= 0) return true;
@@ -2540,7 +2543,7 @@
   }
 
   /** Bust CDN / Pages cache so replaced SVGs actually load (never fall back to default.svg). */
-  var PROOF_ASSET_V = "svg-xml-fix-20260731c";
+  var PROOF_ASSET_V = "svg-xml-fix-20260731d";
   function withProofCacheBust(src) {
     if (!src || src.indexOf("data:") === 0) return src;
     if (src.indexOf("?") >= 0) return src;
