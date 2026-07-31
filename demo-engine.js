@@ -4389,18 +4389,21 @@
     primeAudio();
     var steps = [
       {
+        role: "narrator",
         sel: "#reputation-storyboard",
         banner: "1 · These pictures = the payout (Google before/after)",
         say: "Start here. These pictures show what reputation work looks like — Google before and after, campaigns, and documents you get.",
         wait: 4200,
       },
       {
+        role: "narrator",
         sel: "#demo-theater-heading",
         banner: "2 · Live demos sit right under the pictures",
         say: "Live demos are right under those pictures — not buried halfway down the page.",
         wait: 2800,
       },
       {
+        role: "narrator",
         sel: "#demo-card-r",
         banner: "3 · Click the blue card: Reputation before → after",
         say: "Click the blue reputation card for a short walkthrough with the same screens. Orange highlights mark what to click.",
@@ -4411,7 +4414,7 @@
     steps.forEach(function (step) {
       chain = chain.then(function () {
         highlightTourTarget(step.sel, step.banner);
-        return speakQueued(step.say, "narrator").then(function () {
+        return speakQueued(step.say, step.role || "narrator").then(function () {
           return guidedTourSleep(Math.max(0, step.wait - 800));
         });
       });
