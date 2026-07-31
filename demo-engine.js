@@ -17,6 +17,42 @@
     return { "ngrok-skip-browser-warning": "1" };
   }
 
+  /** True when API is same origin (local :17890 or portfolio tunnel serving the page itself). */
+  function isSameOriginApiRoot(root) {
+    if (!root || typeof location === "undefined") return false;
+    try {
+      var u = new URL(root, location.href);
+      return u.origin === location.origin;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /** Cross-origin ngrok/cloudflare tunnels cannot be embedded safely (interstitial traps the proof iframe). */
+  function isTunnelHost(hostname) {
+    var h = String(hostname || "").toLowerCase();
+    return (
+      h.indexOf("ngrok-free") !== -1 ||
+      h.indexOf("ngrok.io") !== -1 ||
+      h.indexOf("ngrok.app") !== -1 ||
+      h.indexOf("trycloudflare.com") !== -1
+    );
+  }
+
+  /** Allow evidence iframe only when same-origin (or non-tunnel). Never iframe ngrok from github.io. */
+  function evidenceEmbedAllowed(url) {
+    if (!url) return false;
+    if (typeof location === "undefined") return true;
+    try {
+      var u = new URL(url, location.href);
+      if (u.origin === location.origin) return true;
+      if (isTunnelHost(u.hostname)) return false;
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   function applyLiveApiUrl(url) {
     if (!url || typeof url !== "string") return;
     PORTFOLIO_LIVE_API = url.replace(/\/+$/, "");
@@ -787,9 +823,9 @@
     }
     var decisionHints = {
       decision_jim: /Andrew|Davis|Mark|David/i,
-      decision_chro: /Guy|Mark|Eric/i,
-      decision_ops: /Michelle|Samantha|Jenny|Aria/i,
-      decision_media: /Roger|Guy|Eric/i,
+      decision_chro: /Michelle|Samantha|Jenny|Aria|Zira/i,
+      decision_ops: /Guy|Mark|Eric|David/i,
+      decision_media: /Jenny|Michelle|Samantha|Aria|Zira/i,
       decision_jordan: /Eric|Andrew|Guy/i,
       decision_guest: /Brian|Guy|Mark/i,
     };
@@ -1058,20 +1094,22 @@
     }
 
     var apiRoot = resolvePortfolioApiRoot();
-    var archeLiveRyan = roleId === "arche" && apiRoot;
+    // Prefer prebuilt MP3s for canned demos. Live Ryan API is optional enhancement —
+    // never leave ArchE silent when API/ngrok fails (GitHub Pages + tunnel trap).
+    var preferLiveRyan = roleId === "arche" && apiRoot && isSameOriginApiRoot(apiRoot);
 
     function afterMp3(hadMp3) {
       if (hadMp3) {
         setVoiceStatus(audioManifest ? "Voice: Edge TTS (manifest)" : "Voice: ON");
         return;
       }
-      if (archeLiveRyan) {
-        setVoiceStatus("Voice: Ryan API failed — refresh :17890 server");
-        return;
-      }
       return playEdgeTtsApi(roleId, clean).then(function (hadLive) {
         if (hadLive) {
-          setVoiceStatus("Voice: Edge TTS (live)");
+          setVoiceStatus(
+            roleId === "arche"
+              ? "Voice: Edge TTS · en-GB-RyanNeural"
+              : "Voice: Edge TTS (live)"
+          );
           return;
         }
         return speakBrowserOnce(clean, roleId).then(function () {
@@ -1080,7 +1118,7 @@
       });
     }
 
-    if (archeLiveRyan) {
+    if (preferLiveRyan) {
       return playEdgeTtsApi(roleId, clean).then(function (hadLive) {
         if (hadLive) {
           setVoiceStatus("Voice: Edge TTS · en-GB-RyanNeural");
@@ -1158,7 +1196,7 @@
     hideSpeakerPopup();
   }
 
-  /** Portrait / φ-shell shown while a role is speaking */
+  /** Portrait / φ-shell shown while a role is speaking (must match Edge TTS cast gender). */
   var SPEAKER_VISUALS = {
     arche: {
       src: "assets/arche-phi-shell.png",
@@ -1172,12 +1210,12 @@
       subtitle: "Midwest subscription finance",
     },
     decision_chro: {
-      src: "assets/speakers/media-lead.png",
+      src: "assets/speakers/chro.svg",
       title: "Chief People Officer",
       subtitle: "HR policy simulation",
     },
     decision_ops: {
-      src: "assets/speakers/jim-cfo.png",
+      src: "assets/speakers/ops-director.svg",
       title: "Director of Operations",
       subtitle: "Internal playbook owner",
     },
@@ -1187,12 +1225,12 @@
       subtitle: "Paid media · closed loop",
     },
     decision_jordan: {
-      src: "assets/speakers/jim-cfo.png",
+      src: "assets/speakers/jordan.svg",
       title: "Jordan · job seeker",
       subtitle: "SMS · Vault RAG coach",
     },
     decision_guest: {
-      src: "assets/speakers/jim-cfo.png",
+      src: "assets/speakers/guest.svg",
       title: "Decision maker",
       subtitle: "Your brief · executive portrait",
     },
@@ -2096,15 +2134,19 @@
     var root = resolvePortfolioApiRoot();
     if (out.evidenceSlug && root) {
       var briefQ = out.briefQuery || activeBriefQuery || "";
-      out.evidenceUrl = evidenceUrlForSlug(out.evidenceSlug, briefQ);
-      out.citationUrl = out.evidenceUrl;
-      var disclosure =
-        out.disclosure ||
-        "Scrubbed demonstration file — not live market or government data.";
-      out.proofSubtitle =
-        (out.proofSubtitle || out.label || "Evidence document") +
-        " · " +
-        disclosure.slice(0, 140);
+      var candidate = evidenceUrlForSlug(out.evidenceSlug, briefQ);
+      if (evidenceEmbedAllowed(candidate)) {
+        out.evidenceUrl = candidate;
+        out.citationUrl = out.evidenceUrl;
+        var disclosure =
+          out.disclosure ||
+          "Scrubbed demonstration file — not live market or government data.";
+        out.proofSubtitle =
+          (out.proofSubtitle || out.label || "Evidence document") +
+          " · " +
+          disclosure.slice(0, 140);
+      }
+      // else: keep static SVG/terminal proof — never trap visitor in ngrok interstitial iframe
     }
     return out;
   }
@@ -2139,14 +2181,19 @@
       };
     }
     if (source.evidenceSlug) base.evidenceSlug = source.evidenceSlug;
-    if (source.evidenceUrl) base.evidenceUrl = source.evidenceUrl;
+    if (source.evidenceUrl && evidenceEmbedAllowed(source.evidenceUrl)) {
+      base.evidenceUrl = source.evidenceUrl;
+    }
     if (base && (source.citationUrl || source.citation) && !base.citation) {
       base.citation = source.citationUrl || source.citation;
     }
     if (base && base.evidenceSlug && !base.evidenceUrl && resolvePortfolioApiRoot()) {
-      base.evidenceUrl =
+      var candidate =
         resolvePortfolioApiRoot() + "/api/portfolio/evidence/" + base.evidenceSlug;
-      if (!base.citation) base.citation = base.evidenceUrl;
+      if (evidenceEmbedAllowed(candidate)) {
+        base.evidenceUrl = candidate;
+        if (!base.citation) base.citation = base.evidenceUrl;
+      }
     }
     return base;
   }
@@ -2190,7 +2237,13 @@
     var card = pop && pop.querySelector(".proof-popup-card");
     if (!pop || !img || !visual) return;
 
-    var useDocument = proofIsDocumentVisual(visual, source) || !!visual.evidenceUrl;
+    var useDocument = proofIsDocumentVisual(visual, source);
+    // Only promote to iframe document mode when embed is safe (never ngrok interstitial).
+    if (visual.evidenceUrl && evidenceEmbedAllowed(visual.evidenceUrl)) {
+      useDocument = true;
+    } else if (visual.evidenceUrl && !evidenceEmbedAllowed(visual.evidenceUrl)) {
+      visual = Object.assign({}, visual, { evidenceUrl: "" });
+    }
     if (card) {
       card.classList.toggle("proof-mode-document", useDocument);
       card.classList.toggle("proof-mode-terminal", !useDocument);
@@ -2198,7 +2251,7 @@
 
     if (useDocument) {
       if (termWrap) termWrap.hidden = true;
-      if (visual.evidenceUrl && frame) {
+      if (visual.evidenceUrl && frame && evidenceEmbedAllowed(visual.evidenceUrl)) {
         frame.style.display = "block";
         frame.src = visual.evidenceUrl;
         img.style.display = "none";
@@ -2211,15 +2264,9 @@
         img.style.display = "block";
         img.onerror = function () {
           img.onerror = null;
-          if (visual.evidenceUrl && frame) {
-            frame.style.display = "block";
-            frame.src = visual.evidenceUrl;
-            img.style.display = "none";
-          } else {
-            img.src = "assets/proofs/default.svg";
-          }
+          img.src = "assets/proofs/default.svg";
         };
-        img.src = visual.src;
+        img.src = visual.src || "assets/proofs/default.svg";
         img.alt = visual.title;
       }
     } else {
@@ -2457,6 +2504,30 @@
     {
       role: "decision_chro",
       say: "That reads polished — but how do I know this is not HR-flavored fiction? What actually ran, and what would break my credibility in the room?",
+    },
+    {
+      role: "narrator",
+      say: "CHRO office, remote policy bet. ArchE runs the same spine as the thought mapper — problem frame, process graph, tool branches, vetting gate — then a board-ready answer.",
+    },
+    {
+      role: "arche",
+      say: "Good morning. Before I quote attrition curves — I am loading your last hybrid pilot notes and the workforce snapshot we tagged in March. Give me ninety seconds to lock the problem frame and spin baseline versus full remote-with-visits in the population model.",
+    },
+    {
+      role: "arche",
+      say: "CHRO — three layers, then the recommendation. Frame: we are stress-testing a mandatory remote-with-quarterly-visits policy against your current hybrid baseline — not predicting individual resignations. Twenty-four hundred agent-employees, calibrated to exit-survey cadence and hire cohorts you already trust. Attrition — voluntary turnover: policy path adds about zero point eight percentage points on rolling twelve-month attrition by month eighteen. The effect is lagged — most signal lands months ten through fifteen, when manager touchpoints thin out in Q2 crunch. Baseline stays near your fourteen point two percent band. Productivity: self-report bumps months one through four — commute relief and focus — then flattens by Q3. Our output proxy — throughput times quality gate — does not confirm a lasting gain. Plain language: people feel productive before coordination tax shows up. Mechanism HR will recognize: causal pass puts twelve-to-fourteen-week lag from visit-cadence slip to engagement decay; ABM shows weak cross-team ties when visit weeks cluster instead of spreading. Call: six-month pilot in two business units with enforced visit cadence and monthly manager calibration — not enterprise mandate. Confidence zero point eight two after realism vetting; widen if you want union or geo slices next run.",
+    },
+    {
+      role: "arche",
+      say: "Fair challenge. Every claim maps to a line in the orchestration trace — click workforce fetch, causal lag, or ABM emergent and the log scrolls. We ingested a scrubbed workforce snapshot, estimated treatment lags on engagement and manager hours, then ran seventy-eight ABM steps for baseline versus policy. Vetting returned PASS with explicit boundary notes: no union shock in this bundle, productivity is self-report heavy. If a feed fails, you will see WARN in trace and confidence drops — I do not ship a polite essay.",
+    },
+    {
+      role: "narrator",
+      say: "Scenario realism vetting runs — boundary conditions logged before the answer ships.",
+    },
+    {
+      role: "decision_ops",
+      say: "Make this playbook queryable in chat. Small context, fast answers — escalation paths must stay human.",
     },
   ];
 
@@ -4007,9 +4078,75 @@
     runWithScenario(activeScenario);
   }
 
+  /**
+   * Apply one buyer-safe Adaptive Proof Surface from the deterministic manifest.
+   * The URL carries an opaque view slug; private prospect records never enter the
+   * public bundle. The visitor may edit the seeded Resonant View query.
+   */
+  function loadAdaptiveProofSurface() {
+    if (typeof URLSearchParams === "undefined") return Promise.resolve(null);
+    var params = new URLSearchParams(window.location.search || "");
+    var viewSlug = (params.get("view") || "").trim();
+    var explicitQuery = sanitizeQuery(params.get("query") || "");
+    if (!viewSlug && !explicitQuery) return Promise.resolve(null);
+
+    return fetch("adaptive_views.json", {
+      method: "GET",
+      cache: "no-store",
+      headers: portfolioFetchHeaders(),
+    })
+      .then(function (response) {
+        if (!response.ok) throw new Error("adaptive_views.json HTTP " + response.status);
+        return response.json();
+      })
+      .then(function (manifest) {
+        var view = viewSlug && manifest && manifest.views ? manifest.views[viewSlug] : null;
+        var seed = explicitQuery || sanitizeQuery((view && view.seeded_query) || "");
+        if (view) {
+          document.title = view.headline + " — Resonant View";
+          var banner = document.createElement("section");
+          banner.id = "adaptive-proof-surface";
+          banner.style.cssText =
+            "margin:0 0 1rem;padding:1rem 1.1rem;border:1px solid rgba(34,211,238,.55);" +
+            "border-radius:12px;background:linear-gradient(110deg,rgba(34,211,238,.11),rgba(139,92,246,.13))";
+          var proofLinks = (view.proofs || [])
+            .map(function (proof) {
+              var safePath = String(proof.path || "").replace(/^income_liberation\/portfolio\//, "");
+              return '<li><a style="color:#67e8f9" href="' + encodeURI(safePath) + '">' +
+                String(proof.label || "Evidence") + "</a>" +
+                (proof.limitation ? " — " + String(proof.limitation) : "") + "</li>";
+            })
+            .join("");
+          banner.innerHTML =
+            '<div style="font-size:.72rem;color:#67e8f9;text-transform:uppercase;letter-spacing:.08em">Adaptive proof surface</div>' +
+            '<h1 style="margin:.25rem 0;color:#c4b5fd">' + String(view.headline || "") + "</h1>" +
+            '<p style="color:#e4e4e7">' + String(view.pain_statement || "") + "</p>" +
+            '<p><strong style="color:#fde68a">' + String(view.offer_title || "") + "</strong> · " +
+            String(view.cta || "") + "</p>" +
+            (proofLinks ? '<ul style="font-size:.78rem">' + proofLinks + "</ul>" : "") +
+            '<p style="font-size:.72rem">' + String(view.disclosure || "") + "</p>";
+          document.body.insertBefore(banner, document.body.firstChild);
+        }
+        if (seed) {
+          setUnlocked(true);
+          var input = $("#custom-query");
+          if (input) {
+            input.value = seed;
+            input.setAttribute("data-adaptive-seed", "1");
+          }
+        }
+        return view;
+      })
+      .catch(function (error) {
+        console.warn("Adaptive proof surface unavailable:", error);
+        return null;
+      });
+  }
+
   function init() {
     renderToolRack();
     if (sessionStorage.getItem("resonant_portfolio_unlock") === "1") setUnlocked(true);
+    loadAdaptiveProofSurface();
 
     $("#access-unlock") &&
       $("#access-unlock").addEventListener("click", function () {

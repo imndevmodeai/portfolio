@@ -1,0 +1,97 @@
+{
+  "schema_version": "adaptive_proof_surface_v1",
+  "generic_url": "https://imndevmodeai.github.io/portfolio/",
+  "views": {
+    "healthcare-automation-implementation-teams-6346bf8938": {
+      "schema_version": "adaptive_proof_surface_v1",
+      "view_slug": "healthcare-automation-implementation-teams-6346bf8938",
+      "version": 1,
+      "source_type": "prospect",
+      "audience_segment": "Healthcare automation implementation teams",
+      "headline": "Deploy specified healthcare automations without weakening PHI boundaries",
+      "pain_statement": "Eight specified agents still need reliable Python, API, scheduling, de-identification, and acceptance-test execution.",
+      "seeded_query": "Design a governed implementation plan for eight healthcare automation agents using Python, REST APIs, Claude, Firestore, individual credentials, de-identification, and written done-when tests. Do not use or request PHI.",
+      "offer_title": "Governed automation implementation sprint",
+      "cta": "Edit the PHI-free implementation question and inspect the evidence-gated workflow.",
+      "disclosure": "Adaptive first-party proof view generated from public job requirements. It does not identify the prospect or claim client results.",
+      "proofs": [
+        {
+          "label": "OpenAI automation governance",
+          "path": "income_liberation/portfolio/case-studies/04-openai-automation-governance.md",
+          "claim_id": "",
+          "limitation": "First-party architecture proof; not a prior client outcome."
+        },
+        {
+          "label": "Workflow orchestration",
+          "path": "Three_PointO_ArchE/workflow_engine.py",
+          "claim_id": "",
+          "limitation": "Repository implementation, not healthcare production history."
+        }
+      ],
+      "url": "https://imndevmodeai.github.io/portfolio/?view=healthcare-automation-implementation-teams-6346bf8938"
+    },
+    "small-business-support-automation-builders-b2b327ab99": {
+      "schema_version": "adaptive_proof_surface_v1",
+      "view_slug": "small-business-support-automation-builders-b2b327ab99",
+      "version": 1,
+      "source_type": "prospect",
+      "audience_segment": "Small-business support automation builders",
+      "headline": "A RAG support prototype that shows why each answer is grounded",
+      "pain_statement": "A short prototype must combine model APIs, editable prompts, FAQ retrieval, a usable chat surface, and accuracy checks.",
+      "seeded_query": "Design a five-hour customer-support RAG prototype with an editable FAQ knowledge base, retrieval citations, prompt controls, a chat interface, evaluation questions, failure handling, and a source-code handoff.",
+      "offer_title": "Evidence-grounded support assistant prototype",
+      "cta": "Bring the prototype brief to a focused implementation scoping call.",
+      "disclosure": "Adaptive first-party proof view generated from public job requirements. It does not identify the prospect or claim client results.",
+      "proofs": [
+        {
+          "label": "Knowledge-base RAG assistant",
+          "path": "income_liberation/portfolio/case-studies/03-knowledge-base-rag-assistant.md",
+          "claim_id": "",
+          "limitation": "Sanitized first-party work sample."
+        },
+        {
+          "label": "OpenAI automation governance",
+          "path": "income_liberation/portfolio/case-studies/04-openai-automation-governance.md",
+          "claim_id": "",
+          "limitation": "First-party architecture proof; not a prior client outcome."
+        }
+      ],
+      "url": "https://imndevmodeai.github.io/portfolio/?view=small-business-support-automation-builders-b2b327ab99"
+    },
+    "business-leaders-using-ai-automation-b925aa51a6": {
+      "schema_version": "adaptive_proof_surface_v1",
+      "view_slug": "business-leaders-using-ai-automation-b925aa51a6",
+      "version": 1,
+      "source_type": "campaign",
+      "audience_segment": "Business leaders using AI automation",
+      "headline": "When a green workflow still misses the business result",
+      "pain_statement": "Automation tools change, old methods keep retrying, and a green status can hide an incomplete or costly business outcome.",
+      "seeded_query": "Review one AI workflow for outdated tools, incomplete outcomes, wasted retries, and paid actions that need human approval. Show the evidence and repair plan.",
+      "offer_title": "AI Workflow Risk Review",
+      "cta": "Bring one concerning automation to a 20-minute workflow risk review.",
+      "disclosure": "First-party engineering material from ArchE, an AI operations system built by B.J. Lewis. B.J. Lewis reviews paid and external actions. No client result is claimed.",
+      "proofs": [
+        {
+          "label": "Stale-method detection",
+          "path": "Three_PointO_ArchE/temporal_goal_compiler.py",
+          "claim_id": "temporal_method_compiler",
+          "limitation": "First-party repository evidence; no client result is claimed."
+        },
+        {
+          "label": "Outcome completion checks",
+          "path": "Three_PointO_ArchE/output_contract_validation.py",
+          "claim_id": "semantic_completion_gate",
+          "limitation": "First-party repository evidence; no client result is claimed."
+        },
+        {
+          "label": "Queued-work continuity",
+          "path": "Three_PointO_ArchE/openclaw/heartbeat_engine.py",
+          "claim_id": "true_ice_heartbeat_continuity",
+          "limitation": "First-party repository evidence; no client result is claimed."
+        }
+      ],
+      "campaign_id": "from-stale-methods-and-false-success-to-governed-96c04b2eb8e4",
+      "url": "https://imndevmodeai.github.io/portfolio/?view=business-leaders-using-ai-automation-b925aa51a6"
+    }
+  }
+}
