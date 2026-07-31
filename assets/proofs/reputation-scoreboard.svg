@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" role="img" aria-label="Reputation flywheel scoreboard">
+  <rect width="960" height="640" fill="#09090b"/>
+  <rect width="960" height="64" fill="#18181b"/>
+  <text x="28" y="40" fill="#fde68a" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700">Reputation scoreboard  this week</text>
+  <text x="680" y="40" fill="#a1a1aa" font-family="Arial,Helvetica,sans-serif" font-size="12">scrubbed demo · not live metrics</text>
+
+  <rect x="28" y="96" width="175" height="120" rx="10" fill="#27272a" stroke="#3f3f46"/>
+  <text x="44" y="130" fill="#a1a1aa" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700">MOMENTS</text>
+  <text x="44" y="175" fill="#fafafa" font-family="Arial,Helvetica,sans-serif" font-size="36" font-weight="700">12</text>
+  <text x="44" y="200" fill="#71717a" font-family="Arial,Helvetica,sans-serif" font-size="11">happy jobs detected</text>
+
+  <rect x="218" y="96" width="175" height="120" rx="10" fill="#27272a" stroke="#3f3f46"/>
+  <text x="234" y="130" fill="#a1a1aa" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700">ASKS</text>
+  <text x="234" y="175" fill="#67e8f9" font-family="Arial,Helvetica,sans-serif" font-size="36" font-weight="700">4</text>
+  <text x="234" y="200" fill="#71717a" font-family="Arial,Helvetica,sans-serif" font-size="11">review asks queued</text>
+
+  <rect x="408" y="96" width="175" height="120" rx="10" fill="#27272a" stroke="#3f3f46"/>
+  <text x="424" y="130" fill="#a1a1aa" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700">STARS</text>
+  <text x="424" y="175" fill="#fbbf24" font-family="Arial,Helvetica,sans-serif" font-size="36" font-weight="700">3</text>
+  <text x="424" y="200" fill="#71717a" font-family="Arial,Helvetica,sans-serif" font-size="11">authentic new reviews</text>
+
+  <rect x="598" y="96" width="160" height="120" rx="10" fill="#27272a" stroke="#3f3f46"/>
+  <text x="614" y="130" fill="#a1a1aa" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700">YOUTUBE</text>
+  <text x="614" y="175" fill="#f472b6" font-family="Arial,Helvetica,sans-serif" font-size="36" font-weight="700">7</text>
+  <text x="614" y="200" fill="#71717a" font-family="Arial,Helvetica,sans-serif" font-size="11">clips awaiting Publish</text>
+
+  <rect x="773" y="96" width="159" height="120" rx="10" fill="#27272a" stroke="#3f3f46"/>
+  <text x="789" y="130" fill="#a1a1aa" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700">SOCIAL</text>
+  <text x="789" y="175" fill="#a78bfa" font-family="Arial,Helvetica,sans-serif" font-size="36" font-weight="700">18</text>
+  <text x="789" y="200" fill="#71717a" font-family="Arial,Helvetica,sans-serif" font-size="11">drafts · your click</text>
+
+  <rect x="28" y="244" width="560" height="220" rx="12" fill="#18181b" stroke="#3f3f46"/>
+  <text x="48" y="284" fill="#e4e4e7" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="700">Presence trajectory (illustrative)</text>
+  <rect x="48" y="310" width="500" height="18" rx="4" fill="#27272a"/>
+  <rect x="48" y="310" width="180" height="18" rx="4" fill="#f87171"/>
+  <text x="48" y="350" fill="#fca5a5" font-family="Arial,Helvetica,sans-serif" font-size="12">BEFORE · thin SERP · unanswered one-stars</text>
+  <rect x="48" y="375" width="500" height="18" rx="4" fill="#27272a"/>
+  <rect x="48" y="375" width="380" height="18" rx="4" fill="#4ade80"/>
+  <text x="48" y="415" fill="#86efac" font-family="Arial,Helvetica,sans-serif" font-size="12">AFTER PLAN · owned replies · video · GBP activity</text>
+  <text x="48" y="445" fill="#71717a" font-family="Arial,Helvetica,sans-serif" font-size="12">Human Publish gate stays on. No ranking guarantees.</text>
+
+  <rect x="608" y="244" width="324" height="220" rx="12" fill="#14532d" stroke="#22c55e"/>
+  <text x="628" y="284" fill="#bbf7d0" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="700">Why $10k can be cheap</text>
+  <text x="628" y="320" fill="#e2e8f0" font-family="Arial,Helvetica,sans-serif" font-size="13">One recovered Maps pack slot</text>
+  <text x="628" y="344" fill="#e2e8f0" font-family="Arial,Helvetica,sans-serif" font-size="13">or one video-driven book</text>
+  <text x="628" y="368" fill="#e2e8f0" font-family="Arial,Helvetica,sans-serif" font-size="13">can exceed the engagement.</text>
+  <text x="628" y="410" fill="#86efac" font-family="Arial,Helvetica,sans-serif" font-size="12">Sell captured demand </text>
+  <text x="628" y="432" fill="#86efac" font-family="Arial,Helvetica,sans-serif" font-size="12">not posts-per-week.</text>
+
+  <rect x="28" y="490" width="904" height="120" rx="12" fill="#1e293b" stroke="#38bdf8"/>
+  <text x="48" y="535" fill="#7dd3fc" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="700">Flywheel: moments ’ asks ’ authentic stars ’ YouTube/social drafts ’ your Publish ’ stronger Google presence</text>
+  <text x="48" y="570" fill="#cbd5e1" font-family="Arial,Helvetica,sans-serif" font-size="13">Sources below reopen every panel. Recipes stay private. Outcomes stay buyer-legible.</text>
+</svg>
