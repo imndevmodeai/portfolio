@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Bank statements — Brightline HVAC LLC (sanitized demo)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Helvetica Neue", Arial, sans-serif; font-size: 11px; color: #1a1a1a; background: #fff; padding: 32px 40px; line-height: 1.35; }
+    .header { display: flex; justify-content: space-between; border-bottom: 2px solid #003366; padding-bottom: 12px; margin-bottom: 16px; }
+    .bank { font-size: 22px; font-weight: 700; color: #003366; letter-spacing: -0.02em; }
+    .bank sub { display: block; font-size: 9px; font-weight: 400; color: #666; margin-top: 2px; }
+    .stmt-meta { text-align: right; font-size: 10px; color: #444; }
+    .stmt-meta strong { display: block; font-size: 12px; color: #111; }
+    .account-box { background: #f4f6f8; border: 1px solid #d0d5dd; padding: 10px 14px; margin-bottom: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 10px; }
+    .account-box label { color: #666; display: block; font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+    .summary div { border: 1px solid #e0e0e0; padding: 8px 10px; }
+    .summary label { font-size: 9px; color: #666; text-transform: uppercase; }
+    .summary .val { font-size: 14px; font-weight: 700; margin-top: 4px; }
+    table { width: 100%; border-collapse: collapse; font-size: 10px; }
+    th { text-align: left; background: #003366; color: #fff; padding: 6px 8px; font-weight: 600; }
+    td { padding: 5px 8px; border-bottom: 1px solid #e8e8e8; }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    tr.alt td { background: #fafafa; }
+    .footer { margin-top: 20px; font-size: 9px; color: #888; border-top: 1px solid #ddd; padding-top: 10px; }
+    .watermark { position: fixed; bottom: 24px; right: 32px; font-size: 48px; color: rgba(0,0,0,0.04); font-weight: 700; transform: rotate(-12deg); pointer-events: none; }
+    .page { page-break-after: always; margin-bottom: 28px; }
+    h3 { font-size: 11px; margin: 14px 0 8px; color: #003366; }
+  </style>
+</head>
+<body>
+  <div class="watermark">SANITIZED</div>
+  <div class="page">
+    <div class="header">
+      <div class="bank">First Commerce Bank<sub>Business Banking · Statement of Account</sub></div>
+      <div class="stmt-meta">
+        <strong>Combined Business Checking</strong>
+        Statement period: Mar 1 – Mar 31, 2026<br/>
+        Generated: Apr 1, 2026 · Page 1 of 4
+      </div>
+    </div>
+    <div class="account-box">
+      <div><label>Account holder</label>Brightline HVAC LLC · DBA Brightline Comfort</div>
+      <div><label>Account number</label>•••• •••• •••• 4821</div>
+      <div><label>Address</label>1842 Industrial Blvd, Suite 200, Dallas, TX 75207</div>
+      <div><label>Routing (ABA)</label>•••••••• (masked)</div>
+    </div>
+    <div class="summary">
+      <div><label>Beginning balance</label><div class="val">$41,208.44</div></div>
+      <div><label>Total deposits</label><div class="val">$148,620.00</div></div>
+      <div><label>Total withdrawals</label><div class="val">$47,892.18</div></div>
+      <div><label>Ending balance</label><div class="val">$141,936.26</div></div>
+    </div>
+    <h3>Transaction detail — March 2026 (excerpt)</h3>
+    <table>
+      <thead><tr><th>Date</th><th>Description</th><th class="num">Withdrawals</th><th class="num">Deposits</th><th class="num">Balance</th></tr></thead>
+      <tbody>
+        <tr><td>03/01</td><td>ACH PAYROLL — ADP</td><td class="num">12,400.00</td><td class="num"></td><td class="num">28,808.44</td></tr>
+        <tr class="alt"><td>03/03</td><td>MERCHANT DEP — SQUARE *BRIGHTLINE</td><td class="num"></td><td class="num">18,240.00</td><td class="num">47,048.44</td></tr>
+        <tr><td>03/05</td><td>WIRE IN — ATLAS FUNDING PARTNERS</td><td class="num"></td><td class="num">42,000.00</td><td class="num">89,048.44</td></tr>
+        <tr class="alt"><td>03/08</td><td>CHECK #1042 — SUPPLIER</td><td class="num">3,180.50</td><td class="num"></td><td class="num">85,867.94</td></tr>
+        <tr><td>03/12</td><td>MERCHANT DEP — SQUARE *BRIGHTLINE</td><td class="num"></td><td class="num">22,110.00</td><td class="num">107,977.94</td></tr>
+        <tr class="alt"><td>03/18</td><td>ACH MCA PMT — LENDER ••••901</td><td class="num">4,250.00</td><td class="num"></td><td class="num">103,727.94</td></tr>
+        <tr><td>03/22</td><td>MERCHANT DEP — SQUARE *BRIGHTLINE</td><td class="num"></td><td class="num">19,880.00</td><td class="num">123,607.94</td></tr>
+        <tr class="alt"><td>03/28</td><td>UTILITY — ONCOR ELECTRIC</td><td class="num">2,104.72</td><td class="num"></td><td class="num">121,503.22</td></tr>
+        <tr><td>03/31</td><td>MONTHLY SERVICE FEE</td><td class="num">45.00</td><td class="num"></td><td class="num">121,458.22</td></tr>
+      </tbody>
+    </table>
+    <p class="footer">Demo document for ResonantiA partner-intake simulation only. Not a real bank statement. Account numbers and names are fictional.</p>
+  </div>
+  <div class="page">
+    <div class="header">
+      <div class="bank">First Commerce Bank<sub>February 2026 — Page 1 of 4</sub></div>
+      <div class="stmt-meta"><strong>Ending balance Feb 28, 2026</strong>$118,402.11</div>
+    </div>
+    <p style="font-size:10px;color:#666;margin-bottom:10px">Average daily balance (Feb): $112,840 · Deposits: $139,200 · Withdrawals: $52,006</p>
+    <table>
+      <thead><tr><th>Date</th><th>Description</th><th class="num">Withdrawals</th><th class="num">Deposits</th></tr></thead>
+      <tbody>
+        <tr><td>02/14</td><td>MERCHANT DEP — SQUARE *BRIGHTLINE</td><td class="num"></td><td class="num">21,400.00</td></tr>
+        <tr class="alt"><td>02/21</td><td>ACH MCA PMT — LENDER ••••901</td><td class="num">4,250.00</td><td class="num"></td></tr>
+      </tbody>
+    </table>
+    <p class="footer">Pages 2–3 omitted in demo preview · Full PDF would include January 2026.</p>
+  </div>
+</body>
+</html>

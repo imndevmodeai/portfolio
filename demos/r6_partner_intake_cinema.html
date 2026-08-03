@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>If you hire me — Partner intake → Close.io (scenario demo)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --gmail-bg: #f6f8fc;
+      --gmail-nav: #eef2f6;
+      --gmail-blue: #1a73e8;
+      --gmail-red: #d93025;
+      --zoho-blue: #089949;
+      --zoho-header: #226db4;
+      --close-bg: #1a1d21;
+      --close-orange: #e8743a;
+      --close-panel: #252a30;
+      --slack-aubergine: #350d36;
+      --slack-sidebar: #3f0e40;
+      --arche-accent: #38bdf8;
+      --arche-panel: rgba(15, 23, 42, 0.94);
+      --pain: #f87171;
+      --ok: #4ade80;
+      --warn: #fbbf24;
+      --font: "Roboto", system-ui, sans-serif;
+      --mono: "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; background: #0a0e14; color: #e2e8f0; font-family: var(--font); }
+
+    /* —— Theater chrome —— */
+    #theater {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      height: 100vh;
+    }
+    #topbar {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 0.6rem 1rem;
+      background: #111827;
+      border-bottom: 1px solid #1f2937;
+      z-index: 100;
+    }
+    #topbar h1 { font-size: 0.95rem; font-weight: 500; flex: 1; }
+    #topbar .tag { font-size: 0.7rem; color: #94a3b8; background: #1e293b; padding: 0.2rem 0.5rem; border-radius: 4px; }
+    .ctrl { display: flex; gap: 0.4rem; }
+    .ctrl button:disabled { opacity: 0.45; cursor: not-allowed; }
+    .ctrl button {
+      font: inherit; font-size: 0.8rem; padding: 0.35rem 0.75rem;
+      border: 1px solid #334155; background: #1e293b; color: #e2e8f0;
+      border-radius: 6px; cursor: pointer;
+    }
+    .ctrl button.primary { background: var(--arche-accent); color: #0f172a; border-color: transparent; font-weight: 600; }
+    .ctrl button:hover { filter: brightness(1.08); }
+    #progress { flex: 0 0 120px; height: 4px; background: #334155; border-radius: 2px; overflow: hidden; }
+    #progress i { display: block; height: 100%; width: 0%; background: var(--arche-accent); transition: width 0.4s; }
+
+    #stage-wrap { position: relative; overflow: hidden; background: #0f1419; }
+    #main-grid {
+      display: grid;
+      grid-template-columns: 1fr min(400px, 40vw);
+      height: 100%;
+      min-height: 0;
+    }
+    #right-rail {
+      display: flex; flex-direction: column;
+      min-height: 0; overflow: hidden;
+      background: #0f172a;
+      border-left: 1px solid #1e293b;
+    }
+    #terminal-panel {
+      flex: 0 0 42%; min-height: 140px; max-height: 46%;
+      display: flex; flex-direction: column;
+      border-bottom: 1px solid #1e293b;
+      background: #09090b;
+    }
+    #terminal-panel h4, #cast-rail h4 {
+      font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em;
+      color: #64748b; padding: 0.5rem 0.75rem 0.2rem; margin: 0;
+    }
+    #terminal-panel .term-chrome {
+      display: flex; align-items: center; gap: 0.4rem;
+      padding: 0.35rem 0.65rem; background: #18181b; border-bottom: 1px solid #27272a;
+      font-size: 0.62rem; color: #71717a; font-family: var(--mono);
+    }
+    #terminal-panel .term-chrome span.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    #terminal-panel .term-chrome span.dot:nth-child(1) { background: #f87171; }
+    #terminal-panel .term-chrome span.dot:nth-child(2) { background: #fbbf24; }
+    #terminal-panel .term-chrome span.dot:nth-child(3) { background: #4ade80; }
+    #terminal-panel .term-chrome .term-title { flex: 1; margin-left: 0.35rem; color: #a1a1aa; }
+    #terminal-out {
+      flex: 1; overflow-y: auto; padding: 0.45rem 0.65rem;
+      font-family: var(--mono); font-size: 0.68rem; line-height: 1.5;
+    }
+    .log-line { display: block; padding: 0.12rem 0; color: #a1a1aa; }
+    .log-line.log-boot, .log-line.log-plan, .log-line.log-wire { color: #67e8f9; }
+    .log-line.log-bau { color: #4ade80; font-weight: 600; }
+    .log-line.log-extract, .log-line.log-sync, .log-line.log-close, .log-line.log-slack, .log-line.log-gate { color: #fde047; }
+    .log-line.log-highlight { color: #e2e8f0; }
+    #cast-rail {
+      flex: 1; min-height: 0;
+      display: flex; flex-direction: column;
+      border-left: none;
+      background: transparent;
+    }
+    /* Speaker portrait — docked in right rail, never over the app stage */
+    #speaker-dock {
+      flex-shrink: 0;
+      padding: 0 0.65rem 0.45rem;
+      border-bottom: 1px solid #1e293b;
+      min-height: 0;
+    }
+    #speaker-dock:not(.speaker-dock-active) {
+      padding: 0;
+      border-bottom: none;
+    }
+    .speaker-dock-label {
+      font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em;
+      color: #64748b; margin: 0 0 0.35rem; display: none;
+    }
+    #speaker-dock.speaker-dock-active .speaker-dock-label { display: block; }
+    #speaker-popup {
+      position: relative;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(6px) scale(0.98);
+      transition: opacity 0.28s ease, transform 0.32s cubic-bezier(0.2, 0.9, 0.3, 1);
+      width: 100%;
+      max-width: none;
+    }
+    #speaker-popup.visible { opacity: 1; transform: none; }
+    #speaker-popup.hidden { display: none; }
+    .speaker-popup-card {
+      background: linear-gradient(165deg, rgba(24,24,27,0.98), rgba(9,9,11,0.98));
+      border: 1px solid #334155; border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 88px 1fr;
+      align-items: stretch;
+    }
+    #speaker-popup.arche-mode .speaker-popup-card {
+      border-color: rgba(139,92,246,0.55);
+      box-shadow: 0 8px 24px rgba(139,92,246,0.2);
+    }
+    #speaker-popup-img {
+      display: block; width: 88px; height: 88px;
+      object-fit: cover; background: #0c0c0f;
+      grid-row: 1 / span 2;
+    }
+    #speaker-popup.arche-mode #speaker-popup-img {
+      object-fit: contain; padding: 0.25rem; background: #0a0a0f;
+    }
+    .speaker-popup-meta {
+      padding: 0.5rem 0.55rem 0.5rem 0;
+      display: flex; flex-direction: column; justify-content: center;
+      min-width: 0;
+    }
+    #speaker-popup-title { display: block; font-size: 0.74rem; font-weight: 700; color: #38bdf8; line-height: 1.25; }
+    #speaker-popup-sub { display: block; font-size: 0.62rem; color: #94a3b8; margin-top: 0.15rem; line-height: 1.3; }
+    .dashboard-offer {
+      width: min(920px, 96vw); padding: 1.5rem;
+      background: linear-gradient(160deg, #0f172a, #1e1b4b);
+      border: 1px solid #334155; border-radius: 14px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .dashboard-offer h2 { font-size: 1.35rem; margin-bottom: 0.35rem; color: #f8fafc; }
+    .dashboard-offer .sub { color: #94a3b8; font-size: 0.85rem; margin-bottom: 1.25rem; }
+    .offer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+    @media (max-width: 900px) { .offer-grid { grid-template-columns: 1fr; } }
+    .offer-card {
+      background: rgba(15,23,42,0.8); border: 1px solid #334155;
+      border-radius: 10px; padding: 1rem;
+    }
+    .offer-card h3 { font-size: 0.9rem; color: #38bdf8; margin-bottom: 0.35rem; }
+    .offer-card p { font-size: 0.78rem; color: #cbd5e1; line-height: 1.45; }
+    .offer-card .tag { display: inline-block; margin-top: 0.5rem; font-size: 0.65rem;
+      padding: 0.15rem 0.45rem; border-radius: 4px; background: #1e293b; color: #94a3b8; }
+    .offer-card.featured { border-color: rgba(139,92,246,0.5); }
+    #stage {
+      position: relative;
+      min-height: 0;
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0.75rem;
+    }
+    #phase-banner {
+      position: absolute; top: 0.5rem; left: 50%; transform: translateX(-50%);
+      z-index: 45; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em;
+      padding: 0.35rem 0.85rem; border-radius: 999px; pointer-events: none;
+      background: rgba(15,23,42,0.92); border: 1px solid #334155; color: #e2e8f0;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4); white-space: nowrap; max-width: 92%;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    #phase-banner.hidden { display: none; }
+    #phase-banner.phase-manual { border-color: #fbbf24; color: #fde68a; }
+    #phase-banner.phase-gates { border-color: #4ade80; color: #bbf7d0; }
+    #phase-banner.phase-wire { border-color: #38bdf8; color: #bae6fd; }
+    #phase-banner.phase-future, #phase-banner.phase-auto { border-color: #a78bfa; color: #e9d5ff; }
+    #demo-cursor {
+      position: absolute; left: 0; top: 0; z-index: 60; pointer-events: none;
+      width: 0; height: 0; opacity: 0; transition: opacity 0.2s;
+    }
+    #demo-cursor.visible { opacity: 1; }
+    .cursor-pointer {
+      position: absolute; left: -2px; top: -2px; width: 18px; height: 22px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' stroke='%23111' stroke-width='1.2' d='M5 3l3 18 3-7 7-3z'/%3E%3C/svg%3E") center/contain no-repeat;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45));
+    }
+    .cursor-ring {
+      position: absolute; left: -14px; top: -14px; width: 28px; height: 28px;
+      border: 2px solid rgba(56,189,248,0.5); border-radius: 50%;
+      transition: transform 0.15s;
+    }
+    #demo-cursor.clicking .cursor-ring { transform: scale(0.75); border-color: #38bdf8; }
+    .cursor-click-burst {
+      position: absolute; left: -20px; top: -20px; width: 40px; height: 40px;
+      border-radius: 50%; border: 2px solid rgba(56,189,248,0.7); opacity: 0;
+    }
+    #demo-cursor.clicking .cursor-click-burst { animation: cursor-burst 0.45s ease; }
+    @keyframes cursor-burst {
+      0% { opacity: 0.9; transform: scale(0.3); }
+      100% { opacity: 0; transform: scale(1.2); }
+    }
+    .cursor-target-pulse {
+      outline: 2px solid rgba(26,115,232,0.85) !important;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(26,115,232,0.2) !important;
+    }
+    .app-window.manual-mode .arche-overlay { display: none !important; }
+    #manual-overlay {
+      position: absolute; right: 12px; bottom: 12px; width: min(320px, 42%);
+      background: #fff; border: 1px solid #dadce0; border-radius: 10px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25); z-index: 12; padding: 10px 12px;
+      font-size: 12px; color: #202124;
+    }
+    #manual-overlay.hidden { display: none; }
+    #manual-overlay .manual-hud {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #b45309; font-weight: 700; margin-bottom: 8px;
+    }
+    #manual-overlay .manual-row {
+      display: grid; grid-template-columns: 88px 1fr; gap: 6px; align-items: center;
+      padding: 4px 0; border-bottom: 1px solid #f1f3f4;
+    }
+    #manual-overlay .manual-row.active { background: #fef9c3; }
+    #manual-overlay .manual-row.done .manual-val { color: #0f172a; font-weight: 500; }
+    #manual-overlay .manual-val {
+      min-height: 18px; border-bottom: 1px dashed #9aa0a6; font-family: var(--mono);
+      font-size: 11px;
+    }
+    .gate-board {
+      width: min(900px, 96vw); padding: 1.25rem;
+      background: linear-gradient(160deg, #0f172a, #1e293b);
+      border: 1px solid #334155; border-radius: 14px;
+    }
+    .gate-board h2 { font-size: 1.2rem; margin-bottom: 0.35rem; }
+    .gate-board .sub { color: #94a3b8; font-size: 0.82rem; margin-bottom: 1rem; }
+    .gate-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+    @media (max-width: 800px) { .gate-grid { grid-template-columns: 1fr; } }
+    .gate-card {
+      background: #0f172a; border: 1px solid #475569; border-radius: 10px;
+      padding: 0.85rem; position: relative;
+    }
+    .gate-card.saved { border-color: #4ade80; box-shadow: 0 0 0 1px rgba(74,222,128,0.35); }
+    .gate-card h3 { font-size: 0.85rem; color: #38bdf8; margin-bottom: 0.35rem; }
+    .gate-card p { font-size: 0.72rem; color: #cbd5e1; line-height: 1.4; min-height: 2.8em; }
+    .gate-stamp { font-size: 0.65rem; color: #64748b; margin: 0.35rem 0; font-weight: 700; }
+    .gate-card.saved .gate-stamp { color: #4ade80; }
+    .gate-save-btn {
+      margin-top: 0.5rem; width: 100%; padding: 0.4rem; border-radius: 6px;
+      border: 1px solid #38bdf8; background: #1e3a5f; color: #e0f2fe;
+      font-size: 0.72rem; font-weight: 600; cursor: pointer; font-family: var(--font);
+    }
+    .gate-card.saved .gate-save-btn { opacity: 0.5; cursor: default; }
+    .wire-stage {
+      width: min(960px, 96vw); padding: 1rem;
+      background: #0a0e14; border: 1px solid #334155; border-radius: 14px;
+    }
+    .wire-stage h2 { font-size: 1.15rem; margin-bottom: 0.25rem; }
+    .wire-stage .sub { color: #94a3b8; font-size: 0.8rem; margin-bottom: 0.75rem; }
+    #wire-canvas {
+      position: relative; height: min(420px, 50vh); background: #0f1419;
+      border-radius: 10px; border: 1px solid #1e293b; overflow: hidden;
+    }
+    #wire-canvas svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    #wire-canvas .wire-path {
+      fill: none; stroke: #334155; stroke-width: 3; stroke-dasharray: 8 6;
+      transition: stroke 0.4s, stroke-dashoffset 0.6s;
+    }
+    #wire-canvas .wire-path.live {
+      stroke: #38bdf8; stroke-dasharray: none;
+      animation: wire-flow 1.2s linear infinite;
+    }
+    @keyframes wire-flow {
+      0% { stroke-dasharray: 4 12; stroke-dashoffset: 0; }
+      100% { stroke-dasharray: 4 12; stroke-dashoffset: -32; }
+    }
+    .wire-node {
+      position: absolute; transform: translate(-50%, -50%);
+      padding: 0.45rem 0.65rem; border-radius: 8px; font-size: 0.68rem; font-weight: 600;
+      background: #1e293b; border: 1px solid #475569; color: #94a3b8;
+      white-space: nowrap; cursor: pointer;
+    }
+    .wire-node.on { border-color: #38bdf8; color: #e0f2fe; background: #0c4a6e; box-shadow: 0 0 16px rgba(56,189,248,0.35); }
+    #stack-whiteboard {
+      position: relative; height: min(380px, 46vh); margin-bottom: 0.75rem;
+      background: #faf8f2; border: 2px solid #d4cfc0; border-radius: 12px;
+      overflow: hidden; box-shadow: inset 0 0 40px rgba(0,0,0,0.04);
+    }
+    #stack-whiteboard.hidden { display: none; }
+    #stack-whiteboard .wb-title {
+      position: absolute; top: 10px; left: 14px; font-size: 0.72rem; font-weight: 700;
+      color: #64748b; letter-spacing: 0.04em; text-transform: uppercase; z-index: 2;
+    }
+    #stack-whiteboard svg { width: 100%; height: 100%; display: block; }
+    #stack-whiteboard .wb-stroke {
+      fill: none; stroke: #1e293b; stroke-width: 2.2; stroke-linecap: round;
+      stroke-dasharray: 1200; stroke-dashoffset: 1200;
+    }
+    #stack-whiteboard.drawing .wb-stroke { animation: wb-draw 2.8s ease forwards; }
+    #stack-whiteboard .wb-stroke.delay1 { animation-delay: 0.35s; }
+    #stack-whiteboard .wb-stroke.delay2 { animation-delay: 0.9s; }
+    #stack-whiteboard .wb-stroke.delay3 { animation-delay: 1.5s; }
+    #stack-whiteboard .wb-label {
+      font-family: "Segoe Print", "Comic Sans MS", cursive; font-size: 13px; fill: #334155;
+    }
+    @keyframes wb-draw { to { stroke-dashoffset: 0; } }
+    #wire-canvas.dimmed { opacity: 0.35; pointer-events: none; }
+    .playbook-bar {
+      display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center;
+      margin: 0.75rem 0 0.5rem; font-size: 0.72rem; color: #94a3b8;
+    }
+    .playbook-bar select {
+      background: #0f172a; border: 1px solid #475569; color: #e2e8f0;
+      border-radius: 6px; padding: 0.35rem 0.5rem; font-size: 0.72rem;
+    }
+    .playbook-chip {
+      padding: 0.2rem 0.5rem; border-radius: 999px; border: 1px solid #334155;
+      font-size: 0.65rem; color: #7dd3fc;
+    }
+    .multiply-stage {
+      width: min(920px, 96vw); display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+    }
+    @media (max-width: 800px) { .multiply-stage { grid-template-columns: 1fr; } }
+    .multiply-panel {
+      background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 1rem;
+    }
+    .multiply-panel h3 { font-size: 0.9rem; color: #a78bfa; margin-bottom: 0.5rem; }
+    #deal-queue .queue-deal {
+      padding: 0.45rem 0.55rem; margin: 0.35rem 0; border-radius: 6px;
+      border: 1px solid #334155; font-size: 0.72rem; color: #cbd5e1;
+      transition: background 0.25s, border-color 0.25s;
+    }
+    #deal-queue .queue-deal.processed {
+      border-color: #4ade80; background: rgba(74,222,128,0.12); color: #bbf7d0;
+    }
+    #multiply-meter .meter-track {
+      height: 10px; background: #1e293b; border-radius: 6px; overflow: hidden; margin-top: 0.5rem;
+    }
+    #multiply-meter .meter-fill {
+      height: 100%; width: 12%; background: linear-gradient(90deg, #6366f1, #22d3ee);
+      transition: width 2.8s ease;
+    }
+    #multiply-meter.running .meter-fill { width: 88%; }
+    .multiply-panel .meter-label { font-size: 0.7rem; color: #94a3b8; margin-top: 0.35rem; }
+    #cast-rail .persona-hint {
+      font-size: 0.72rem; color: #94a3b8; padding: 0 0.75rem 0.5rem;
+      line-height: 1.35; border-bottom: 1px solid #1e293b;
+    }
+    #broadcast-out {
+      flex: 1; overflow-y: auto; padding: 0.5rem 0.65rem 0.75rem;
+    }
+    .cast-line {
+      margin: 0.5rem 0; padding: 0.55rem 0.65rem; border-radius: 10px;
+      font-size: 0.8rem; line-height: 1.45;
+      animation: cast-in 0.35s ease;
+    }
+    @keyframes cast-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .cast-line .cast-label { display: block; font-size: 0.62rem; font-weight: 700; margin-bottom: 0.25rem; letter-spacing: 0.03em; }
+    .cast-line .cast-text { display: block; }
+    .cast-decision { background: rgba(59,130,246,0.14); border: 1px solid rgba(59,130,246,0.35); }
+    .cast-decision .cast-label { color: #93c5fd; }
+    .cast-arche { background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.4); }
+    .cast-arche .cast-label { color: #c4b5fd; }
+    .cast-narrator { background: rgba(161,161,170,0.06); border: 1px solid #334155; font-size: 0.75rem; color: #94a3b8; }
+    .cast-narrator .cast-label { color: #64748b; }
+    #voice-status { font-size: 0.7rem; color: #64748b; padding: 0.35rem 0.75rem; border-top: 1px solid #1e293b; }
+    .scene {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0.5rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.55s ease;
+    }
+    .scene.active { opacity: 1; pointer-events: auto; z-index: 2; }
+
+    #narration {
+      padding: 0.65rem 1rem;
+      background: #0f172a;
+      border-top: 1px solid #1e293b;
+      display: grid; grid-template-columns: auto 1fr auto;
+      gap: 0.75rem; align-items: center;
+      min-height: 56px;
+    }
+    #narration .speaker {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, #0ea5e9, #6366f1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.55rem; font-weight: 700; text-align: center; line-height: 1.1;
+    }
+    #narration .speaker.keyholder { background: linear-gradient(135deg, #0ea5e9, #0369a1); }
+    #narration .speaker.arche { background: linear-gradient(135deg, #6366f1, #0ea5e9); }
+    #narration .speaker.buyer { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+    #narration .speaker.work-agent { background: linear-gradient(135deg, #ec4899, #be185d); }
+    #narration p { font-size: 0.9rem; line-height: 1.35; color: #cbd5e1; }
+    #narration .scene-idx { font-size: 0.75rem; color: #64748b; font-family: var(--mono); }
+
+    /* —— App frame (shared) —— */
+    .app-window {
+      width: min(1100px, 96vw);
+      height: min(620px, 72vh);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.55);
+      display: flex; flex-direction: column;
+      position: relative;
+    }
+    .app-titlebar {
+      height: 32px; background: #e8eaed;
+      display: flex; align-items: center; padding: 0 12px; gap: 6px;
+      border-bottom: 1px solid #dadce0;
+    }
+    .app-titlebar i { width: 10px; height: 10px; border-radius: 50%; }
+    .app-titlebar i:nth-child(1) { background: #ff5f57; }
+    .app-titlebar i:nth-child(2) { background: #febc2e; }
+    .app-titlebar i:nth-child(3) { background: #28c840; }
+    .app-titlebar span { margin-left: 8px; font-size: 12px; color: #5f6368; }
+
+    /* —— Workflow swimlane (consultant) —— */
+    .workflow-board {
+      width: min(1000px, 96vw); max-height: 72vh; overflow: auto;
+      background: #111827; border: 1px solid #334155; border-radius: 12px; padding: 1.25rem;
+    }
+    .workflow-board h2 { font-size: 1.15rem; font-weight: 500; margin-bottom: 0.5rem; }
+    .workflow-board .sub { color: #94a3b8; font-size: 0.85rem; margin-bottom: 1rem; }
+    .swim { display: grid; gap: 10px; margin-bottom: 1rem; }
+    .swim-row { display: grid; grid-template-columns: 140px 1fr 32px 1fr; gap: 8px; align-items: center; font-size: 12px; }
+    .swim-row .lane { color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .swim-box { background: #1e293b; border-radius: 8px; padding: 8px 10px; border: 1px solid #334155; }
+    .swim-box.human { border-color: #f87171; background: rgba(248,113,113,0.08); }
+    .swim-box.arche { border-color: var(--arche-accent); background: rgba(56,189,248,0.1); }
+    .swim-box.keep { border-color: #4ade80; background: rgba(74,222,128,0.06); }
+    .swim-arrow { text-align: center; color: #64748b; font-size: 18px; }
+    .raci { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 12px; }
+    .raci h4 { font-size: 11px; text-transform: uppercase; color: #94a3b8; margin-bottom: 6px; }
+    .raci ul { list-style: none; padding: 0; }
+    .raci li { padding: 4px 0; border-bottom: 1px solid #1e293b; color: #cbd5e1; }
+    .raci li strike { color: #64748b; }
+    .cite-strip { margin-top: 12px; padding: 10px; background: #0f172a; border-radius: 8px; font-size: 11px; color: #94a3b8; line-height: 1.45; }
+    .cite-strip a { color: #7dd3fc; }
+
+    /* —— Gmail (M3 Expressive–inspired, 2025–2026) —— */
+    .gmail { background: var(--gmail-bg); color: #202124; flex: 1; display: flex; flex-direction: column; }
+    .gmail-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px 8px 8px; background: var(--gmail-bg);
+    }
+    .gmail-menu-btn {
+      width: 40px; height: 40px; border: none; background: transparent;
+      border-radius: 50%; font-size: 18px; color: #5f6368; cursor: default;
+    }
+    .gmail-search-wrap { flex: 1; display: flex; align-items: center; gap: 8px; }
+    .gmail-logo { font-family: "Google Sans", var(--font); font-size: 22px; }
+    .gmail-logo b { color: #ea4335; font-weight: 500; }
+    .gmail-logo span { color: #5f6368; }
+    .gmail-search {
+      flex: 1; height: 48px; border-radius: 28px;
+      background: #eaf1fb; border: none; padding: 0 20px;
+      font-size: 15px; color: #5f6368; box-shadow: none;
+    }
+    .gmail-account { width: 32px; height: 32px; border-radius: 50%; background: #1a73e8; color: #fff; font-size: 13px; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+    .gmail-body { flex: 1; display: flex; min-height: 0; padding: 8px 8px 8px 0; gap: 8px; }
+    .gmail-list-card {
+      flex: 1; display: flex; min-height: 0; background: #fff;
+      border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(60,64,67,0.15);
+    }
+    .gmail-nav {
+      width: 200px; padding: 8px; background: var(--gmail-bg);
+      border-right: 1px solid #e0e0e0;
+    }
+    .gmail-compose {
+      background: #c2e7ff; color: #001d35; border: none; border-radius: 16px;
+      padding: 14px 26px; font-weight: 500; margin-bottom: 12px; width: calc(100% - 16px);
+      font-size: 14px; cursor: default; box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+    .gmail-compose .ico { margin-right: 8px; }
+    .gmail-nav a {
+      display: flex; align-items: center; gap: 12px;
+      padding: 6px 12px 6px 20px; border-radius: 0 20px 20px 0;
+      font-size: 14px; color: #202124; text-decoration: none;
+    }
+    .gmail-nav a.on { background: #d3e3fd; font-weight: 700; }
+    .gmail-list { width: 340px; border-right: 1px solid #e8eaed; background: #fff; overflow: auto; }
+    .gmail-row {
+      padding: 10px 16px; margin: 4px 8px; border-radius: 12px; cursor: default;
+      font-size: 13px; border: 1px solid transparent;
+    }
+    .gmail-row.unread { background: #f2f6fc; }
+    .gmail-row.unread .subj { font-weight: 700; }
+    .gmail-row.hl { background: #d3e3fd; outline: 2px solid var(--gmail-blue); outline-offset: -2px; }
+    .gmail-row .from { color: #202124; }
+    .gmail-row .subj { color: #202124; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .gmail-row .prev { color: #5f6368; font-size: 12px; }
+    .gmail-read { flex: 1; background: #fff; padding: 20px 24px; overflow: auto; font-size: 14px; line-height: 1.5; border-radius: 16px; box-shadow: 0 1px 3px rgba(60,64,67,0.12); }
+    .gmail-reply-bar { display: flex; gap: 8px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #e8eaed; }
+    .gmail-reply-bar button { padding: 10px 20px; border-radius: 20px; border: none; font-size: 13px; font-weight: 500; cursor: default; }
+    .gmail-reply-bar .reply { background: #0b57d0; color: #fff; }
+    .gmail-reply-bar .fwd { background: #f1f3f4; color: #202124; }
+    .gmail-read h2 { font-size: 20px; font-weight: 400; margin-bottom: 12px; }
+    .gmail-meta { color: #5f6368; font-size: 13px; margin-bottom: 16px; }
+    .gmail-attach-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 8px; }
+    .gmail-attach-chip {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: #fff; border: 1px solid #dadce0; border-radius: 8px;
+      padding: 8px 12px 8px 10px; margin: 0; font-size: 12px; cursor: pointer;
+      font-family: var(--font); text-align: left; max-width: 280px;
+      transition: box-shadow 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .gmail-attach-chip:hover { border-color: var(--gmail-blue); box-shadow: 0 1px 4px rgba(26,115,232,0.25); background: #f8fbff; }
+    .gmail-attach-chip:active { transform: scale(0.98); }
+    .gmail-attach-icon {
+      width: 32px; height: 32px; border-radius: 4px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 800; color: #fff; letter-spacing: -0.02em;
+    }
+    .gmail-attach-icon.pdf { background: linear-gradient(135deg, #e53935, #c62828); }
+    .gmail-attach-meta { display: flex; flex-direction: column; min-width: 0; }
+    .gmail-attach-meta .name { color: #202124; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .gmail-attach-meta .size { color: #5f6368; font-size: 11px; margin-top: 2px; }
+    .close-doc-chip {
+      display: inline-flex; align-items: center; gap: 6px; background: #2d333b; border: 1px solid #3d444d;
+      border-radius: 6px; padding: 6px 10px; margin: 4px 6px 4px 0; font-size: 11px; color: #e8eaed;
+      cursor: pointer; font-family: var(--font);
+    }
+    .close-doc-chip:hover { border-color: var(--close-orange); background: #353b44; }
+    #doc-viewer {
+      position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center;
+      padding: 24px; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    #doc-viewer.visible { opacity: 1; pointer-events: auto; }
+    #doc-viewer.hidden { display: none; }
+    #doc-viewer-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.72); }
+    .doc-viewer-card {
+      position: relative; width: min(920px, 96vw); height: min(88vh, 820px);
+      background: #fff; border-radius: 12px; overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.55);
+      display: flex; flex-direction: column;
+    }
+    .doc-viewer-head {
+      display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+      background: #f1f3f4; border-bottom: 1px solid #dadce0; flex-shrink: 0;
+    }
+    .doc-viewer-head .pdf-badge { background: #c62828; color: #fff; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px; }
+    .doc-viewer-head .titles { flex: 1; min-width: 0; }
+    .doc-viewer-head .titles strong { display: block; font-size: 13px; color: #202124; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .doc-viewer-head .titles span { font-size: 11px; color: #5f6368; }
+    #doc-viewer-close {
+      border: none; background: transparent; font-size: 1.4rem; line-height: 1; cursor: pointer;
+      color: #5f6368; padding: 4px 8px; border-radius: 6px;
+    }
+    #doc-viewer-close:hover { background: #e8eaed; color: #202124; }
+    #doc-viewer-frame { flex: 1; width: 100%; border: 0; background: #fff; }
+
+    /* —— Zoho —— */
+    .zoho { background: #f5f7fa; color: #313949; flex: 1; display: flex; flex-direction: column; }
+    .zoho-top {
+      background: var(--zoho-header); color: #fff; padding: 0 16px; height: 48px;
+      display: flex; align-items: center; gap: 16px; font-size: 14px;
+    }
+    .zoho-top .logo { font-weight: 700; letter-spacing: -0.02em; }
+    .zoho-tabs { display: flex; gap: 4px; margin-left: 24px; }
+    .zoho-tabs span { padding: 14px 12px; opacity: 0.7; font-size: 13px; }
+    .zoho-tabs span.on { opacity: 1; border-bottom: 3px solid #fff; font-weight: 600; }
+    .zoho-main { flex: 1; display: flex; min-height: 0; }
+    .zoho-side { width: 220px; background: #fff; border-right: 1px solid #e3e7ed; padding: 12px 0; font-size: 13px; }
+    .zoho-side div { padding: 8px 20px; color: #616e88; }
+    .zoho-side div.on { background: #e8f4fc; color: var(--zoho-header); font-weight: 600; border-left: 3px solid var(--zoho-header); }
+    .zoho-record { flex: 1; padding: 20px; background: #fff; }
+    .zoho-record h3 { font-size: 18px; margin-bottom: 16px; color: #111; }
+    .zoho-grid { display: grid; grid-template-columns: 140px 1fr; gap: 8px 16px; font-size: 13px; }
+    .zoho-grid label { color: #616e88; }
+    .zoho-grid .val { color: #111; font-weight: 500; }
+    .zoho-grid .val.new { animation: flash 0.6s ease; color: var(--zoho-blue); }
+
+    /* —— Close.io (lead page layout per Close Help) —— */
+    .close { background: var(--close-bg); color: #e8eaed; flex: 1; display: flex; min-height: 0; }
+    .close-app-nav { width: 56px; background: #0d0f12; border-right: 1px solid #2d333b; }
+    .close-side { width: 220px; background: #12151a; padding: 12px 0; border-right: 1px solid #2d333b; font-size: 12px; }
+    .close-side .section { padding: 8px 16px; color: #6b7280; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 8px; }
+    .close-side .item { padding: 6px 16px; color: #d1d5db; }
+    .close-side .item strong { color: #fff; display: block; }
+    .close-side .brand { padding: 0 16px 16px; font-weight: 700; color: var(--close-orange); font-size: 15px; }
+    .close-side a { display: block; padding: 8px 16px; font-size: 13px; color: #9aa0a6; }
+    .close-side a.on { background: #252a30; color: #fff; }
+    .close-main { flex: 1; padding: 16px 20px; min-width: 0; overflow: auto; }
+    .close-history { width: 260px; background: #12151a; border-left: 1px solid #2d333b; padding: 12px; font-size: 12px; overflow: auto; }
+    .close-history h4 { font-size: 11px; color: #9aa0a6; margin-bottom: 8px; text-transform: uppercase; }
+    .close-history .ev { padding: 8px 0; border-bottom: 1px solid #2d333b; color: #d1d5db; }
+    .close-status-pill { float: right; background: var(--close-orange); color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .close-main h2 { font-size: 22px; margin-bottom: 4px; }
+    .close-main .sub { color: #9aa0a6; font-size: 13px; margin-bottom: 20px; }
+    .close-fields { display: grid; grid-template-columns: 160px 1fr; gap: 10px; font-size: 13px; max-width: 560px; }
+    .close-fields label { color: #9aa0a6; }
+    .close-pipeline { display: flex; gap: 8px; margin: 16px 0; }
+    .close-pipeline span { padding: 6px 12px; border-radius: 4px; background: #252a30; font-size: 12px; }
+    .close-pipeline span.on { background: var(--close-orange); color: #fff; }
+    .close-docs { margin-top: 16px; }
+    .close-docs .chip { display: inline-block; background: #252a30; padding: 6px 10px; border-radius: 4px; font-size: 12px; margin: 4px 6px 0 0; }
+
+    /* —— Slack —— */
+    .slack { background: #fff; flex: 1; display: flex; }
+    .slack-rail { width: 56px; background: var(--slack-aubergine); }
+    .slack-side { width: 220px; background: var(--slack-sidebar); color: #d1d2d3; padding: 12px 0; font-size: 14px; }
+    .slack-side .team { padding: 0 16px 12px; font-weight: 700; color: #fff; }
+    .slack-side .ch { padding: 6px 16px; border-radius: 4px; margin: 2px 8px; }
+    .slack-side .ch.on { background: #1164a3; color: #fff; }
+    .slack-feed { flex: 1; padding: 16px 20px; background: #fff; color: #1d1c1d; }
+    .slack-feed h3 { font-size: 18px; margin-bottom: 16px; border-bottom: 1px solid #e8e8e8; padding-bottom: 12px; }
+    .slack-msg { display: flex; gap: 10px; margin-bottom: 16px; font-size: 14px; line-height: 1.45; }
+    .slack-msg .av { width: 36px; height: 36px; border-radius: 6px; background: var(--close-orange); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 12px; }
+    .slack-msg .who { font-weight: 700; margin-right: 8px; }
+    .slack-msg .ts { color: #616061; font-size: 12px; font-weight: 400; }
+
+    /* —— ArchE overlay —— */
+    .arche-overlay {
+      position: absolute; right: 12px; top: 44px; bottom: 12px; width: 300px;
+      background: var(--arche-panel); border: 1px solid #334155; border-radius: 10px;
+      padding: 12px; font-size: 12px; z-index: 20;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      display: flex; flex-direction: column;
+    }
+    .arche-overlay h4 { color: var(--arche-accent); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+    .arche-overlay .scan { height: 3px; background: #1e293b; border-radius: 2px; overflow: hidden; margin-bottom: 10px; }
+    .arche-overlay .scan i { display: block; height: 100%; width: 30%; background: var(--arche-accent); animation: scan 1.2s ease infinite; }
+  @keyframes scan { 0% { transform: translateX(-100%); } 100% { transform: translateX(400%); } }
+    .arche-json { font-family: var(--mono); font-size: 10px; color: #94a3b8; flex: 1; overflow: auto; line-height: 1.5; }
+    .arche-json .field { opacity: 0; transform: translateY(4px); }
+    .arche-json .field.show { opacity: 1; transform: none; transition: all 0.35s ease; color: #e2e8f0; }
+    .arche-json .field .k { color: #7dd3fc; }
+    .conf-bar { margin-top: 8px; height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden; }
+    .conf-bar i { display: block; height: 100%; width: 0%; background: var(--ok); transition: width 1s ease; }
+    .conf-label { font-size: 11px; margin-top: 4px; color: #94a3b8; }
+
+    /* —— Pain popup —— */
+    .pain-popup {
+      position: absolute; inset: 0; z-index: 30;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.55);
+    }
+    .pain-card {
+      max-width: 420px; background: #1e1e1e; border: 2px solid var(--pain);
+      border-radius: 12px; padding: 24px; text-align: center;
+      box-shadow: 0 0 60px rgba(248,113,113,0.25);
+    }
+    .pain-card h3 { color: var(--pain); font-size: 1.1rem; margin-bottom: 12px; }
+    .pain-card p { font-size: 0.95rem; color: #cbd5e1; line-height: 1.45; }
+    .pain-card.ok h3 { color: var(--ok); }
+    .pain-card.ok { border-color: var(--ok); box-shadow: 0 0 60px rgba(74,222,128,0.2); }
+
+    /* —— Intro / outro —— */
+    .title-card {
+      text-align: center; max-width: 640px; padding: 2rem;
+    }
+    .title-card h2 { font-size: 1.75rem; font-weight: 500; margin-bottom: 1rem; line-height: 1.25; }
+    .title-card p { color: #94a3b8; font-size: 1rem; line-height: 1.5; }
+    .title-card .stat { display: flex; gap: 2rem; justify-content: center; margin-top: 2rem; }
+    .title-card .stat div { text-align: center; }
+    .title-card .stat b { display: block; font-size: 2rem; color: var(--pain); }
+    .title-card .stat.ok b { color: var(--ok); }
+
+    @keyframes flash { 0%,100% { background: transparent; } 50% { background: #e8f8ef; } }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div id="theater">
+    <header id="topbar">
+      <h1>If you hire me — Partner intake scenario <span class="tag">SANITIZED · PORTFOLIO CAST</span></h1>
+      <div id="progress"><i id="progress-bar"></i></div>
+      <div class="ctrl">
+        <button type="button" id="btn-prev">◀</button>
+        <button type="button" id="btn-play" class="primary" disabled title="Loading scenario…">▶ Loading…</button>
+        <button type="button" id="btn-pause">⏸</button>
+        <button type="button" id="btn-restart">↺</button>
+        <button type="button" id="btn-next">▶▶</button>
+      </div>
+    </header>
+
+    <div id="stage-wrap">
+      <div id="main-grid">
+      <div id="stage">
+        <div id="phase-banner" class="hidden"></div>
+
+        <!-- Scene 0: Workflow + RACI -->
+        <div class="scene active" data-scene="0">
+          <div class="workflow-board">
+            <h2>Your stack — before and after Week 1</h2>
+            <p class="sub">14-step RFP · conversation driven from your Upwork post · <strong>sanitized simulation</strong></p>
+            <div class="swim">
+              <div class="swim-row"><span class="lane">Partner</span><div class="swim-box keep">ISO emails deal + PDFs</div><span class="swim-arrow">→</span><div class="swim-box arche">Gmail API ingest</div></div>
+              <div class="swim-row"><span class="lane">Was: Ops</span><div class="swim-box human">Manual read + type 15+ fields</div><span class="swim-arrow">→</span><div class="swim-box arche">Claude extract + JSON audit</div></div>
+              <div class="swim-row"><span class="lane">Was: CRM</span><div class="swim-box human">Create GHL/Zoho → wait for Close</div><span class="swim-arrow">→</span><div class="swim-box arche">Your existing bridge (unchanged)</div></div>
+              <div class="swim-row"><span class="lane">Was: Admin</span><div class="swim-box human">Rename lead, upload docs, start sequence</div><span class="swim-arrow">→</span><div class="swim-box arche">Close.io API enrich</div></div>
+              <div class="swim-row"><span class="lane">Kept</span><div class="swim-box keep">Sales AE — book call</div><span class="swim-arrow">→</span><div class="swim-box keep">Slack notify + human review queue</div></div>
+            </div>
+            <div class="raci">
+              <div><h4>Replaced or collapsed</h4><ul><li><strike>Data entry / ops coordinator</strike> → extract + API</li><li><strike>CRM copy-paste</strike> → structured sync</li></ul></div>
+              <div><h4>Not replaced</h4><ul><li>Underwriter / credit judgment</li><li>Partner relationship owners</li><li>Low-confidence review (human gate)</li></ul></div>
+            </div>
+            <div class="cite-strip">
+              <strong>Cited risk math:</strong> manual field error rates ~1–4% per field (Barchard &amp; Pace 2011; Goldberg et al. 2008 JAMIA).
+              ~15 fields/deal → ~36% chance ≥1 error/deal at 3%/field (illustrative).
+              <a href="R6_CINEMA_SOURCES.md">Full sources</a>
+            </div>
+            <div class="playbook-bar">
+              <span>Playbook adapter:</span>
+              <select id="crm-adapter" aria-label="CRM adapter">
+                <option value="zoho">Zoho CRM (client default)</option>
+                <option value="ghl">Go High Level</option>
+                <option value="hubspot">HubSpot</option>
+              </select>
+              <span class="playbook-chip">Gmail API</span>
+              <span class="playbook-chip">Claude extract</span>
+              <span class="playbook-chip">Middleware bridge</span>
+              <span class="playbook-chip">Close.io</span>
+              <span class="playbook-chip">Slack</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scene 1: Gmail inbox -->
+        <div class="scene" data-scene="1">
+          <div class="app-window">
+            <div class="app-titlebar"><i></i><i></i><i></i><span>mail.google.com — Inbox</span></div>
+            <div class="gmail">
+              <div class="gmail-header">
+                <button class="gmail-menu-btn" type="button" aria-label="Menu">☰</button>
+                <div class="gmail-logo"><b>M</b><span>ail</span></div>
+                <div class="gmail-search-wrap">
+                  <input class="gmail-search" type="text" readonly value="Search mail" />
+                  <span class="gmail-account">B</span>
+                </div>
+              </div>
+              <div class="gmail-body">
+                <nav class="gmail-nav">
+                  <button class="gmail-compose"><span class="ico">✎</span>Compose</button>
+                  <a class="on" href="#">Inbox <span style="margin-left:auto;font-weight:700">3</span></a>
+                  <a href="#">Starred</a>
+                  <a href="#">Sent</a>
+                </nav>
+                <div class="gmail-list-card">
+                  <div class="gmail-list" id="gmail-list"></div>
+                  <div class="gmail-read" style="color:#5f6368;display:flex;align-items:center;justify-content:center">
+                    Select a message to read
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scene 2: Gmail open email -->
+        <div class="scene" data-scene="2">
+          <div class="app-window" style="position:relative">
+            <div class="app-titlebar"><i></i><i></i><i></i><span>mail.google.com — Partner submission</span></div>
+            <div class="gmail">
+              <div class="gmail-header">
+                <button class="gmail-menu-btn" type="button">☰</button>
+                <div class="gmail-logo"><b>M</b><span>ail</span></div>
+                <div class="gmail-search-wrap">
+                  <input class="gmail-search" readonly value="partner deals" />
+                  <span class="gmail-account">B</span>
+                </div>
+              </div>
+              <div class="gmail-body">
+                <nav class="gmail-nav"><button class="gmail-compose"><span class="ico">✎</span>Compose</button><a class="on" href="#">Inbox</a></nav>
+                <div class="gmail-list-card">
+                  <div class="gmail-list" style="width:260px" id="gmail-list-mini"></div>
+                  <div class="gmail-read" id="gmail-open-body"></div>
+                </div>
+              </div>
+            </div>
+            <div id="manual-overlay" class="hidden">
+              <div class="manual-hud">Manual ops worksheet · deliberate pace</div>
+              <div class="manual-row" data-manual="legal"><span>Legal name</span><span class="manual-val"></span></div>
+              <div class="manual-row" data-manual="owner"><span>Owner</span><span class="manual-val"></span></div>
+              <div class="manual-row" data-manual="revenue"><span>Revenue/mo</span><span class="manual-val"></span></div>
+              <div class="manual-row" data-manual="request"><span>Request $</span><span class="manual-val"></span></div>
+            </div>
+            <div class="arche-overlay hidden" id="overlay-scan">
+              <h4>ArchE · scanning</h4>
+              <div class="scan"><i></i></div>
+              <div class="arche-json" id="extract-json"></div>
+              <div class="conf-bar"><i id="conf-fill"></i></div>
+              <div class="conf-label" id="conf-label">Confidence: —</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scene 3: Pain manual -->
+        <div class="scene" data-scene="3">
+          <div class="app-window" style="position:relative">
+            <div class="app-titlebar"><i></i><i></i><i></i><span>mail.google.com</span></div>
+            <div class="gmail" style="filter:blur(1px);opacity:0.7"><div class="gmail-read" id="gmail-blur"></div></div>
+            <div class="pain-popup">
+              <div class="pain-card">
+                <h3>⚠ Pain point</h3>
+                <p>Ops copies from PDFs and email bodies into Close — <strong>15+ fields</strong>, inconsistent formats, missing voided checks. At ~3% error/field (published manual-entry range), roughly <strong>one in three deals</strong> gets at least one wrong field.</p>
+                <p style="margin-top:10px;font-size:0.8rem;color:#94a3b8">Barchard &amp; Pace 2011; Goldberg et al. 2008 — see R6_CINEMA_SOURCES.md</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scene 4: Zoho -->
+        <div class="scene" data-scene="4">
+          <div class="app-window">
+            <div class="app-titlebar"><i></i><i></i><i></i><span>crm.zoho.com — Leads</span></div>
+            <div class="zoho">
+              <div class="zoho-top">
+                <span class="logo">Zoho CRM</span>
+                <div class="zoho-tabs"><span class="on">Leads</span><span>Contacts</span><span>Deals</span></div>
+              </div>
+              <div class="zoho-main">
+                <div class="zoho-side"><div class="on">Leads</div><div>Contacts</div><div>Reports</div></div>
+                <div class="zoho-record" id="zoho-record"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scene 5: Close.io -->
+        <div class="scene" data-scene="5">
+          <div class="app-window">
+            <div class="app-titlebar"><i></i><i></i><i></i><span>app.close.com — Lead</span></div>
+            <div class="close">
+              <div class="close-app-nav"></div>
+              <div class="close-side" id="close-left-rail">
+                <div class="brand">close</div>
+                <div class="section">This lead</div>
+                <div class="item"><strong>Tasks</strong> Book partner call</div>
+                <div class="item"><strong>Contacts</strong> M. Chen</div>
+                <div class="item"><strong>Custom fields</strong> Revenue, MCA</div>
+              </div>
+              <div class="close-main" id="close-main"></div>
+              <div class="close-history" id="close-history"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scene 6: Slack -->
+        <div class="scene" data-scene="6">
+          <div class="app-window">
+            <div class="app-titlebar"><i></i><i></i><i></i><span>app.slack.com</span></div>
+            <div class="slack">
+              <div class="slack-rail"></div>
+              <div class="slack-side">
+                <div class="team">Funding Ops</div>
+                <div class="ch on"># partner-intake</div>
+                <div class="ch"># sales-handoff</div>
+              </div>
+              <div class="slack-feed" id="slack-feed"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scene 9: Gate capture -->
+        <div class="scene" data-scene="9">
+          <div class="gate-board" id="gate-board">
+            <h2>Crystallize the gates</h2>
+            <p class="sub">Save rules before automation — no silent Close writes</p>
+            <div class="gate-grid">
+              <div class="gate-card" data-gate="confidence_threshold">
+                <h3>Confidence gate</h3>
+                <p>Auto-write only when model score ≥ kickoff threshold. Demo 94% is message-only.</p>
+                <div class="gate-stamp">UNSAVED</div>
+                <button type="button" class="gate-save-btn">Save gate</button>
+              </div>
+              <div class="gate-card" data-gate="human_review_queue">
+                <h3>Human review queue</h3>
+                <p>Missing docs, conflicts, duplicates → review lane. Harbor Retail held in demo.</p>
+                <div class="gate-stamp">UNSAVED</div>
+                <button type="button" class="gate-save-btn">Save gate</button>
+              </div>
+              <div class="gate-card" data-gate="json_audit_log">
+                <h3>JSON audit log</h3>
+                <p>Every API step logged — ingest, extract, CRM, Close, Slack — for compliance.</p>
+                <div class="gate-stamp">UNSAVED</div>
+                <button type="button" class="gate-save-btn">Save gate</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scene 10: Automation wiring -->
+        <div class="scene" data-scene="10">
+          <div class="wire-stage">
+            <h2>Wire automations on your stack</h2>
+            <p class="sub">Week 1 whiteboard → governed API wiring (playbook swaps CRM, keeps the path)</p>
+            <div id="stack-whiteboard" class="hidden" aria-hidden="true">
+              <span class="wb-title">Week 1 · live stack map</span>
+              <svg viewBox="0 0 600 320" preserveAspectRatio="xMidYMid meet">
+                <text class="wb-label" x="24" y="36">Partner email + PDFs</text>
+                <path class="wb-stroke" d="M40,50 L120,50 L120,90 L200,90" />
+                <text class="wb-label" x="210" y="98">Extract + gates</text>
+                <path class="wb-stroke delay1" d="M200,90 L280,90 L280,150 L360,150" />
+                <text class="wb-label" x="370" y="158" id="wb-crm-label">Zoho / GHL bridge</text>
+                <path class="wb-stroke delay2" d="M360,150 L440,150 L440,210 L520,210" />
+                <text class="wb-label" x="430" y="228">Close + Slack</text>
+                <path class="wb-stroke delay3" d="M520,210 L560,210" />
+              </svg>
+            </div>
+            <div id="wire-canvas">
+              <svg viewBox="0 0 800 400" preserveAspectRatio="none">
+                <path class="wire-path" d="M120,200 L240,200" />
+                <path class="wire-path" d="M320,200 L440,200" />
+                <path class="wire-path" d="M520,200 L600,120" />
+                <path class="wire-path" d="M520,200 L600,280" />
+                <path class="wire-path" d="M680,120 L720,120" />
+                <path class="wire-path" d="M680,280 L720,280" />
+              </svg>
+              <div class="wire-node" style="left:15%;top:50%" data-tap="gmail.api">Gmail API</div>
+              <div class="wire-node" style="left:40%;top:50%" data-tap="claude.extract">Claude extract</div>
+              <div class="wire-node" style="left:65%;top:50%" data-tap="crm.bridge">GHL / Zoho</div>
+              <div class="wire-node" style="left:85%;top:30%" data-tap="close.api">Close.io</div>
+              <div class="wire-node" style="left:85%;top:70%" data-tap="slack.webhook">Slack</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scene 11: Future multiply -->
+        <div class="scene" data-scene="11">
+          <div class="multiply-stage">
+            <div class="multiply-panel">
+              <h3>Parallel intake queue</h3>
+              <div id="deal-queue">
+                <div class="queue-deal">Brightline HVAC · $85K</div>
+                <div class="queue-deal">Harbor Retail · review</div>
+                <div class="queue-deal">Summit Referral · $62K</div>
+                <div class="queue-deal">Prairie Logistics · $110K</div>
+                <div class="queue-deal">Coastal Mech · $48K</div>
+                <div class="queue-deal">Metro Plumbing · $72K</div>
+              </div>
+            </div>
+            <div class="multiply-panel" id="multiply-meter">
+              <h3>Multiplication effect</h3>
+              <p style="font-size:0.78rem;color:#cbd5e1;line-height:1.45">One careful manual path → governed queue drains while ops only touches exceptions.</p>
+              <div class="meter-track"><div class="meter-fill"></div></div>
+              <div class="meter-label">Starting single-thread manual load…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scene 7: Solved -->
+        <div class="scene" data-scene="7">
+          <div class="title-card">
+            <h2>Week 1 deliverable on your stack</h2>
+            <p>Live Gmail ingest · Claude extract · confidence gate · Close enrich · Slack · JSON audit every step</p>
+            <div class="stat">
+              <div class="ok"><b>SLA</b><span>defined at kickoff</span></div>
+              <div class="ok"><b>Audit</b><span>every API step logged</span></div>
+              <div class="ok"><b>Gate</b><span>no silent CRM writes</span></div>
+            </div>
+            <p class="cite-strip" style="max-width:520px;margin:1rem auto 0;text-align:left">
+              Model confidence in demo (94%) is <em>this message only</em>, not an industry benchmark.
+            </p>
+          </div>
+        </div>
+
+        <!-- Scene 8: ResonantiA dashboard + retainer -->
+        <div class="scene" data-scene="8">
+          <div class="dashboard-offer">
+            <h2>After go-live — ResonantiA leave-behind</h2>
+            <p class="sub">Custom operations dashboard · staff training · personal ArchE consultant · optional Maintenance Agent</p>
+            <div class="offer-grid">
+              <div class="offer-card">
+                <h3>Training dashboard</h3>
+                <p>Employee-safe automation playbooks, trace replay like this CLI, and role-based views so ops learns the intake path without shadowing you daily.</p>
+                <span class="tag">Included in handoff</span>
+              </div>
+              <div class="offer-card featured">
+                <h3>ArchE consultant</h3>
+                <p>Personal leave-behind: your team queries ArchE on naming rules, partner templates, and confidence gates — same voice and audit trail as Week 1.</p>
+                <span class="tag">Client consultant layer</span>
+              </div>
+              <div class="offer-card">
+                <h3>Maintenance Agent</h3>
+                <p>Monthly add-on: watches API drift, partner layout changes, and extraction regressions — governed updates without a full-time automation hire.</p>
+                <span class="tag">Monthly retainer hook</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <aside id="right-rail">
+        <div id="terminal-panel">
+          <h4>Orchestration trace</h4>
+          <div class="term-chrome">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <span class="term-title">arche@partner-intake — first wire</span>
+          </div>
+          <div id="terminal-out"></div>
+        </div>
+        <div id="cast-rail">
+          <h4>Conversation</h4>
+          <div id="speaker-dock" aria-live="polite">
+            <p class="speaker-dock-label">Now speaking</p>
+            <div id="speaker-popup" class="hidden" aria-hidden="true">
+              <div class="speaker-popup-card">
+                <img id="speaker-popup-img" src="" alt="" />
+                <div class="speaker-popup-meta">
+                  <span id="speaker-popup-title"></span>
+                  <span id="speaker-popup-sub"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="persona-hint" id="persona-hint">Marcus Hale · Director of Partner Operations — persona inferred from Upwork post.</p>
+          <div id="broadcast-out"></div>
+          <div id="voice-status">Voice: run <code>python3 scripts/build_r6_partner_demo_audio.py</code> — B.J. clone (narrator) · Ryan (ArchE) · Andrew (Marcus) · Jenny (work agent). Portraits: <code>keyholder-narrator.png</code> · <code>arche-phi-shell.png</code> · <code>media-lead</code> (Jenny).</div>
+        </div>
+      </aside>
+      </div>
+    </div>
+
+    <footer id="narration">
+      <div class="speaker keyholder" id="footer-speaker">B.J.</div>
+      <p id="narr-text">Press Play scenario — buyer speaks in first person from your post; ArchE answers where it fits the stack.</p>
+      <span class="scene-idx" id="scene-idx">—</span>
+    </footer>
+  </div>
+
+  <div id="doc-viewer" class="hidden" aria-hidden="true" role="dialog" aria-label="Document preview">
+    <div id="doc-viewer-backdrop"></div>
+    <div class="doc-viewer-card">
+      <div class="doc-viewer-head">
+        <span class="pdf-badge">PDF</span>
+        <div class="titles">
+          <strong id="doc-viewer-title">Document</strong>
+          <span id="doc-viewer-sub"></span>
+        </div>
+        <button type="button" id="doc-viewer-close" aria-label="Close">×</button>
+      </div>
+      <iframe id="doc-viewer-frame" title="Document preview"></iframe>
+    </div>
+  </div>
+
+  <script>
+(function () {
+  "use strict";
+  var global = typeof globalThis !== "undefined" ? globalThis : window;
+
+  var DEAL = {
+    partner: "Atlas Funding Partners",
+    legal_name: "Brightline HVAC LLC",
+    dba: "Brightline Comfort",
+    owner: "M. Chen",
+    email: "mchen@brightlinecomfort.example",
+    monthly_revenue: 142000,
+    requested_usd: 85000,
+    state: "TX",
+    docs: [
+      { key: "bank_statements_3mo.pdf", label: "bank_statements_3mo.pdf" },
+      { key: "voided_check.pdf", label: "voided_check.pdf" },
+      { key: "partner_mca_application.pdf", label: "Brightline_MCA_App_2026.pdf" }
+    ]
+  };
+
+  var DOC_MANIFEST = null;
+  var NARRATOR_PORTRAIT = "assets/keyholder-narrator.png";
+  var NARRATOR_PORTRAIT_FALLBACK = "assets/keyholder-narrator.placeholder.png";
+
+  var ASSET_BASE = "../../../income_liberation/portfolio/assets";
+  var SPEAKER_VISUALS = {
+    narrator: {
+      src: NARRATOR_PORTRAIT,
+      fallback: NARRATOR_PORTRAIT_FALLBACK,
+      title: "B.J. Lewis",
+      subtitle: "Play-by-play · Keyholder"
+    },
+    arche: {
+      src: ASSET_BASE + "/arche-phi-shell.png",
+      title: "ArchE",
+      subtitle: "φ-shell · automation partner",
+      arche: true
+    },
+    decision_funding: {
+      src: ASSET_BASE + "/speakers/jim-cfo.png",
+      title: "Marcus Hale",
+      subtitle: "Director of Partner Operations · client"
+    },
+    work_agent: {
+      src: ASSET_BASE + "/speakers/media-lead.png",
+      title: "Jenny",
+      subtitle: "Work Agent · ops coaching"
+    }
+  };
+
+  var FIRST_WIRE_LOGS = [
+    { tag: "BOOT", msg: "session=partner_intake_wire  run_id=demo_r6  keyholder=IMnDEVmode" },
+    { tag: "PLAN", msg: "workflow=14_step_rfp  sources=gmail,attachments" },
+    { tag: "WIRE", msg: "connect gmail.api  scope=readonly,modify  status=ok" },
+    { tag: "WIRE", msg: "connect claude.extract  model=sonnet  audit=jsonl" },
+    { tag: "WIRE", msg: "connect bridge.ghl_zoho  mode=existing_credentials" },
+    { tag: "WIRE", msg: "connect close.api  enrich=rename,docs,sequence" },
+    { tag: "WIRE", msg: "connect slack.webhook  channels=partner-intake,review" },
+    { tag: "WIRE", msg: "confidence_gate=enabled  threshold=kickoff_defined" },
+    { tag: "PLAN", msg: "first_wire complete — awaiting partner message" }
+  ];
+
+  var beats = [];
+  var beatIdx = 0;
+  var audioManifest = null;
+  var playToken = 0;
+  var activeAudios = [];
+  var demoReady = false;
+  var audioUnlocked = false;
+  var wireLogsDrained = false;
+  var bauAnnounced = false;
+  var choreoDone = { manual: false, gates: false, whiteboard: false, wire: false, future: false };
+
+  var emails = [
+    { from: "Atlas Funding Partners", subj: "Fwd: Brightline HVAC — $85K request + docs", prev: "Attached bank statements and app…", unread: true, hl: true },
+    { from: "Summit Referral", subj: "Harbor Retail — need today", prev: "See attached application only…", unread: true },
+    { from: "noreply@close.com", subj: "Lead assigned to you", prev: "Prairie Logistics was updated…", unread: false }
+  ];
+
+  var currentScene = 0;
+  var playing = false;
+
+  function $(id) { return document.getElementById(id); }
+
+  function delay(ms) {
+    return new Promise(function (resolve) { setTimeout(resolve, ms); });
+  }
+
+  function castClass(role) {
+    if (role === "arche") return "arche";
+    if (role === "work_agent") return "work-agent";
+    if (role === "decision_funding" || (role && role.indexOf("decision") === 0)) return "decision";
+    return "narrator";
+  }
+
+  function appendBroadcast(role, label, text) {
+    var box = $("broadcast-out");
+    if (!box || !text) return;
+    var row = document.createElement("div");
+    row.className = "cast-line cast-" + castClass(role);
+    var lab = document.createElement("span");
+    lab.className = "cast-label";
+    lab.textContent = label || "";
+    var body = document.createElement("span");
+    body.className = "cast-text";
+    body.textContent = text;
+    row.appendChild(lab);
+    row.appendChild(body);
+    box.appendChild(row);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function appendTerminal(tag, msg, highlight) {
+    var term = $("terminal-out");
+    if (!term) return;
+    var row = document.createElement("div");
+    row.className = "log-line log-" + (tag || "info").toLowerCase() + (highlight ? " log-highlight" : "");
+    row.textContent = "[" + (tag || "LOG") + "] " + msg;
+    term.appendChild(row);
+    term.scrollTop = term.scrollHeight;
+  }
+
+  function clearTerminal() {
+    var term = $("terminal-out");
+    if (term) term.innerHTML = "";
+    wireLogsDrained = false;
+    bauAnnounced = false;
+    var title = document.querySelector("#terminal-panel .term-title");
+    if (title) title.textContent = "arche@partner-intake — first wire";
+  }
+
+  async function drainWireLogs(token) {
+    if (wireLogsDrained) return;
+    wireLogsDrained = true;
+    for (var i = 0; i < FIRST_WIRE_LOGS.length; i++) {
+      if (token !== playToken) return;
+      var L = FIRST_WIRE_LOGS[i];
+      appendTerminal(L.tag, L.msg, false);
+      await delay(180);
+    }
+  }
+
+  function announceBau() {
+    if (bauAnnounced) return;
+    bauAnnounced = true;
+    var title = document.querySelector("#terminal-panel .term-title");
+    if (title) title.textContent = "arche@partner-intake — business as usual";
+    appendTerminal("BAU", "mode=business_as_usual  trace=per_message  audit=every_api_step", true);
+  }
+
+  function loadDocManifest() {
+    return fetch("documents/doc-manifest.json")
+      .then(function (r) { return r.ok ? r.json() : {}; })
+      .then(function (m) { DOC_MANIFEST = m || {}; return DOC_MANIFEST; })
+      .catch(function () { DOC_MANIFEST = {}; });
+  }
+
+  function attachChipsHtml() {
+    return DEAL.docs.map(function (d) {
+      var meta = (DOC_MANIFEST && DOC_MANIFEST[d.key]) || {};
+      var label = d.label || meta.title || d.key;
+      var size = meta.size || "";
+      return (
+        '<button type="button" class="gmail-attach-chip" data-doc-key="' + d.key + '">' +
+        '<span class="gmail-attach-icon pdf">PDF</span>' +
+        '<span class="gmail-attach-meta"><span class="name">' + label + "</span>" +
+        (size ? '<span class="size">' + size + "</span>" : "") +
+        "</span></button>"
+      );
+    }).join("");
+  }
+
+  function openDocViewer(docKey) {
+    var meta = DOC_MANIFEST && DOC_MANIFEST[docKey];
+    if (!meta || !meta.html) return;
+    var viewer = $("doc-viewer");
+    var frame = $("doc-viewer-frame");
+    if (!viewer || !frame) return;
+    $("doc-viewer-title").textContent = meta.title || docKey;
+    $("doc-viewer-sub").textContent = meta.subtitle || "Sanitized demo document";
+    frame.src = meta.html;
+    viewer.classList.remove("hidden");
+    viewer.classList.add("visible");
+    viewer.setAttribute("aria-hidden", "false");
+  }
+
+  function closeDocViewer() {
+    var viewer = $("doc-viewer");
+    var frame = $("doc-viewer-frame");
+    if (!viewer) return;
+    viewer.classList.remove("visible");
+    viewer.classList.add("hidden");
+    viewer.setAttribute("aria-hidden", "true");
+    if (frame) frame.removeAttribute("src");
+  }
+
+  function bindDocClickHandlers() {
+    document.addEventListener("click", function (ev) {
+      if (ev.target.id === "doc-viewer-backdrop" || ev.target.closest("#doc-viewer-close")) {
+        closeDocViewer();
+        return;
+      }
+      var btn = ev.target.closest(".gmail-attach-chip, .close-doc-chip");
+      if (!btn) return;
+      var key = btn.getAttribute("data-doc-key");
+      if (key) {
+        ev.preventDefault();
+        openDocViewer(key);
+      }
+    });
+  }
+
+  function showSpeakerPopup(role) {
+    var pop = $("speaker-popup");
+    var img = $("speaker-popup-img");
+    var title = $("speaker-popup-title");
+    var sub = $("speaker-popup-sub");
+    if (!pop || !img) return;
+    var vis = SPEAKER_VISUALS[role] || SPEAKER_VISUALS.narrator;
+    if (vis.arche) pop.classList.add("arche-mode");
+    else pop.classList.remove("arche-mode");
+    img.onerror = function () {
+      if (vis.fallback && img.src.indexOf("placeholder") < 0) img.src = vis.fallback;
+    };
+    img.src = vis.src;
+    img.alt = vis.title || "";
+    if (title) title.textContent = vis.title || "";
+    if (sub) sub.textContent = vis.subtitle || "";
+    pop.classList.remove("hidden");
+    pop.setAttribute("aria-hidden", "false");
+    var dock = $("speaker-dock");
+    if (dock) dock.classList.add("speaker-dock-active");
+    requestAnimationFrame(function () { pop.classList.add("visible"); });
+  }
+
+  function hideSpeakerPopup() {
+    var pop = $("speaker-popup");
+    if (!pop) return;
+    pop.classList.remove("visible");
+    setTimeout(function () {
+      if (!pop.classList.contains("visible")) {
+        pop.classList.add("hidden");
+        pop.setAttribute("aria-hidden", "true");
+        var dock = $("speaker-dock");
+        if (dock) dock.classList.remove("speaker-dock-active");
+      }
+    }, 320);
+  }
+
+  function setFooterSpeaker(role, label) {
+    var sp = $("footer-speaker");
+    var el = $("narr-text");
+    if (sp) {
+      sp.className = "speaker " + (role === "arche" ? "arche" : role === "decision_funding" ? "buyer" : role === "work_agent" ? "work-agent" : "keyholder");
+      sp.textContent = role === "arche" ? "ArchE" : role === "decision_funding" ? "Marcus" : role === "work_agent" ? "Jenny" : "B.J.";
+    }
+    if (el && label) el.textContent = label;
+  }
+
+  function setVoiceStatus(msg) {
+    var vs = $("voice-status");
+    if (vs) vs.textContent = msg || "";
+  }
+
+  function cleanForSpeech(text) {
+    return (text || "").replace(/\s+/g, " ").trim();
+  }
+
+  function audioKey(role, text) {
+    var slug = cleanForSpeech(text).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48);
+    return role + "/" + slug;
+  }
+
+  function loadManifest() {
+    return fetch("audio/manifest.json")
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function (m) {
+        audioManifest = m;
+        setVoiceStatus("Voice: B.J. clone + Ryan (ArchE) + Andrew (Marcus) + Jenny (" + Object.keys(m.files || {}).length + " clips)");
+        return m;
+      })
+      .catch(function () {
+        audioManifest = null;
+        setVoiceStatus("Voice: browser fallback — run build_r6_partner_demo_audio.py and serve via http for B.J./Marcus/Ryan");
+      });
+  }
+
+  function loadBeats() {
+    return fetch("r6_scenario_beats.json", { cache: "no-store" })
+      .then(function (r) {
+        if (!r.ok) throw new Error("beats HTTP " + r.status);
+        return r.json();
+      })
+      .then(function (data) {
+        beats = data.beats || [];
+        if (!beats.length) throw new Error("beats empty");
+        var p = data.persona;
+        if (p && $("persona-hint")) {
+          $("persona-hint").textContent =
+            (p.name || "") + " · " + (p.label || "Decision maker") + " — " + (p.org || "inferred from Upwork post");
+        }
+        return beats;
+      });
+  }
+
+  function setPlayButtonReady(ready, errMsg) {
+    var btn = $("btn-play");
+    if (!btn) return;
+    if (ready) {
+      demoReady = true;
+      btn.disabled = false;
+      btn.textContent = "▶ Play scenario";
+      btn.title = "Play full scenario with cast voices";
+    } else {
+      demoReady = false;
+      btn.disabled = true;
+      btn.textContent = errMsg ? "⚠ Reload page" : "▶ Loading…";
+      btn.title = errMsg || "Loading scenario…";
+    }
+  }
+
+  function unlockDemoAudio() {
+    if (audioUnlocked) return Promise.resolve();
+    audioUnlocked = true;
+    return new Promise(function (resolve) {
+      if (!window.speechSynthesis) { resolve(); return; }
+      try {
+        var u = new SpeechSynthesisUtterance(" ");
+        u.volume = 0.01;
+        u.onend = resolve;
+        u.onerror = resolve;
+        window.speechSynthesis.speak(u);
+        setTimeout(resolve, 120);
+      } catch (e) { resolve(); }
+    });
+  }
+
+  var castOnlyAudio = true;
+
+  function estimateSpeakMs(text) {
+    var words = cleanForSpeech(text).split(/\s+/).filter(Boolean).length;
+    return Math.max(900, Math.min(7000, words * 320));
+  }
+
+  function preloadCastAudio() {
+    if (!audioManifest || !audioManifest.files) return;
+    Object.keys(audioManifest.files).forEach(function (k) {
+      try {
+        var a = new Audio(audioManifest.files[k]);
+        a.preload = "auto";
+        a.load();
+      } catch (e) {}
+    });
+  }
+
+  function playMp3(role, text) {
+    if (!audioManifest || !audioManifest.files) return Promise.resolve(false);
+    var key = audioKey(role, text);
+    var rel = audioManifest.files[key];
+    if (!rel) {
+      console.warn("R6 CAST: missing clip", role, key);
+      return Promise.resolve(false);
+    }
+    return new Promise(function (resolve) {
+      var a = new Audio(rel);
+      a.volume = 1;
+      a.preload = "auto";
+      activeAudios.push(a);
+      var done = false;
+      function finish(ok) {
+        if (done) return;
+        done = true;
+        activeAudios = activeAudios.filter(function (x) { return x !== a; });
+        resolve(!!ok);
+      }
+      a.onended = function () { finish(true); };
+      a.onerror = function () {
+        console.warn("R6 demo: audio error", rel);
+        finish(false);
+      };
+      var p = a.play();
+      if (p && p.then) {
+        p.then(function () { /* playing */ }).catch(function () { finish(false); });
+      }
+    });
+  }
+
+  function pickVoice(role) {
+    var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+    function maleGb() {
+      return voices.find(function (v) {
+        return v.lang === "en-GB" && !/female|fiona|kate|serena|sonia|susan|zira|samantha/i.test(v.name);
+      });
+    }
+    function maleUs() {
+      return voices.find(function (v) {
+        return v.lang === "en-US" && !/female|zira|samantha|aria|jenny|susan|victoria/i.test(v.name);
+      });
+    }
+    if (role === "narrator") {
+      return voices.find(function (v) { return /Christopher|Brian|David/i.test(v.name); }) || maleUs();
+    }
+    if (role === "arche") {
+      return voices.find(function (v) { return /Ryan|George|Daniel|British Male/i.test(v.name); }) || maleGb();
+    }
+    if (role === "work_agent") {
+      return voices.find(function (v) { return /Jenny|Aria/i.test(v.name); });
+    }
+    if (role === "decision_funding") {
+      return voices.find(function (v) { return /Andrew|Guy|Brian|Eric/i.test(v.name); }) || maleUs();
+    }
+    return maleUs();
+  }
+
+  function speakBrowser(text, role) {
+    return new Promise(function (resolve) {
+      if (!window.speechSynthesis) { resolve(); return; }
+      var u = new SpeechSynthesisUtterance(cleanForSpeech(text));
+      u.rate = role === "narrator" ? 1.08 : role === "arche" ? 1.02 : role === "work_agent" ? 1.0 : 0.98;
+      var v = pickVoice(role);
+      if (v) u.voice = v;
+      u.onend = resolve;
+      u.onerror = resolve;
+      window.speechSynthesis.speak(u);
+    });
+  }
+
+  function speakQueued(text, role) {
+    return playMp3(role, text).then(function (ok) {
+      if (ok) return;
+      var key = audioKey(role, text);
+      var cast = (audioManifest && audioManifest.cast && audioManifest.cast[role]) || role;
+      console.error("R6 CAST: no MP3 — blocking browser fallback", role, cast, key);
+      setVoiceStatus("Missing " + role + " audio (" + cast + ") — rebuild: build_r6_partner_demo_audio.py");
+      if (castOnlyAudio && audioManifest && audioManifest.cast) {
+        return delay(estimateSpeakMs(text));
+      }
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      return speakBrowser(text, role);
+    });
+  }
+
+  function stopSpeech() {
+    activeAudios.forEach(function (a) { try { a.pause(); } catch (e) {} });
+    activeAudios = [];
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+  }
+
+  function renderGmailList(targetId, mini) {
+    var el = $(targetId);
+    if (!el) return;
+    el.innerHTML = emails.map(function (e) {
+      var cls = "gmail-row" + (e.unread ? " unread" : "") + (e.hl ? " hl" : "");
+      return '<div class="' + cls + '"><div class="from">' + e.from + '</div><div class="subj">' + e.subj + '</div><div class="prev">' + e.prev + '</div></div>';
+    }).join("");
+  }
+
+  function renderOpenEmail() {
+    var body = $("gmail-open-body");
+    if (!body) return;
+    body.innerHTML =
+      '<h2>' + emails[0].subj + '</h2>' +
+      '<div class="gmail-meta">From <b>' + emails[0].from + '</b> · Today 9:14 AM</div>' +
+      '<p>Team — forwarding partner package for <b>' + DEAL.legal_name + '</b> (DBA ' + DEAL.dba + ').</p>' +
+      '<p>Owner: ' + DEAL.owner + ' · ' + DEAL.state + '<br/>Stated monthly revenue: $' + (DEAL.monthly_revenue/1000) + 'K · Request: $' + (DEAL.requested_usd/1000) + 'K MCA</p>' +
+      '<p style="color:#5f6368;font-size:13px">Note: revenue in body differs from attachment on page 2 — please verify.</p>' +
+      '<p style="margin-top:12px;color:#5f6368;font-size:12px">3 attachments</p>' +
+      '<div class="gmail-attach-row">' + attachChipsHtml() + "</div>" +
+      '<div class="gmail-reply-bar"><button class="reply" type="button">Reply</button><button class="fwd" type="button">Forward</button></div>';
+    var blur = $("gmail-blur");
+    if (blur) blur.innerHTML = body.innerHTML;
+  }
+
+  var extractFields = [
+    ["legal_name", DEAL.legal_name],
+    ["dba", DEAL.dba],
+    ["owner", DEAL.owner],
+    ["monthly_revenue", "$" + DEAL.monthly_revenue.toLocaleString()],
+    ["requested_usd", "$" + DEAL.requested_usd.toLocaleString()],
+    ["state", DEAL.state],
+    ["docs", DEAL.docs.map(function (d) { return d.label; }).join(", ")],
+    ["confidence", "0.94"]
+  ];
+
+  function animateExtract() {
+    var box = $("extract-json");
+    var overlay = $("overlay-scan");
+    if (!box || !overlay) return;
+    overlay.classList.remove("hidden");
+    box.innerHTML = "";
+    extractFields.forEach(function (pair, i) {
+      setTimeout(function () {
+        var div = document.createElement("div");
+        div.className = "field";
+        div.innerHTML = '<span class="k">' + pair[0] + '</span>: ' + pair[1];
+        box.appendChild(div);
+        requestAnimationFrame(function () { div.classList.add("show"); });
+        if (i === extractFields.length - 1) {
+          setTimeout(function () {
+            $("conf-fill").style.width = "94%";
+            $("conf-label").textContent = "Model confidence (this msg): 94% — AUTO → Close";
+          }, 400);
+        }
+      }, i * 450);
+    });
+  }
+
+  function crmAdapterLabel() {
+    var sel = $("crm-adapter");
+    if (!sel) return "Zoho CRM";
+    var map = { zoho: "Zoho CRM", ghl: "Go High Level", hubspot: "HubSpot" };
+    return map[sel.value] || "Zoho CRM";
+  }
+
+  function renderZoho() {
+    var el = $("zoho-record");
+    var crm = crmAdapterLabel();
+    el.innerHTML = '<p style="font-size:11px;color:#616e88;margin-bottom:8px">' + crm + ' · playbook adapter</p><h3>Lead · ' + DEAL.legal_name + '</h3><div class="zoho-grid" id="zoho-grid">' +
+      '<label>Company</label><div class="val" data-f="company"></div>' +
+      '<label>Contact</label><div class="val" data-f="contact"></div>' +
+      '<label>Revenue/mo</label><div class="val" data-f="rev"></div>' +
+      '<label>Source</label><div class="val">Partner email</div>' +
+      '<label>Status</label><div class="val new">New → syncing Close</div></div>';
+    setTimeout(function () {
+      el.querySelector('[data-f="company"]').textContent = DEAL.legal_name;
+      el.querySelector('[data-f="contact"]').textContent = DEAL.owner;
+      el.querySelector('[data-f="rev"]').textContent = "$" + DEAL.monthly_revenue.toLocaleString();
+    }, 600);
+  }
+
+  function renderClose() {
+    $("close-main").innerHTML =
+      '<span class="close-status-pill">Qualified</span>' +
+      '<h2 id="close-title">Lead — processing…</h2><div class="sub">Partner intake · API sync</div>' +
+      '<div class="close-pipeline"><span>New</span><span class="on">Qualified</span><span>Call booked</span></div>' +
+      '<div class="close-fields">' +
+      '<label>Legal name</label><div>' + DEAL.legal_name + '</div>' +
+      '<label>DBA</label><div>' + DEAL.dba + '</div>' +
+      '<label>Owner</label><div>' + DEAL.owner + '</div>' +
+      '<label>Request</label><div>$' + DEAL.requested_usd.toLocaleString() + '</div>' +
+      '</div><div class="close-docs"><strong style="font-size:12px;color:#9aa0a6">Documents</strong><br/>' +
+      DEAL.docs.map(function (d) {
+        var label = d.label || d.key;
+        return '<button type="button" class="close-doc-chip" data-doc-key="' + d.key + '">📎 ' + label + "</button>";
+      }).join("") +
+      '</div>';
+    $("close-history").innerHTML =
+      '<h4>Lead history</h4>' +
+      '<div class="ev">📧 Partner email ingested · 9:14 AM</div>' +
+      '<div class="ev">🤖 Fields extracted (94% conf.) · 9:15 AM</div>' +
+      '<div class="ev">📎 Docs attached · 9:16 AM</div>' +
+      '<div class="ev">▶ Sequence started · 9:16 AM</div>';
+    setTimeout(function () {
+      $("close-title").textContent = "TX · Brightline HVAC LLC · $85K";
+    }, 800);
+  }
+
+  function renderSlack() {
+    $("slack-feed").innerHTML =
+      '<h3># partner-intake</h3>' +
+      '<div class="slack-msg"><div class="av">AE</div><div><span class="who">ArchE Intake</span><span class="ts">9:16 AM</span><br/>' +
+      '✅ <b>' + DEAL.legal_name + '</b> — extracted, Close updated, docs attached.<br/>' +
+      '<span style="color:#616061">Model conf. 94% (demo) · Sequence: Book partner call</span></div></div>' +
+      '<div class="slack-msg"><div class="av" style="background:#4a154b">!</div><div><span class="who">System</span><span class="ts">9:16 AM</span><br/>' +
+      '⚠ <b>Harbor Retail</b> held for human review — missing voided check.</div></div>';
+  }
+
+  async function speakLine(role, text, token) {
+    if (!playing || token !== playToken || !text) return;
+    var who = role === "arche" ? "ArchE" : role === "narrator" ? "B.J. Lewis" : role === "work_agent" ? "Jenny" : "Marcus Hale";
+    appendBroadcast(role, who, text);
+    showSpeakerPopup(role);
+    await speakQueued(text, role);
+    hideSpeakerPopup();
+  }
+
+  function resetGateBoard() {
+    document.querySelectorAll("#gate-board .gate-card").forEach(function (c) {
+      c.classList.remove("saved");
+      var st = c.querySelector(".gate-stamp");
+      if (st) st.textContent = "UNSAVED";
+    });
+    document.querySelectorAll("#wire-canvas .wire-path").forEach(function (p) {
+      p.classList.remove("live");
+    });
+    document.querySelectorAll("#wire-canvas .wire-node").forEach(function (n) {
+      n.classList.remove("on");
+    });
+    document.querySelectorAll("#deal-queue .queue-deal").forEach(function (d) {
+      d.classList.remove("processed");
+    });
+    var fill = document.querySelector("#multiply-meter .meter-fill");
+    if (fill) fill.style.width = "12%";
+    var manualRows = document.querySelectorAll("#manual-overlay .manual-row");
+    manualRows.forEach(function (r) {
+      r.classList.remove("active", "done");
+      var v = r.querySelector(".manual-val");
+      if (v) v.textContent = "";
+    });
+    choreoDone = { manual: false, gates: false, whiteboard: false, wire: false, future: false };
+  }
+
+  function showScene(idx) {
+    currentScene = Math.max(0, Math.min(idx, 11));
+    document.querySelectorAll(".scene").forEach(function (s) {
+      s.classList.toggle("active", parseInt(s.getAttribute("data-scene"), 10) === currentScene);
+    });
+    if (currentScene === 1) renderGmailList("gmail-list", false);
+    if (currentScene === 2) {
+      renderGmailList("gmail-list-mini", true);
+      renderOpenEmail();
+      $("overlay-scan").classList.add("hidden");
+      $("conf-fill").style.width = "0%";
+      if (choreoDone.wire) {
+        setTimeout(animateExtract, 400);
+      }
+    }
+    if (currentScene === 3) renderOpenEmail();
+    if (currentScene === 4) renderZoho();
+    if (currentScene === 5) renderClose();
+    if (currentScene === 6) renderSlack();
+  }
+
+  function updateProgress() {
+    if (!beats.length) return;
+    $("scene-idx").textContent = "Beat " + (beatIdx + 1) + " / " + beats.length + " · scene " + (currentScene + 1);
+    $("progress-bar").style.width = ((beatIdx + 1) / beats.length * 100) + "%";
+  }
+
+  async function runChoreoTrigger(name, token) {
+    var C = window.R6Choreo;
+    if (!C || !tokenOkChoreo(token)) return;
+    if (name === "manual_walkthrough" && !choreoDone.manual) {
+      await C.runPhaseManualWalkthrough(token);
+      choreoDone.manual = true;
+    } else if (name === "gate_capture" && !choreoDone.gates) {
+      await C.runPhaseGateCapture(token);
+      choreoDone.gates = true;
+    } else if (name === "stack_whiteboard" && !choreoDone.whiteboard) {
+      await C.runPhaseStackWhiteboard(token);
+      choreoDone.whiteboard = true;
+    } else if (name === "automation_wire" && !choreoDone.wire) {
+      await C.runPhaseAutomationWire(token);
+      choreoDone.wire = true;
+      await C.runFastAutomationReplay(token);
+    } else if (name === "future_multiply" && !choreoDone.future) {
+      await C.runPhaseFutureMultiply(token);
+      choreoDone.future = true;
+    }
+  }
+
+  function tokenOkChoreo(token) {
+    return token === playToken && playing;
+  }
+
+  async function runBeat(beat, token) {
+    if (token !== playToken || !beat) return;
+    if (beat.triggerOnly && beat.trigger && playing) {
+      if (typeof beat.scene === "number") showScene(beat.scene);
+      await runChoreoTrigger(beat.trigger, token);
+      updateProgress();
+      await delay(beat.pauseAfter || 300);
+      return;
+    }
+    var role = beat.role || "narrator";
+    var label = beat.label || "";
+    var say = beat.say || "";
+    if (beat.trigger && playing) {
+      await runChoreoTrigger(beat.trigger, token);
+    }
+    if (beat.wire && !wireLogsDrained) {
+      await drainWireLogs(token);
+    }
+    if (beat.bau) announceBau();
+    if (beat.log) appendTerminal(beat.log.tag, beat.log.msg, true);
+    if (typeof beat.scene === "number") showScene(beat.scene);
+    setFooterSpeaker(role, say);
+    $("narr-text").textContent = say;
+    updateProgress();
+    appendBroadcast(role, label, say);
+    showSpeakerPopup(role);
+    if (playing && say) await speakQueued(say, role);
+    hideSpeakerPopup();
+    await delay(beat.pauseAfter || 500);
+  }
+
+  async function playScenario(fromIdx) {
+    if (!demoReady || !beats.length) {
+      setVoiceStatus("Not ready — open via http://127.0.0.1:8765/…/r6_partner_intake_cinema.html (not file://)");
+      return;
+    }
+    await unlockDemoAudio();
+    preloadCastAudio();
+    playToken++;
+    var token = playToken;
+    playing = true;
+    $("btn-play").textContent = "▶ Playing…";
+    if (fromIdx === 0) {
+      var box = $("broadcast-out");
+      if (box) box.innerHTML = "";
+      clearTerminal();
+      resetGateBoard();
+      closeDocViewer();
+      if (window.R6Choreo) R6Choreo.hideCursor();
+    }
+    beatIdx = Math.max(0, fromIdx || 0);
+    for (; beatIdx < beats.length; beatIdx++) {
+      if (token !== playToken || !playing) break;
+      await runBeat(beats[beatIdx], token);
+    }
+    if (token === playToken) {
+      playing = false;
+      $("btn-play").textContent = "▶ Play scenario";
+    }
+  }
+
+  function pause() {
+    playing = false;
+    playToken++;
+    stopSpeech();
+    $("btn-play").textContent = "▶ Play scenario";
+  }
+
+  function bindControls() {
+    $("btn-play").onclick = function () {
+      if (!demoReady) return;
+      if (playing) pause();
+      else playScenario(beatIdx);
+    };
+    $("btn-pause").onclick = pause;
+    $("btn-restart").onclick = function () { pause(); beatIdx = 0; showScene(0); updateProgress(); };
+    $("btn-prev").onclick = function () {
+      if (!demoReady) return;
+      pause();
+      beatIdx = Math.max(0, beatIdx - 1);
+      if (beats[beatIdx]) {
+        var b = beats[beatIdx];
+        if (typeof b.scene === "number") showScene(b.scene);
+        setFooterSpeaker(b.role, b.say);
+        $("narr-text").textContent = b.say || "";
+        updateProgress();
+      }
+    };
+    $("btn-next").onclick = function () {
+      if (!demoReady) return;
+      pause();
+      beatIdx = Math.min(beats.length - 1, beatIdx + 1);
+      if (beats[beatIdx]) {
+        var b = beats[beatIdx];
+        if (typeof b.scene === "number") showScene(b.scene);
+        setFooterSpeaker(b.role, b.say);
+        $("narr-text").textContent = b.say || "";
+        updateProgress();
+      }
+    };
+  }
+
+  if (window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = function () {};
+  }
+
+  bindDocClickHandlers();
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape") closeDocViewer();
+    if (ev.key === " " && ev.target === document.body) {
+      ev.preventDefault();
+      if (demoReady) $("btn-play").click();
+    }
+  });
+
+  global.R6Demo = {
+    delay: delay,
+    get playToken() { return playToken; },
+    get playing() { return playing; },
+    DEAL: DEAL,
+    showScene: showScene,
+    renderOpenEmail: renderOpenEmail,
+    renderZoho: renderZoho,
+    renderClose: renderClose,
+    renderSlack: renderSlack,
+    openDocViewer: openDocViewer,
+    closeDocViewer: closeDocViewer,
+    appendTerminal: appendTerminal,
+    speakLine: speakLine,
+    animateExtract: animateExtract,
+  };
+
+  bindControls();
+
+  Promise.all([loadManifest(), loadBeats(), loadDocManifest()])
+    .then(function () {
+      renderGmailList("gmail-list", false);
+      renderOpenEmail();
+      showScene(0);
+      updateProgress();
+      setPlayButtonReady(true);
+      preloadCastAudio();
+      setFooterSpeaker("narrator", "Ready — ~3 min · cast-locked: B.J. clone, Ryan, Andrew, Jenny (no browser fallback).");
+      var crmSel = $("crm-adapter");
+      if (crmSel) {
+        crmSel.addEventListener("change", function () {
+          var wbLbl = $("wb-crm-label");
+          if (wbLbl) {
+            var labels = { zoho: "Zoho CRM bridge", ghl: "Go High Level bridge", hubspot: "HubSpot bridge" };
+            wbLbl.textContent = labels[crmSel.value] || "CRM bridge";
+          }
+        });
+      }
+    })
+    .catch(function (err) {
+      console.error("R6 demo init failed", err);
+      setPlayButtonReady(false, "Serve over HTTP — see voice-status");
+      $("narr-text").textContent =
+        "Could not load scenario — run: ./scripts/open_r6_cinema_demo.sh (not file://)";
+      setVoiceStatus("Fix: ./scripts/open_r6_cinema_demo.sh  →  http://127.0.0.1:8765/…/r6_partner_intake_cinema.html");
+    });
+})();
+  </script>
+  <script src="r6_cinema_choreography.js"></script>
+</body>
+</html>

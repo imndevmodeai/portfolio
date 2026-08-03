@@ -1,0 +1,140 @@
+{
+  "title": "If you hire me — Partner email intake → Close.io",
+  "job_id": "022059858213392404990",
+  "target_runtime_min": 3,
+  "persona": {
+    "label": "Director of Partner Operations",
+    "name": "Marcus Hale",
+    "org": "Business funding company (Upwork client — persona inferred from post)"
+  },
+  "beats": [
+    {
+      "role": "decision_funding",
+      "label": "Marcus Hale",
+      "say": "Partners email us deal packages — facts in the body, in PDFs, or both. Every layout is different. That email is our source of truth.",
+      "scene": 0,
+      "wire": true,
+      "pauseAfter": 180
+    },
+    {
+      "role": "arche",
+      "label": "ArchE",
+      "say": "Gmail ingest, Claude extract, your GHL or Zoho bridge, Close dot I O enrich, Slack — with confidence gates before any write.",
+      "scene": 0,
+      "wire": true,
+      "pauseAfter": 180
+    },
+    {
+      "role": "decision_funding",
+      "label": "Marcus Hale",
+      "say": "Low confidence or missing docs goes to human review. No silent bad rows in Close dot I O.",
+      "scene": 0,
+      "wire": true,
+      "pauseAfter": 180
+    },
+    {
+      "role": "narrator",
+      "label": "B.J. Lewis",
+      "say": "Week one on your stack — same playbook, your CRM plugged in.",
+      "scene": 0,
+      "pauseAfter": 200
+    },
+    {
+      "role": "arche",
+      "label": "ArchE",
+      "say": "First wire — inbox, extract, gates locked, then speed.",
+      "scene": 1,
+      "bau": true,
+      "pauseAfter": 180
+    },
+    {
+      "triggerOnly": true,
+      "trigger": "manual_walkthrough",
+      "scene": 1,
+      "pauseAfter": 120
+    },
+    {
+      "role": "decision_funding",
+      "label": "Marcus Hale",
+      "say": "My team should not retype the same deal three times.",
+      "scene": 2,
+      "pauseAfter": 260
+    },
+    {
+      "role": "arche",
+      "label": "ArchE",
+      "say": "Structured JSON per message. Nothing touches Close dot I O until the gate passes.",
+      "scene": 2,
+      "log": { "tag": "EXTRACT", "msg": "claude.extract  confidence=0.94  gate=PASS" },
+      "pauseAfter": 200
+    },
+    {
+      "role": "work_agent",
+      "label": "Jenny",
+      "say": "Human gate — reviewer saves the call, taps Done. ArchE holds the write until then.",
+      "scene": 9,
+      "pauseAfter": 200
+    },
+    {
+      "triggerOnly": true,
+      "trigger": "gate_capture",
+      "scene": 9,
+      "pauseAfter": 120
+    },
+    {
+      "triggerOnly": true,
+      "trigger": "stack_whiteboard",
+      "scene": 10,
+      "pauseAfter": 120
+    },
+    {
+      "triggerOnly": true,
+      "trigger": "automation_wire",
+      "scene": 10,
+      "pauseAfter": 120
+    },
+    {
+      "role": "arche",
+      "label": "ArchE",
+      "say": "Clean fields to your middleware — Close dot I O gets rename, docs, and sequence.",
+      "scene": 5,
+      "log": { "tag": "CLOSE", "msg": "lead.enrich  sequence=book_partner_call" },
+      "pauseAfter": 300
+    },
+    {
+      "role": "decision_funding",
+      "label": "Marcus Hale",
+      "say": "Reps hear it in Slack — not by refreshing Close dot I O.",
+      "scene": 6,
+      "pauseAfter": 260
+    },
+    {
+      "role": "arche",
+      "label": "ArchE",
+      "say": "Done to partner-intake. Review lane for the rest.",
+      "scene": 6,
+      "log": { "tag": "SLACK", "msg": "channel=partner-intake  status=done" },
+      "pauseAfter": 180
+    },
+    {
+      "triggerOnly": true,
+      "trigger": "future_multiply",
+      "scene": 11,
+      "pauseAfter": 80
+    },
+    {
+      "role": "decision_funding",
+      "label": "Marcus Hale",
+      "say": "What do we get after go-live so my team runs this without calling you daily?",
+      "scene": 7,
+      "pauseAfter": 260
+    },
+    {
+      "role": "arche",
+      "label": "ArchE",
+      "say": "Training dashboard, trace replay, and an Arche consultant leave-behind. Twenty minutes to confirm Close dot I O naming — then one partner-email path live.",
+      "scene": 8,
+      "pauseAfter": 240
+    }
+  ]
+}

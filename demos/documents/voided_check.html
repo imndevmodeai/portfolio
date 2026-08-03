@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Voided check — Brightline HVAC LLC (sanitized demo)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "MICR", "Courier New", monospace; background: #e8e4dc; padding: 40px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
+    .check-wrap { position: relative; width: 720px; }
+    .check {
+      background: linear-gradient(180deg, #fffef8 0%, #f8f6ee 100%);
+      border: 1px solid #c4bfb0;
+      border-radius: 2px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+      padding: 28px 32px 36px;
+      position: relative;
+      overflow: hidden;
+    }
+    .void-stamp {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      font-size: 72px; font-weight: 900; color: rgba(180, 40, 40, 0.22);
+      letter-spacing: 0.15em; transform: rotate(-18deg); pointer-events: none;
+      font-family: Arial, sans-serif;
+    }
+    .top-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; font-family: Arial, sans-serif; }
+    .bank-name { font-size: 18px; font-weight: 700; color: #003366; }
+    .check-no { font-size: 11px; color: #333; }
+    .date-line { font-size: 12px; margin-bottom: 16px; font-family: Arial, sans-serif; }
+    .payee { border-bottom: 1px solid #333; min-height: 28px; margin-bottom: 8px; font-size: 14px; padding-bottom: 4px; font-family: Arial, sans-serif; }
+    .amount-box { float: right; border: 1px solid #333; padding: 6px 16px; font-size: 16px; font-weight: 700; margin-top: -32px; font-family: Arial, sans-serif; }
+    .written { clear: both; border-bottom: 1px solid #333; min-height: 24px; margin: 24px 0 20px; font-size: 12px; font-family: Arial, sans-serif; color: #444; }
+    .sig-line { border-bottom: 1px solid #999; width: 200px; margin-top: 32px; font-family: Arial, sans-serif; font-size: 10px; color: #666; }
+    .micr {
+      margin-top: 28px; padding-top: 12px; border-top: 2px dashed #ccc;
+      font-size: 14px; letter-spacing: 0.22em; color: #222;
+    }
+    .caption { margin-top: 16px; font-family: Arial, sans-serif; font-size: 10px; color: #666; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="check-wrap">
+    <div class="check">
+      <div class="void-stamp">VOID</div>
+      <div class="top-row">
+        <div class="bank-name">First Commerce Bank</div>
+        <div class="check-no">Check #1048 · Not for payment</div>
+      </div>
+      <div class="date-line">Date: ________________</div>
+      <div class="payee">Pay to the order of: <em style="color:#999">VOID — verification only</em></div>
+      <div class="amount-box">$85,000.00</div>
+      <div class="written">Eighty-five thousand and 00/100 — VOIDED FOR ACH VERIFICATION (MCA request per package)</div>
+      <div class="sig-line">Authorized signature (voided)</div>
+      <div class="micr">⑆111000025⑆ 4821⑈ 1048</div>
+    </div>
+    <p class="caption">Sanitized demo voided check · Routing and account masked for simulation · Brightline HVAC LLC</p>
+  </div>
+</body>
+</html>

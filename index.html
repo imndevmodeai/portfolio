@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ArchE · what you actually get (reputation before → after)</title>
-  <meta name="description" content="Sanitized ResonantiA / ArchE portfolio — interactive agent orchestration demo, production-scale cognitive stack." />
-  <meta property="og:title" content="ResonantiA — Cognitive AI Architecture" />
-  <meta property="og:description" content="Interactive demo: pipeline trace, vetting gates, causal + ABM scenarios. Built solo — 350+ modules." />
+  <title>ArchE · Governed Multi-Agent Systems (Agent Pods)</title>
+  <meta name="description" content="Governed multi-agent systems — teams of AI agents that finish complex work with audit trails, confidence scoring, and a human on the Publish button. Live demos." />
+  <meta property="og:title" content="ArchE — Governed Multi-Agent Systems" />
+  <meta property="og:description" content="Agent Pods with governance: vetting gates, confidence scores, audit traces, human Publish. Interactive demos — 350+ modules." />
   <meta property="og:image" content="https://imndevmodeai.github.io/portfolio/assets/architecture-diagram.svg" />
   <meta property="og:type" content="website" />
   <style>
@@ -397,7 +397,11 @@
     .system-architecture p { margin: 0.35rem 0; color: #d4d4d8; line-height: 1.45; font-size: 0.95rem; }
     .system-architecture .hero-visual { margin: 0.85rem 0 0; }
     .sku-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-top: 0.75rem;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.85rem; margin-top: 0.75rem;
+    }
+    .pod-badge {
+      display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; color: #67e8f9; margin-bottom: 0.35rem;
     }
     .sku-card {
       margin: 0; padding: 1rem 1.1rem; border: 1px solid #3f3f46; border-radius: 12px;
@@ -431,63 +435,85 @@
 </head>
 <body>
   <header class="portfolio-top">
-    <h1>ArchE · what you actually get</h1>
+    <h1>ArchE · Governed Multi-Agent Systems</h1>
     <p><span class="tag">ResonantiA</span> Built by <strong>B. J. Lewis</strong> —
       <a href="tel:+12698883503">(269) 888-3503</a> ·
       <a href="sms:+12698883503">SMS</a> ·
       <a href="mailto:imndevmodeai@gmail.com">email</a>
     </p>
-    <p class="layman-lead">Not a ChatGPT wrapper. <strong>ArchE</strong> is an orchestration system — intake, plan, tools, vetting, answer — with live demos you can click. Named agents and scoreboards are outcomes of that stack, not the whole story.</p>
+    <p class="layman-lead">We build and run <strong>teams of AI agents that finish complex work</strong> — with governance, audit trails, confidence scoring, and a human still holding the final <strong>Publish</strong> button. Not a ChatGPT wrapper. Live demos below.</p>
   </header>
 
   <div id="guided-tour-bar" class="guided-tour-bar" role="region" aria-label="15-second tour">
     <strong>First visit?</strong>
-    <span id="guided-tour-copy">15-second tour: system → how to open a demo → one example.</span>
+    <span id="guided-tour-copy">15-second tour: governance spine → Agent Pods → one live demo.</span>
     <button type="button" class="btn" id="guided-tour-start">Play tour</button>
     <button type="button" class="btn secondary" id="guided-tour-skip">Skip</button>
   </div>
   <div id="tour-highlight-banner" class="tour-highlight-banner hidden" aria-live="polite"></div>
 
   <section id="system-architecture" class="system-architecture" aria-label="What this system is">
-    <h2>What this system is</h2>
-    <p><strong>ArchE</strong> runs tool-using workflows: intake → plan → tools → vetting → answer. <strong>ResonantiA</strong> is the stack behind it. You get outcomes you can click in the demos below — recipes stay private.</p>
-    <p>Reputation agents, finance briefs, SMS coaching, and the other cards are <em>examples</em> of the same orchestration spine — not a one-feature product.</p>
+    <h2>The control plane buyers actually need</h2>
+    <p><strong>ArchE</strong> runs tool-using workflows: intake → plan → tools → <strong>vetting</strong> → answer. <strong>ResonantiA</strong> is the stack behind it. Serious 2026 buyers are not impressed by “we have agents” — they need orchestration that survives production: confidence scores, audit traces, and human gates when brand or spend is on the line.</p>
+    <p>Each <strong>Agent Pod</strong> below is a pre-architected multi-agent team for a high-value job. Same spine. Different jobs. Recipes stay private; outcomes you can click.</p>
     <figure class="hero-visual">
       <img src="assets/architecture-diagram.svg?v=arch-first-20260731f" width="920" height="320" alt="Architecture diagram: Intake to Plan to Tools to Vetting to Answer" loading="eager" decoding="async" />
-      <figcaption>Sanitized architecture map — Intake → Plan → Tools → Vetting → Answer.</figcaption>
+      <figcaption>Sanitized architecture map — Intake → Plan → Tools → Vetting → Answer (human Publish on external actions).</figcaption>
     </figure>
   </section>
 
-  <section id="sku-offers" class="sku-section" aria-label="Example agents you can buy">
-    <h2>Example agents (one offer path)</h2>
+  <section id="sku-offers" class="sku-section" aria-label="Agent Pods you can buy">
+    <h2>Agent Pods</h2>
     <blockquote class="offer-pitch" cite="https://imndevmodeai.github.io/portfolio/">
-      We don’t invent stars. We refuse to waste the positive experiences your business already creates —
-      and we staff agents whose only job is to turn those into Google, YouTube, and social proof you approve.
+      Most agent setups look good in demos and fall apart (or create risk) in production.
+      We keep humans in control while agents do the heavy multi-step work — with a scoreboard and an audit trail you can show a buyer or a compliance reviewer.
     </blockquote>
     <div class="sku-grid">
-      <article class="sku-card" id="sku-experience-capture">
-        <h3>Experience Capture Agent</h3>
-        <p><strong>Job:</strong> create authentic Google stars without inventing them — catch praise that already happened, queue the review ask, attribute the star on the scoreboard.</p>
-        <p class="sku-meta">Offer sheet · <a href="https://github.com/imndevmodeai/portfolio/blob/main/offers/experience-capture-agent.md" target="_blank" rel="noopener">experience-capture-agent.md</a> · Auditor blocks fake stars · human Publish ON</p>
+      <article class="sku-card" id="pod-sales-outreach">
+        <span class="pod-badge">Pod</span>
+        <h3>Sales &amp; Outreach</h3>
+        <p><strong>Job:</strong> multi-channel drafts and fills with channel isolation, proof-before-claim, and an Auth Gate before Post/Send/Publish.</p>
+        <p class="sku-meta">Case · <a href="https://github.com/imndevmodeai/portfolio/blob/main/case-studies/05-multi-channel-outreach-orchestration.md" target="_blank" rel="noopener">05 — outreach orchestration</a></p>
       </article>
-      <article class="sku-card" id="sku-social-media">
-        <h3>Social Media Agent</h3>
-        <p><strong>Sole purpose:</strong> already-positive experience → Google Business / social drafts for brand solidification and market capture. Composers filled; you click Publish.</p>
-        <p class="sku-meta">Offer sheet · <a href="https://github.com/imndevmodeai/portfolio/blob/main/offers/social-media-agent.md" target="_blank" rel="noopener">social-media-agent.md</a> · pairs with YouTube Harvest · never invents testimonials</p>
+      <article class="sku-card" id="pod-research-synthesis">
+        <span class="pod-badge">Pod</span>
+        <h3>Research &amp; Synthesis</h3>
+        <p><strong>Job:</strong> multi-source research → vetted briefs with tool traces, confidence, and conflict flags — not a single-model essay.</p>
+        <p class="sku-meta">Live demos A–C · pipeline terminal shows FETCH / VETTING / answer</p>
+      </article>
+      <article class="sku-card" id="pod-customer-success">
+        <span class="pod-badge">Pod</span>
+        <h3>Customer Success / Support</h3>
+        <p><strong>Job:</strong> grounded support or coaching loops (RAG + memory) with opt-out, admin logging, and low-confidence human review.</p>
+        <p class="sku-meta">Cases · <a href="https://github.com/imndevmodeai/portfolio/blob/main/case-studies/01-sms-rag-job-coach-mvp.md" target="_blank" rel="noopener">01 SMS coach</a> · <a href="https://github.com/imndevmodeai/portfolio/blob/main/case-studies/03-knowledge-base-rag-assistant.md" target="_blank" rel="noopener">03 RAG</a> · demo <strong>E</strong></p>
+      </article>
+      <article class="sku-card" id="pod-knowledge-ops">
+        <span class="pod-badge">Pod</span>
+        <h3>Internal Knowledge &amp; Ops</h3>
+        <p><strong>Job:</strong> workflow orchestration for internal knowledge work — phase gates, IAR confidence, and failure recovery instead of silent retries.</p>
+        <p class="sku-meta">Case · <a href="https://github.com/imndevmodeai/portfolio/blob/main/case-studies/04-openai-automation-governance.md" target="_blank" rel="noopener">04 — automation governance</a></p>
+      </article>
+      <article class="sku-card" id="pod-reputation-proof">
+        <span class="pod-badge">Pod</span>
+        <h3>Reputation &amp; Proof</h3>
+        <p><strong>Job:</strong> Experience Capture + Social Media agents turn real positive moments into review asks and brand drafts you approve — no invented stars.</p>
+        <p class="sku-meta">Case · <a href="https://github.com/imndevmodeai/portfolio/blob/main/case-studies/06-evidence-backed-reputation-flywheel.md" target="_blank" rel="noopener">06 — reputation flywheel</a> · demo <strong>R</strong></p>
       </article>
     </div>
     <div class="price-ladder" id="price-narrative">
-      <strong>Price narrative:</strong> diagnostic / setup often <strong>$2,500–$7,500</strong> after discovery → monthly flywheel
-      priced so <strong>one incremental booked job or Maps recovery</strong> can exceed the fee.
-      Not a ranking or revenue guarantee. Full ladder: <a href="https://github.com/imndevmodeai/portfolio/blob/main/offers/reputation-flywheel-pricing.md" target="_blank" rel="noopener">reputation-flywheel-pricing.md</a>.
+      <strong>Governed Pods ladder:</strong> Diagnostic / architecture workshop <strong>$3k–$8k</strong> →
+      Pilot Pod (30–60 days) <strong>$8k–$25k</strong> → production orchestration retainer (monthly).
+      <br /><strong>Cash-path Reputation Pod:</strong> diagnostic often <strong>$2,500–$7,500</strong> → monthly flywheel
+      (see <a href="https://github.com/imndevmodeai/portfolio/blob/main/offers/reputation-flywheel-pricing.md" target="_blank" rel="noopener">reputation-flywheel-pricing.md</a>).
+      Not a ranking or revenue guarantee. Ladder sheet: <a href="offers/governed-agent-pods-pricing.md">governed-agent-pods-pricing.md</a>.
     </div>
   </section>
 
-  <section id="reputation-storyboard" class="reputation-storyboard" aria-label="Reputation flywheel payout">
-    <h2>Agent roster + scoreboard (SERP = evidence)</h2>
+  <section id="reputation-storyboard" class="reputation-storyboard" aria-label="Reputation and Proof Pod detail">
+    <h2>Reputation &amp; Proof Pod — roster + scoreboard</h2>
     <p class="disclaimer" style="margin:0.35rem 0 0.75rem">
-      <strong>Product story:</strong> named agents and a measurable scoreboard. Google before/after screens prove the stake —
-      they are not the whole offer. No fake star ratings. Outcomes you can click; recipes stay private.
+      <strong>One Pod, not the whole brand.</strong> Named agents and a measurable scoreboard. Google before/after screens prove the stake —
+      they are not the whole offer. No fake star ratings. Human Publish ON.
     </p>
     <div class="storyboard-grid">
       <figure>
@@ -518,7 +544,7 @@
   </section>
 
   <h2 id="demo-theater-heading">Click a live demo</h2>
-  <p class="agentic-lead">Each card opens a short walkthrough — conversation on the right, tool trace on the left. Start anywhere; Reputation flywheel (R) is one concrete example.</p>
+  <p class="agentic-lead">Each card opens a short walkthrough — conversation on the right, <strong>tool / vetting trace</strong> on the left. Start with <strong>E</strong> (governance) or <strong>R</strong> (Reputation &amp; Proof Pod).</p>
   <p class="disclaimer"><strong>Simulation only.</strong> Scrubbed demo businesses. No client PII.</p>
 
   <div id="access-gate" class="access-gate-compact">
@@ -533,13 +559,16 @@
 
   <div id="demo-chooser">
     <div class="demo-cards">
-      <div class="demo-card featured-card" data-demo="r" role="button" tabindex="0" id="demo-card-r">
-        <h3>R. Reputation flywheel</h3>
-        <p>Roster + scoreboard · Capture &amp; Social SKUs · SERP as evidence.</p>
+      <div class="demo-card featured-card" data-demo="e" role="button" tabindex="0" id="demo-card-e">
+        <h3>E. SMS job coach</h3>
+        <p>Governed coaching loop · Vault knowledge · confidence / STOP.</p>
+      </div>
+      <div class="demo-card" data-demo="r" role="button" tabindex="0" id="demo-card-r">
+        <h3>R. Reputation &amp; Proof Pod</h3>
+        <p>Roster + scoreboard · Capture &amp; Social · SERP as evidence.</p>
       </div>
       <div class="demo-card" data-demo="a" role="button" tabindex="0"><h3>A. One source of truth</h3><p>CFO asks ArchE · live billing proof.</p></div>
       <div class="demo-card" data-demo="b" role="button" tabindex="0"><h3>B. Policy in 18 months</h3><p>HR simulation · plain-language answer.</p></div>
-      <div class="demo-card" data-demo="e" role="button" tabindex="0"><h3>E. SMS job coach</h3><p>Text-in coach · Vault knowledge · STOP.</p></div>
       <div class="demo-card" data-demo="c" role="button" tabindex="0"><h3>C. Doc → queryable</h3><p>Playbook answers without shipping the PDF.</p></div>
       <div class="demo-card locked-card" data-demo="d" role="button" tabindex="0"><h3>D. Paid ads loop</h3><p>Unlock with RESONANT-VIEW.</p></div>
     </div>
@@ -747,7 +776,7 @@
   </section>
 
   <h2>Work samples (public — safe for Upwork)</h2>
-  <p>All links are on the <strong>public</strong> repo <a href="https://github.com/imndevmodeai/portfolio" style="color:var(--accent2)">github.com/imndevmodeai/portfolio</a>. Start with demo <strong>R</strong> (reputation before → after) or scenario <strong>E</strong> (SMS coach).</p>
+  <p>All links are on the <strong>public</strong> repo <a href="https://github.com/imndevmodeai/portfolio" style="color:var(--accent2)">github.com/imndevmodeai/portfolio</a>. Start with demo <strong>E</strong> (governance) or <strong>R</strong> (Reputation &amp; Proof Pod).</p>
   <table>
     <tr><th>Sample</th><th>What it proves</th></tr>
     <tr><td><a href="https://github.com/imndevmodeai/portfolio/blob/main/case-studies/01-sms-rag-job-coach-mvp.md" style="color:var(--accent2)">01 — SMS RAG job coach MVP</a></td><td>Twilio webhook loop, Vault KB, OpenAI, memory, opt-out, admin log</td></tr>
@@ -755,7 +784,7 @@
     <tr><td><a href="https://github.com/imndevmodeai/portfolio/blob/main/case-studies/03-knowledge-base-rag-assistant.md" style="color:var(--accent2)">03 — Knowledge-base RAG</a></td><td>Indexed content, not generic LLM advice</td></tr>
     <tr><td><a href="https://github.com/imndevmodeai/portfolio/blob/main/case-studies/04-openai-automation-governance.md" style="color:var(--accent2)">04 — OpenAI automation governance</a></td><td>Vetting, confidence, audit traces</td></tr>
     <tr><td><a href="https://github.com/imndevmodeai/portfolio/blob/main/case-studies/05-multi-channel-outreach-orchestration.md" style="color:var(--accent2)">05 — Multi-channel outreach orchestration</a></td><td>Parallel CDP channels · Post Auth Gate · proof-before-claim</td></tr>
-    <tr><td><a href="https://github.com/imndevmodeai/portfolio/blob/main/case-studies/06-evidence-backed-reputation-flywheel.md" style="color:var(--accent2)">06 — Evidence-backed reputation flywheel</a></td><td>Capture + Social SKUs · roster/scoreboard · $2.5–7.5k diagnostic ladder</td></tr>
+    <tr><td><a href="https://github.com/imndevmodeai/portfolio/blob/main/case-studies/06-evidence-backed-reputation-flywheel.md" style="color:var(--accent2)">06 — Reputation &amp; Proof Pod</a></td><td>Capture + Social agents · roster/scoreboard · cash-path diagnostic ladder</td></tr>
     <tr><td><a href="https://imndevmodeai.github.io/portfolio/work-samples.html" style="color:var(--accent2)">Hub — work samples (browser)</a></td><td>One page, all six studies</td></tr>
   </table>
   <p style="font-size:0.8rem">Live demo: <a href="https://imndevmodeai.github.io/portfolio/" style="color:var(--accent2)">imndevmodeai.github.io/portfolio</a> · unlock <strong>RESONANT-VIEW</strong> for custom brief routing.</p>
@@ -763,7 +792,7 @@
   <footer>Portfolio · B. L. · <a href="https://imndevmodeai.github.io/portfolio/" style="color:var(--accent2)">imndevmodeai.github.io/portfolio</a></footer>
 
   <div id="sticky-sales-cta" class="sticky-sales-cta hidden" role="region" aria-label="Book pilot">
-    <span id="sticky-sales-copy">Ready for a pilot? Text or email — Upwork-safe contact on this page.</span>
+    <span id="sticky-sales-copy">Ready for a Governed Pod pilot? Text or email — Upwork-safe contact on this page.</span>
     <a id="sticky-sales-tel" href="tel:+12698883503" class="btn">Text to book pilot</a>
     <a id="sticky-sales-sms" href="sms:+12698883503" class="btn secondary">SMS</a>
     <a id="sticky-sales-email" href="mailto:imndevmodeai@gmail.com" class="btn secondary">Email</a>

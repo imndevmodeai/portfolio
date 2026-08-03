@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "cast": {
+    "narrator": "xtts_clone (xtts)",
+    "arche": "en-GB-RyanNeural",
+    "decision_funding": "en-US-AndrewNeural",
+    "work_agent": "en-US-JennyNeural"
+  },
+  "rates": {
+    "narrator": "+14%",
+    "arche": "+12%",
+    "decision_funding": "+12%",
+    "work_agent": "+12%"
+  },
+  "portraits": {
+    "narrator": "demo/assets/keyholder-narrator.png",
+    "arche": "income_liberation/portfolio/assets/arche-phi-shell.png",
+    "decision_funding": "income_liberation/portfolio/assets/speakers/jim-cfo.png",
+    "work_agent": "income_liberation/portfolio/assets/speakers/media-lead.png"
+  },
+  "files": {
+    "decision_funding/partners-email-us-deal-packages-facts-in-the-bod": "audio/decision_funding/partners-email-us-deal-packages-facts-in-the-bod.mp3",
+    "arche/gmail-ingest-claude-extract-your-ghl-or-zoho-bri": "audio/arche/gmail-ingest-claude-extract-your-ghl-or-zoho-bri.mp3",
+    "decision_funding/low-confidence-or-missing-docs-goes-to-human-rev": "audio/decision_funding/low-confidence-or-missing-docs-goes-to-human-rev.mp3",
+    "narrator/week-one-on-your-stack-same-playbook-your-crm-pl": "audio/narrator/week-one-on-your-stack-same-playbook-your-crm-pl.mp3",
+    "arche/first-wire-inbox-extract-gates-locked-then-speed": "audio/arche/first-wire-inbox-extract-gates-locked-then-speed.mp3",
+    "decision_funding/my-team-should-not-retype-the-same-deal-three-ti": "audio/decision_funding/my-team-should-not-retype-the-same-deal-three-ti.mp3",
+    "arche/structured-json-per-message-nothing-touches-clos": "audio/arche/structured-json-per-message-nothing-touches-clos.mp3",
+    "work_agent/human-gate-reviewer-saves-the-call-taps-done-arc": "audio/work_agent/human-gate-reviewer-saves-the-call-taps-done-arc.mp3",
+    "arche/clean-fields-to-your-middleware-close-dot-i-o-ge": "audio/arche/clean-fields-to-your-middleware-close-dot-i-o-ge.mp3",
+    "decision_funding/reps-hear-it-in-slack-not-by-refreshing-close-do": "audio/decision_funding/reps-hear-it-in-slack-not-by-refreshing-close-do.mp3",
+    "arche/done-to-partner-intake-review-lane-for-the-rest": "audio/arche/done-to-partner-intake-review-lane-for-the-rest.mp3",
+    "decision_funding/what-do-we-get-after-go-live-so-my-team-runs-thi": "audio/decision_funding/what-do-we-get-after-go-live-so-my-team-runs-thi.mp3",
+    "arche/training-dashboard-trace-replay-and-an-arche-con": "audio/arche/training-dashboard-trace-replay-and-an-arche-con.mp3"
+  }
+}

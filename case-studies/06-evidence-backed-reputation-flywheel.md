@@ -1,6 +1,6 @@
-# 06 — Evidence-backed reputation flywheel
+# 06 — Reputation & Proof Pod (evidence-backed flywheel)
 
-> First-party material. Virtual-team role names are **disclosed AI functions**, not human employees. Campaign artifacts default to **review-only** — nothing publishes externally without Keyholder approval.
+> First-party material. This is **one Agent Pod** under the Governed Multi-Agent Systems umbrella — not the whole brand. Virtual-team role names are **disclosed AI functions**, not human employees. Campaign artifacts default to **review-only** — nothing publishes externally without Keyholder approval.
 
 ## Customer offer line (canonical)
 > We don’t invent stars. We refuse to waste the positive experiences your business already creates — and we staff agents whose only job is to turn those into Google, YouTube, and social proof you approve.
