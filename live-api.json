@@ -1,8 +1,8 @@
 {
-  "brief_api": "https://kerchiefed-jules-unflunked.ngrok-free.dev/api/portfolio/brief",
-  "health_api": "https://kerchiefed-jules-unflunked.ngrok-free.dev/api/portfolio/health",
-  "public_url": "https://kerchiefed-jules-unflunked.ngrok-free.dev/",
+  "brief_api": "https://province-chubby-parameters-queries.trycloudflare.com/api/portfolio/brief",
+  "health_api": "https://province-chubby-parameters-queries.trycloudflare.com/api/portfolio/health",
+  "public_url": "https://province-chubby-parameters-queries.trycloudflare.com/",
   "embed_evidence": false,
-  "note": "Evidence iframes stay on static SVG when API is cross-origin ngrok; custom brief uses fetch.",
-  "updated_utc": "2026-08-03T03:49:12Z"
+  "note": "Evidence iframes stay on static SVG when API is cross-origin tunnel; custom brief uses fetch. GitHub Pages loads this file as live-api.json.",
+  "updated_utc": "2026-08-04T02:56:03Z"
 }
