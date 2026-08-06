@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Shopify admin customer note">
+  <rect width="640" height="360" fill="#f6f6f7"/>
+  <rect width="640" height="48" fill="#1a1a1a"/>
+  <text x="20" y="30" fill="#95bf47" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="700">Shopify</text>
+  <text x="100" y="30" fill="#b5b5b5" font-family="Helvetica,Arial,sans-serif" font-size="12">Admin · Customers</text>
+  <rect x="24" y="72" width="592" height="260" rx="8" fill="#fff" stroke="#e1e3e5"/>
+  <text x="40" y="108" fill="#202223" font-family="Helvetica,Arial,sans-serif" font-size="18" font-weight="700">Customer · lead_demo_8841</text>
+  <text x="40" y="132" fill="#6d7175" font-family="Helvetica,Arial,sans-serif" font-size="12">Phone +1 """-"""-4201 · SMS channel</text>
+  <rect x="40" y="156" width="560" height="140" rx="8" fill="#f6f6f7" stroke="#e1e3e5"/>
+  <text x="56" y="184" fill="#6d7175" font-family="Helvetica,Arial,sans-serif" font-size="11">Timeline note (stub)</text>
+  <text x="56" y="214" fill="#202223" font-family="Helvetica,Arial,sans-serif" font-size="13">Inbound SMS quote request captured via n8n.</text>
+  <text x="56" y="238" fill="#202223" font-family="Helvetica,Arial,sans-serif" font-size="13">Classified quote_request · confidence 0.91 · ack queued.</text>
+  <text x="56" y="270" fill="#008060" font-family="Helvetica,Arial,sans-serif" font-size="12" font-weight="600">Simulation · no live Shopify write</text>
+</svg>

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>n8n + Twilio + CRM — lead SMS automation (demo cinema)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg: #0b1220;
@@ -18,9 +18,12 @@
       --warn: #fbbf24;
       --twilio: #f22f46;
       --n8n: #ea4b71;
-      --crm: #6366f1;
+      --hubspot: #ff7a59;
+      --shopify: #95bf47;
+      --shopify-dark: #008060;
       --mono: "IBM Plex Mono", ui-monospace, monospace;
       --sans: "IBM Plex Sans", system-ui, sans-serif;
+      --roboto: "Roboto", system-ui, sans-serif;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); }
@@ -31,6 +34,7 @@
     }
     #topbar h1 { font-size: 0.95rem; font-weight: 600; flex: 1; min-width: 12rem; }
     .tag { font-size: 0.68rem; color: var(--muted); background: #1e293b; padding: 0.2rem 0.5rem; border-radius: 4px; }
+    .tag.warn { color: #fde68a; border: 1px solid #713f12; background: #422006; }
     .ctrl { display: flex; gap: 0.35rem; flex-wrap: wrap; }
     .ctrl button {
       font: inherit; font-size: 0.8rem; padding: 0.35rem 0.75rem;
@@ -50,77 +54,224 @@
       #main { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
       #rail { max-height: 42vh; }
     }
-    #stage-wrap { position: relative; overflow: hidden; background: #0a101c; padding: 1rem; }
+    #stage-wrap { position: relative; overflow: hidden; background: #0a101c; padding: 0.75rem; }
     .scene {
       display: none; height: 100%;
-      border: 1px solid var(--line); border-radius: 12px; background: var(--panel);
+      border: 1px solid var(--line); border-radius: 10px; background: var(--panel);
       overflow: hidden; flex-direction: column;
     }
     .scene.active { display: flex; }
-    .scene-head {
+
+    /* ── Twilio Console (Scene 0) ── */
+    .twilio-app { display: flex; height: 100%; min-height: 320px; font-size: 0.72rem; }
+    .twilio-nav {
+      width: 52px; background: #121c2d; border-right: 1px solid #1e293b;
+      display: flex; flex-direction: column; align-items: center; padding-top: 0.5rem; gap: 0.65rem;
+    }
+    .twilio-t {
+      width: 28px; height: 28px; background: var(--twilio); border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: 1rem;
+    }
+    .twilio-nav-ico { width: 20px; height: 20px; border-radius: 4px; background: #1e293b; opacity: 0.6; }
+    .twilio-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .twilio-topbar {
       display: flex; align-items: center; gap: 0.5rem;
-      padding: 0.55rem 0.85rem; border-bottom: 1px solid var(--line);
-      font-size: 0.78rem; color: var(--muted);
+      padding: 0.45rem 0.75rem; background: #fff; color: #0f172a; border-bottom: 1px solid #e2e8f0;
     }
-    .dot { width: 9px; height: 9px; border-radius: 50%; }
-    .dot.tw { background: var(--twilio); }
-    .dot.n8 { background: var(--n8n); }
-    .dot.crm { background: var(--crm); }
-    .scene-body { flex: 1; padding: 1rem; overflow: auto; }
-
-    /* Phone mock */
+    .twilio-topbar .brand { font-weight: 600; font-size: 0.78rem; }
+    .twilio-topbar .brand span { color: var(--twilio); }
+    .twilio-topbar .crumb { color: #64748b; font-size: 0.7rem; }
+    .twilio-content { flex: 1; display: flex; min-height: 0; background: #f8fafc; }
+    .twilio-logs { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .twilio-logs-head {
+      padding: 0.5rem 0.75rem; background: #fff; border-bottom: 1px solid #e2e8f0;
+      font-weight: 600; color: #334155; font-size: 0.75rem;
+    }
+    .twilio-logs-head span { color: #64748b; font-weight: 400; }
+    .twilio-table-wrap { flex: 1; overflow: auto; }
+    .twilio-table { width: 100%; border-collapse: collapse; font-size: 0.68rem; color: #334155; }
+    .twilio-table th {
+      text-align: left; padding: 0.4rem 0.55rem; background: #f1f5f9;
+      border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #64748b; font-size: 0.62rem;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .twilio-table td { padding: 0.4rem 0.55rem; border-bottom: 1px solid #f1f5f9; }
+    .twilio-table tr { cursor: default; }
+    .twilio-table tr.sel { background: #eff6ff; }
+    .twilio-table tr.sel td { border-left: 3px solid var(--twilio); }
+    .twilio-table tr.out-row { opacity: 0.55; }
+    .twilio-table tr.out-row.on { opacity: 1; background: #ecfdf5; }
+    .twilio-table tr.out-row.on td { border-left: 3px solid #10b981; }
+    .status-pill {
+      display: inline-block; padding: 0.1rem 0.35rem; border-radius: 3px;
+      font-size: 0.6rem; font-weight: 600;
+    }
+    .status-pill.delivered { background: #dcfce7; color: #166534; }
+    .status-pill.received { background: #dbeafe; color: #1e40af; }
+    .status-pill.sent { background: #d1fae5; color: #065f46; }
+    .twilio-detail {
+      width: 38%; min-width: 140px; background: #fff; border-left: 1px solid #e2e8f0;
+      padding: 0.65rem; display: flex; flex-direction: column; gap: 0.45rem;
+    }
+    .twilio-detail h4 { font-size: 0.68rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+    .twilio-detail .body-box {
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;
+      padding: 0.55rem; font-size: 0.72rem; color: #334155; line-height: 1.4;
+    }
+    .twilio-detail .meta { font-size: 0.62rem; color: #94a3b8; font-family: var(--mono); }
+    .twilio-phone-col {
+      width: 220px; min-width: 180px; background: #0c0c0f; border-left: 1px solid #1e293b;
+      display: flex; align-items: center; justify-content: center; padding: 0.75rem 0.5rem;
+    }
+    @media (max-width: 700px) {
+      .twilio-phone-col { display: none; }
+      .twilio-detail { width: 45%; }
+    }
     .phone {
-      max-width: 280px; margin: 0 auto;
-      background: #0c0c0f; border: 2px solid #334155; border-radius: 24px;
-      padding: 0.75rem 0.65rem 1rem; box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+      width: 100%; max-width: 190px;
+      background: #111; border: 2px solid #334155; border-radius: 22px;
+      padding: 0.6rem 0.5rem 0.85rem; box-shadow: 0 8px 28px rgba(0,0,0,0.5);
     }
-    .phone .notch { width: 40%; height: 8px; background: #1f2937; border-radius: 8px; margin: 0 auto 0.75rem; }
-    .bubble { max-width: 90%; padding: 0.55rem 0.7rem; border-radius: 12px; font-size: 0.82rem; margin: 0.4rem 0; line-height: 1.35; }
-    .bubble.in { background: #1e293b; color: #e2e8f0; margin-right: auto; }
-    .bubble.out { background: #0e7490; color: #ecfeff; margin-left: auto; }
-    .bubble.meta { font-size: 0.65rem; color: var(--muted); background: transparent; padding: 0; }
+    .phone .notch { width: 38%; height: 6px; background: #1f2937; border-radius: 6px; margin: 0 auto 0.6rem; }
+    .bubble { max-width: 92%; padding: 0.5rem 0.6rem; border-radius: 14px; font-size: 0.72rem; margin: 0.35rem 0; line-height: 1.35; }
+    .bubble.in { background: #262626; color: #e5e5e5; margin-right: auto; border-bottom-left-radius: 4px; }
+    .bubble.out { background: #0e7490; color: #ecfeff; margin-left: auto; border-bottom-right-radius: 4px; }
+    .bubble.meta { font-size: 0.58rem; color: #737373; background: transparent; padding: 0.15rem 0; text-align: center; }
 
-    /* n8n canvas */
-    .n8n-canvas {
-      display: flex; flex-wrap: wrap; gap: 0.65rem; align-items: center; justify-content: center;
-      min-height: 220px; padding: 1rem 0.5rem;
+    /* ── n8n Editor (Scene 1) ── */
+    .n8n-app { display: flex; flex-direction: column; height: 100%; min-height: 320px; background: #101330; }
+    .n8n-topbar {
+      display: flex; align-items: center; gap: 0.65rem;
+      padding: 0.45rem 0.75rem; background: #1a1f3a; border-bottom: 1px solid #2d3258;
+    }
+    .n8n-logo { font-weight: 700; font-size: 0.85rem; color: var(--n8n); letter-spacing: -0.02em; }
+    .n8n-wfname { font-size: 0.75rem; color: #c4c9e0; flex: 1; font-family: var(--mono); }
+    .n8n-exec {
+      font-size: 0.72rem; padding: 0.3rem 0.75rem; background: var(--n8n); color: #fff;
+      border: none; border-radius: 4px; font-weight: 600; cursor: default;
+    }
+    .n8n-canvas-wrap {
+      flex: 1; position: relative; overflow: auto;
+      background-color: #101330;
+      background-image: radial-gradient(circle, #2a3055 1px, transparent 1px);
+      background-size: 16px 16px;
+    }
+    .n8n-flow {
+      position: relative; min-width: 720px; min-height: 260px; padding: 2rem 1.5rem;
+    }
+    .n8n-connectors {
+      position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    }
+    .n8n-connectors line { stroke: #4a5080; stroke-width: 2; }
+    .n8n-connectors line.on { stroke: var(--accent); stroke-width: 2.5; }
+    .n8n-nodes-row {
+      display: flex; align-items: center; justify-content: space-between;
+      position: relative; z-index: 1; gap: 0.25rem;
     }
     .node {
-      min-width: 110px; padding: 0.65rem 0.75rem; border-radius: 10px;
-      border: 1px solid #334155; background: #0f172a; font-size: 0.75rem; text-align: center;
+      flex: 0 0 auto; width: 108px; background: #1a1f3a; border: 1px solid #3d4370;
+      border-radius: 6px; overflow: hidden; font-size: 0.68rem; text-align: left;
       transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
     }
+    .node .bar { height: 4px; }
+    .node .bar.tw { background: var(--twilio); }
+    .node .bar.fn { background: #f59e0b; }
+    .node .bar.http { background: #6366f1; }
+    .node .bar.ai { background: #a855f7; }
+    .node .bar.if { background: #22c55e; }
+    .node .inner { padding: 0.45rem 0.5rem; }
+    .node .k { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.05em; color: #8892b8; margin-bottom: 0.15rem; }
+    .node .lbl { color: #e2e8f0; font-weight: 500; line-height: 1.2; }
     .node.on {
-      border-color: var(--accent); box-shadow: 0 0 0 2px rgba(56,189,248,0.25);
-      transform: translateY(-2px);
+      border-color: var(--accent); box-shadow: 0 0 0 2px rgba(56,189,248,0.35), 0 4px 16px rgba(56,189,248,0.15);
+      transform: translateY(-3px);
     }
-    .node .k { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.2rem; }
-    .arrow { color: var(--muted); font-size: 1.1rem; }
 
-    /* CRM card */
+    /* ── HubSpot CRM (Scene 2) ── */
+    .hubspot-app { display: flex; flex-direction: column; height: 100%; min-height: 320px; }
+    .hubspot-header {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 0.85rem; background: #2d3e50; color: #fff;
+    }
+    .hubspot-wordmark { font-weight: 700; font-size: 0.9rem; color: var(--hubspot); }
+    .hubspot-header span.sub { font-size: 0.68rem; color: #94a3b8; margin-left: auto; }
+    .hubspot-body { flex: 1; padding: 1rem; background: #f5f8fa; overflow: auto; }
     .crm-card {
-      max-width: 420px; margin: 0 auto; background: #0f172a;
-      border: 1px solid #3730a3; border-radius: 12px; overflow: hidden;
+      max-width: 440px; margin: 0 auto; background: #fff;
+      border: 1px solid #cbd6e2; border-radius: 8px; overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
     }
     .crm-card header {
-      background: linear-gradient(90deg, #312e81, #1e1b4b);
-      padding: 0.65rem 0.9rem; font-size: 0.8rem; font-weight: 600;
+      background: #fff; padding: 0.75rem 1rem; font-size: 0.85rem; font-weight: 600;
+      color: #33475b; border-bottom: 1px solid #eaf0f6;
+      display: flex; align-items: center; gap: 0.5rem;
     }
-    .crm-row { display: grid; grid-template-columns: 7rem 1fr; gap: 0.35rem; padding: 0.45rem 0.9rem; font-size: 0.78rem; border-top: 1px solid #1e293b; }
-    .crm-row .lbl { color: var(--muted); }
-    .pill { display: inline-block; padding: 0.15rem 0.45rem; border-radius: 999px; font-size: 0.68rem; background: #14532d; color: #bbf7d0; }
-    .pill.warn { background: #713f12; color: #fde68a; }
-
-    /* Stub strip */
-    .stubs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.55rem; margin-top: 0.75rem; }
-    @media (max-width: 600px) { .stubs { grid-template-columns: 1fr; } }
-    .stub {
-      border: 1px dashed #334155; border-radius: 8px; padding: 0.55rem 0.65rem;
-      font-size: 0.72rem; background: #0b1220; opacity: 0.45; transition: opacity 0.3s, border-color 0.3s;
+    .crm-card header .avatar {
+      width: 32px; height: 32px; border-radius: 50%; background: #ff7a59;
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 700;
     }
-    .stub.on { opacity: 1; border-color: var(--ok); border-style: solid; }
-    .stub strong { display: block; margin-bottom: 0.2rem; color: #e2e8f0; }
+    .crm-row { display: grid; grid-template-columns: 7.5rem 1fr; gap: 0.35rem; padding: 0.5rem 1rem; font-size: 0.76rem; border-top: 1px solid #eaf0f6; color: #33475b; }
+    .crm-row .lbl { color: #7c98b6; font-size: 0.72rem; }
+    .pill { display: inline-block; padding: 0.15rem 0.45rem; border-radius: 999px; font-size: 0.65rem; background: #e5f5e9; color: #006644; font-weight: 600; }
+    .pill.warn { background: #fef3e2; color: #b36b00; }
 
+    /* ── Stubs Scene (Scene 3) ── */
+    .stubs-scene { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; height: 100%; min-height: 320px; padding: 0.5rem; }
+    @media (max-width: 800px) { .stubs-scene { grid-template-columns: 1fr; } }
+    .stub-panel {
+      display: flex; flex-direction: column; border: 1px solid #334155; border-radius: 8px;
+      overflow: hidden; background: #0f172a; opacity: 0.5; transition: opacity 0.35s, box-shadow 0.35s, border-color 0.35s;
+    }
+    .stub-panel.on { opacity: 1; border-color: var(--ok); box-shadow: 0 0 0 2px rgba(74,222,128,0.2); }
+
+    /* Notion stub */
+    .notion-app { flex: 1; display: flex; min-height: 200px; font-size: 0.68rem; }
+    .notion-sidebar { width: 36%; background: #f7f6f3; border-right: 1px solid #e8e7e4; padding: 0.5rem 0.35rem; color: #37352f; }
+    .notion-sidebar .page { padding: 0.25rem 0.35rem; border-radius: 4px; margin-bottom: 0.15rem; color: #787774; }
+    .notion-sidebar .page.active { background: #ebebea; color: #37352f; font-weight: 500; }
+    .notion-main { flex: 1; padding: 0.65rem; background: #fff; color: #37352f; }
+    .notion-main h3 { font-size: 0.82rem; font-weight: 600; margin-bottom: 0.45rem; border-bottom: 1px solid #ebebea; padding-bottom: 0.35rem; }
+    .notion-row { padding: 0.25rem 0; color: #787774; font-size: 0.65rem; }
+
+    /* Shopify stub */
+    .shopify-app { flex: 1; display: flex; flex-direction: column; min-height: 200px; }
+    .shopify-header {
+      display: flex; align-items: center; gap: 0.4rem;
+      padding: 0.4rem 0.55rem; background: var(--shopify-dark); color: #fff;
+    }
+    .shopify-wordmark { font-weight: 700; font-size: 0.78rem; color: var(--shopify); }
+    .shopify-body { flex: 1; padding: 0.55rem; background: #f6f6f7; font-size: 0.68rem; color: #303030; }
+    .shopify-note {
+      background: #fff; border: 1px solid #e3e3e3; border-radius: 6px; padding: 0.5rem;
+    }
+    .shopify-note label { display: block; font-size: 0.62rem; color: #616161; margin-bottom: 0.25rem; }
+    .shopify-note p { font-size: 0.68rem; line-height: 1.35; color: #303030; }
+
+    /* Gmail stub */
+    .gmail-app { flex: 1; display: flex; flex-direction: column; min-height: 200px; font-family: var(--roboto); }
+    .gmail-chrome {
+      display: flex; align-items: center; gap: 0.35rem;
+      padding: 0.4rem 0.55rem; background: #404040; color: #e8eaed; font-size: 0.72rem;
+    }
+    .gmail-chrome .dots { display: flex; gap: 4px; }
+    .gmail-chrome .dots i { width: 8px; height: 8px; border-radius: 50%; display: block; }
+    .gmail-chrome .dots i:nth-child(1) { background: #ff5f57; }
+    .gmail-chrome .dots i:nth-child(2) { background: #febc2e; }
+    .gmail-chrome .dots i:nth-child(3) { background: #28c840; }
+    .gmail-compose { flex: 1; padding: 0.55rem; background: #fff; font-size: 0.68rem; color: #202124; }
+    .gmail-field { display: flex; border-bottom: 1px solid #e8eaed; padding: 0.35rem 0; gap: 0.35rem; align-items: center; }
+    .gmail-field label { color: #5f6368; min-width: 3.2rem; font-size: 0.65rem; }
+    .gmail-field input, .gmail-field textarea { flex: 1; border: none; font: inherit; font-size: 0.68rem; background: transparent; color: #202124; }
+    .gmail-body-area { flex: 1; min-height: 60px; padding: 0.35rem 0; }
+    .gmail-send {
+      margin-top: 0.45rem; padding: 0.35rem 1rem; background: #c2e0ff; color: #5f6368;
+      border: none; border-radius: 18px; font-size: 0.72rem; font-weight: 500; cursor: default; opacity: 0.7;
+    }
+
+    /* Rail */
     #rail {
       display: flex; flex-direction: column; min-height: 0;
       border-left: 1px solid var(--line); background: #0a0f1a;
@@ -159,7 +310,7 @@
   <div id="theater">
     <header id="topbar">
       <h1>n8n + Twilio + CRM — lead SMS → classify → follow-up</h1>
-      <span class="tag">Simulation only · no live APIs · no PII</span>
+      <span class="tag warn">Simulation · no live APIs · no PII</span>
       <div id="progress" aria-hidden="true"><i id="prog-bar"></i></div>
       <div class="ctrl">
         <button type="button" class="primary" id="btn-play">Play</button>
@@ -170,58 +321,197 @@
 
     <div id="main">
       <div id="stage-wrap">
-        <!-- Scene 0: inbound SMS -->
-        <section class="scene active" data-scene="0" aria-label="Inbound SMS">
-          <div class="scene-head"><span class="dot tw"></span> Twilio · inbound SMS (scrubbed)</div>
-          <div class="scene-body">
-            <div class="phone">
-              <div class="notch"></div>
-              <div class="bubble meta">Today · demo lead</div>
-              <div class="bubble in" id="sms-in">Hi — saw your listing. Can I get a quote for next week? Prefer text.</div>
-              <div class="bubble out" id="sms-out" style="display:none;opacity:0;transition:opacity 0.4s">
-                Thanks — we got your request. A specialist will follow up shortly. Reply STOP to opt out.
+        <!-- Scene 0: Twilio Console -->
+        <section class="scene active" data-scene="0" aria-label="Twilio Console">
+          <div class="twilio-app">
+            <nav class="twilio-nav" aria-hidden="true">
+              <div class="twilio-t" title="Twilio">t</div>
+              <div class="twilio-nav-ico"></div>
+              <div class="twilio-nav-ico"></div>
+              <div class="twilio-nav-ico"></div>
+            </nav>
+            <div class="twilio-main">
+              <div class="twilio-topbar">
+                <span class="brand"><span>twilio</span> Console</span>
+                <span class="crumb">› Messaging › Logs</span>
+              </div>
+              <div class="twilio-content">
+                <div class="twilio-logs">
+                  <div class="twilio-logs-head">Messaging <span>› Logs</span></div>
+                  <div class="twilio-table-wrap">
+                    <table class="twilio-table">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>From</th>
+                          <th>To</th>
+                          <th>Status</th>
+                          <th>SID</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr class="sel" id="twilio-in-row">
+                          <td>Aug 6 · 10:42</td>
+                          <td>+1•••4201</td>
+                          <td>+1•••8800</td>
+                          <td><span class="status-pill received">received</span></td>
+                          <td>SM_demo_in_8841</td>
+                        </tr>
+                        <tr class="out-row" id="twilio-out-row">
+                          <td>Aug 6 · 10:42</td>
+                          <td>+1•••8800</td>
+                          <td>+1•••4201</td>
+                          <td><span class="status-pill sent">sent</span></td>
+                          <td>SM_demo_out_8841</td>
+                        </tr>
+                        <tr>
+                          <td>Aug 5 · 16:11</td>
+                          <td>+1•••7733</td>
+                          <td>+1•••8800</td>
+                          <td><span class="status-pill delivered">delivered</span></td>
+                          <td>SM_demo_old_***</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="twilio-detail">
+                  <h4>Message body</h4>
+                  <div class="body-box" id="twilio-body-in">Hi — saw your listing. Can I get a quote for next week? Prefer text.</div>
+                  <div class="body-box" id="twilio-body-out" style="display:none">Thanks — we got your request. A specialist will follow up shortly. Reply STOP to opt out.</div>
+                  <p class="meta">Direction: inbound · scrubbed demo</p>
+                </div>
+                <div class="twilio-phone-col">
+                  <div class="phone">
+                    <div class="notch"></div>
+                    <div class="bubble meta">Today · demo lead</div>
+                    <div class="bubble in" id="sms-in">Hi — saw your listing. Can I get a quote for next week? Prefer text.</div>
+                    <div class="bubble out" id="sms-out" style="display:none;opacity:0;transition:opacity 0.4s">
+                      Thanks — we got your request. A specialist will follow up shortly. Reply STOP to opt out.
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- Scene 1: n8n graph -->
-        <section class="scene" data-scene="1" aria-label="n8n workflow">
-          <div class="scene-head"><span class="dot n8"></span> n8n · workflow lead_sms_crm_v1</div>
-          <div class="scene-body">
-            <div class="n8n-canvas" id="n8n-nodes">
-              <div class="node" data-node="webhook"><div class="k">Trigger</div>Twilio Webhook</div>
-              <span class="arrow">→</span>
-              <div class="node" data-node="normalize"><div class="k">Function</div>Normalize</div>
-              <span class="arrow">→</span>
-              <div class="node" data-node="crm"><div class="k">HTTP</div>CRM Upsert</div>
-              <span class="arrow">→</span>
-              <div class="node" data-node="classify"><div class="k">AI / Rules</div>Classify</div>
-              <span class="arrow">→</span>
-              <div class="node" data-node="gate"><div class="k">IF</div>Confidence Gate</div>
-              <span class="arrow">→</span>
-              <div class="node" data-node="out"><div class="k">Twilio</div>Outbound SMS</div>
+        <!-- Scene 1: n8n Editor -->
+        <section class="scene" data-scene="1" aria-label="n8n workflow editor">
+          <div class="n8n-app">
+            <div class="n8n-topbar">
+              <span class="n8n-logo">n8n</span>
+              <span class="n8n-wfname">lead_sms_crm_v1</span>
+              <button type="button" class="n8n-exec" disabled>Execute workflow</button>
+            </div>
+            <div class="n8n-canvas-wrap">
+              <div class="n8n-flow" id="n8n-nodes">
+                <svg class="n8n-connectors" id="n8n-svg" viewBox="0 0 720 120" preserveAspectRatio="none">
+                  <line x1="108" y1="60" x2="168" y2="60" />
+                  <line x1="228" y1="60" x2="288" y2="60" />
+                  <line x1="348" y1="60" x2="408" y2="60" />
+                  <line x1="468" y1="60" x2="528" y2="60" />
+                  <line x1="588" y1="60" x2="648" y2="60" />
+                </svg>
+                <div class="n8n-nodes-row">
+                  <div class="node" data-node="webhook">
+                    <div class="bar tw"></div>
+                    <div class="inner"><div class="k">Trigger</div><div class="lbl">Twilio Webhook</div></div>
+                  </div>
+                  <div class="node" data-node="normalize">
+                    <div class="bar fn"></div>
+                    <div class="inner"><div class="k">Code</div><div class="lbl">Normalize</div></div>
+                  </div>
+                  <div class="node" data-node="crm">
+                    <div class="bar http"></div>
+                    <div class="inner"><div class="k">HTTP</div><div class="lbl">CRM Upsert</div></div>
+                  </div>
+                  <div class="node" data-node="classify">
+                    <div class="bar ai"></div>
+                    <div class="inner"><div class="k">AI</div><div class="lbl">Classify</div></div>
+                  </div>
+                  <div class="node" data-node="gate">
+                    <div class="bar if"></div>
+                    <div class="inner"><div class="k">IF</div><div class="lbl">Confidence Gate</div></div>
+                  </div>
+                  <div class="node" data-node="out">
+                    <div class="bar tw"></div>
+                    <div class="inner"><div class="k">Twilio</div><div class="lbl">Outbound SMS</div></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        <!-- Scene 2: CRM + stubs -->
-        <section class="scene" data-scene="2" aria-label="CRM record">
-          <div class="scene-head"><span class="dot crm"></span> CRM · contact upsert + stubs</div>
-          <div class="scene-body">
-            <div class="crm-card" id="crm-card">
-              <header>Contact · lead_demo_8841</header>
-              <div class="crm-row"><span class="lbl">Phone</span><span>+1•••-•••-4201</span></div>
-              <div class="crm-row"><span class="lbl">Source</span><span>sms_inbound / twilio</span></div>
-              <div class="crm-row"><span class="lbl">Intent</span><span id="crm-intent">—</span></div>
-              <div class="crm-row"><span class="lbl">Confidence</span><span id="crm-conf">—</span></div>
-              <div class="crm-row"><span class="lbl">Status</span><span id="crm-status"><span class="pill warn">pending classify</span></span></div>
-              <div class="crm-row"><span class="lbl">Next action</span><span id="crm-next">—</span></div>
+        <!-- Scene 2: HubSpot CRM -->
+        <section class="scene" data-scene="2" aria-label="HubSpot CRM contact">
+          <div class="hubspot-app">
+            <div class="hubspot-header">
+              <span class="hubspot-wordmark">HubSpot</span>
+              <span class="sub">Contacts · simulation</span>
             </div>
-            <div class="stubs">
-              <div class="stub" data-stub="notion"><strong>Notion</strong>Draft row · “Inbound quote — week of demo”</div>
-              <div class="stub" data-stub="shopify"><strong>Shopify</strong>Customer note stub · no live store write</div>
-              <div class="stub" data-stub="gmail"><strong>Gmail</strong>Draft to ops@example.invalid · review lane</div>
+            <div class="hubspot-body">
+              <div class="crm-card" id="crm-card">
+                <header><span class="avatar">LD</span> lead_demo_8841</header>
+                <div class="crm-row"><span class="lbl">Phone</span><span>+1•••-•••-4201</span></div>
+                <div class="crm-row"><span class="lbl">Source</span><span>sms_inbound / twilio</span></div>
+                <div class="crm-row"><span class="lbl">Intent</span><span id="crm-intent">—</span></div>
+                <div class="crm-row"><span class="lbl">Confidence</span><span id="crm-conf">—</span></div>
+                <div class="crm-row"><span class="lbl">Status</span><span id="crm-status"><span class="pill warn">pending classify</span></span></div>
+                <div class="crm-row"><span class="lbl">Next action</span><span id="crm-next">—</span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Scene 3: Product stubs -->
+        <section class="scene" data-scene="3" aria-label="Optional side-effect stubs">
+          <div class="stubs-scene">
+            <div class="stub-panel stub" data-stub="notion">
+              <div class="notion-app">
+                <div class="notion-sidebar">
+                  <div class="page">Workspace</div>
+                  <div class="page active">Inbound leads</div>
+                  <div class="page">Templates</div>
+                </div>
+                <div class="notion-main">
+                  <h3>Inbound quote — week of demo</h3>
+                  <div class="notion-row">Lead · lead_demo_8841 · sms</div>
+                  <div class="notion-row">Intent · quote_request · conf 0.91</div>
+                  <div class="notion-row">Status · draft row · no live write</div>
+                </div>
+              </div>
+            </div>
+            <div class="stub-panel stub" data-stub="shopify">
+              <div class="shopify-app">
+                <div class="shopify-header">
+                  <span class="shopify-wordmark">shopify</span>
+                  <span style="font-size:0.62rem;margin-left:auto;opacity:0.85">Admin</span>
+                </div>
+                <div class="shopify-body">
+                  <div class="shopify-note">
+                    <label>Customer note</label>
+                    <p>SMS lead lead_demo_8841 — quote request via Twilio. Classified 0.91. Demo stub only.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="stub-panel stub" data-stub="gmail">
+              <div class="gmail-app">
+                <div class="gmail-chrome">
+                  <span class="dots"><i></i><i></i><i></i></span>
+                  New Message
+                </div>
+                <div class="gmail-compose">
+                  <div class="gmail-field"><label>To</label><input type="text" value="ops@example.invalid" readonly /></div>
+                  <div class="gmail-field"><label>Subject</label><input type="text" value="Review: SMS quote lead lead_demo_8841" readonly /></div>
+                  <div class="gmail-body-area">
+                    <textarea readonly rows="3">New inbound SMS classified as quote_request (0.91). Ack SMS sent. Demo draft — not sent.</textarea>
+                  </div>
+                  <button type="button" class="gmail-send" disabled>Send</button>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -230,7 +520,7 @@
       <aside id="rail">
         <div id="narration">
           <div class="who" id="who">Play-by-play</div>
-          <div class="line" id="line">Press Play to walk lead SMS → n8n → CRM classify → follow-up. Client-side simulation only.</div>
+          <div class="line" id="line">Press Play to walk lead SMS → n8n → HubSpot CRM → side-effect stubs → outbound ack. Client-side simulation only.</div>
         </div>
         <div id="term">
           <h4>Orchestration trace</h4>
@@ -242,7 +532,7 @@
     <footer id="footer">
       <span>Case study · <a href="../case-studies/07-n8n-crm-twilio-automation-stack.md">07 — n8n CRM Twilio</a></span>
       <span>Portfolio · <a href="../index.html">index.html</a> · scenario <strong>N</strong></span>
-      <span>No secrets · no real client PII · stubs only</span>
+      <span>Simulation · no live APIs · no PII · stubs only</span>
     </footer>
   </div>
 
@@ -251,20 +541,29 @@
   var beats = [
     {
       who: "Play-by-play",
-      say: "Buyer problem: a lead texts for a quote. Ops needs CRM capture, intent classify, and a safe follow-up — without copy-paste.",
+      say: "Buyer problem: a lead texts for a quote. Ops needs Twilio capture, n8n orchestration, CRM classify, and a safe follow-up — without copy-paste.",
       scene: 0,
+      pause: 3400
+    },
+    {
+      who: "Twilio · Messaging Logs",
+      say: "Inbound SMS lands in Twilio Console. The selected log row shows scrubbed From, To, and MessageSid — same body the lead typed on their phone.",
+      scene: 0,
+      highlightIn: true,
+      log: { cls: "hi", text: "WEBHOOK   twilio inbound  MessageSid=SM_demo_in_8841  From=+1***" },
       pause: 3200
     },
     {
       who: "Lead (SMS)",
       say: "Hi — saw your listing. Can I get a quote for next week? Prefer text.",
       scene: 0,
-      log: { cls: "hi", text: "WEBHOOK   twilio inbound  MessageSid=SM_demo_***  From=+1***" },
+      highlightIn: true,
+      log: { cls: "hi", text: "SMS       body_len=58  channel=sms  opt_in=implicit" },
       pause: 2800
     },
     {
       who: "ArchE",
-      say: "Twilio hits the n8n webhook. We normalize From and Body, hash the phone for CRM identity, never store raw secrets in the graph.",
+      say: "Twilio hits the n8n webhook. We normalize From and Body, hash the phone for CRM identity — never store raw secrets in the graph.",
       scene: 1,
       nodes: ["webhook", "normalize"],
       log: { cls: "hi", text: "N8N       trigger=twilio_webhook  workflow=lead_sms_crm_v1" },
@@ -272,7 +571,7 @@
     },
     {
       who: "n8n · CRM node",
-      say: "HTTP upsert creates contact lead_demo_8841. Same phone hash merges later texts into one record.",
+      say: "HTTP upsert creates contact lead_demo_8841 in HubSpot. Same phone hash merges later texts into one record.",
       scene: 1,
       nodes: ["webhook", "normalize", "crm"],
       log: { cls: "ok", text: "CRM       upsert contact_id=lead_demo_8841  action=create" },
@@ -280,35 +579,44 @@
     },
     {
       who: "Classify",
-      say: "Rules plus model assist label this as quote_request at ninety-one percent confidence. Gate passes — no human review needed.",
+      say: "Rules plus model assist label this as quote_request at ninety-one percent confidence. The IF gate passes — no human review needed.",
       scene: 1,
       nodes: ["webhook", "normalize", "crm", "classify", "gate"],
       log: { cls: "ok", text: "CLASSIFY  intent=quote_request  conf=0.91  gate=PASS" },
       pause: 3400
     },
     {
-      who: "CRM view",
-      say: "CRM shows intent, confidence, and next action. Notion, Shopify, and Gmail stubs fire as optional side effects — demo only.",
+      who: "HubSpot CRM",
+      say: "CRM contact card shows intent, confidence, status, and next action. This is what ops sees after classify — no spreadsheet export.",
       scene: 2,
       crm: { intent: "quote_request", conf: "0.91", statusOk: true, next: "ack SMS + ops queue" },
+      log: { cls: "ok", text: "HUBSPOT   contact=lead_demo_8841  intent=quote_request  conf=0.91" },
+      pause: 3200
+    },
+    {
+      who: "Side-effect stubs",
+      say: "Notion draft row, Shopify customer note, and Gmail ops draft light up as optional side effects — demo only, no live API writes.",
+      scene: 3,
       stubs: ["notion", "shopify", "gmail"],
       log: { cls: "hi", text: "STUB      notion.page_draft · shopify.customer_note · gmail.draft" },
       pause: 3600
     },
     {
       who: "Twilio outbound",
-      say: "Outbound ack SMS ships from the template. STOP opt-out stays wired. Low confidence would have branched to human review instead.",
+      say: "Outbound ack SMS appears in Messaging Logs and on the phone mock. STOP opt-out stays wired. Low confidence would branch to human review instead.",
       scene: 0,
       showOut: true,
+      highlightOut: true,
       nodes: ["out"],
-      log: { cls: "ok", text: "OUTBOUND  twilio_reply template=ack_quote  segments=1" },
-      pause: 3200
+      log: { cls: "ok", text: "OUTBOUND  twilio_reply template=ack_quote  segments=1  SID=SM_demo_out_8841" },
+      pause: 3400
     },
     {
       who: "Play-by-play",
-      say: "That is the exact stack buyers ask for: Twilio webhook, n8n nodes, CRM classify, follow-up. Open case study zero seven for architecture notes.",
+      say: "That is the exact stack buyers ask for: Twilio webhook, n8n nodes, HubSpot classify, follow-up. Open case study zero seven for architecture notes.",
       scene: 2,
-      log: { cls: "ok", text: "SESSION   complete  mode=n8n_crm_twilio_cinema  conf=0.9" },
+      crm: { intent: "quote_request", conf: "0.91", statusOk: true, next: "ack SMS sent · ops notified" },
+      log: { cls: "ok", text: "SESSION   complete  mode=n8n_crm_twilio_cinema  conf=0.91" },
       pause: 3800
     }
   ];
@@ -323,6 +631,10 @@
   var btnPlay = document.getElementById("btn-play");
   var btnPause = document.getElementById("btn-pause");
   var smsOut = document.getElementById("sms-out");
+  var twilioInRow = document.getElementById("twilio-in-row");
+  var twilioOutRow = document.getElementById("twilio-out-row");
+  var twilioBodyIn = document.getElementById("twilio-body-in");
+  var twilioBodyOut = document.getElementById("twilio-body-out");
 
   function setScene(n) {
     document.querySelectorAll(".scene").forEach(function (el) {
@@ -332,14 +644,24 @@
 
   function clearNodes() {
     document.querySelectorAll(".node").forEach(function (n) { n.classList.remove("on"); });
+    document.querySelectorAll(".n8n-connectors line").forEach(function (l) { l.classList.remove("on"); });
   }
 
   function lightNodes(ids) {
     clearNodes();
-    (ids || []).forEach(function (id) {
+    if (!ids || !ids.length) return;
+    var order = ["webhook", "normalize", "crm", "classify", "gate", "out"];
+    var lastIdx = -1;
+    ids.forEach(function (id) {
       var el = document.querySelector('.node[data-node="' + id + '"]');
       if (el) el.classList.add("on");
+      var i = order.indexOf(id);
+      if (i > lastIdx) lastIdx = i;
     });
+    var lines = document.querySelectorAll(".n8n-connectors line");
+    for (var j = 0; j < lastIdx && j < lines.length; j++) {
+      lines[j].classList.add("on");
+    }
   }
 
   function clearStubs() {
@@ -351,6 +673,13 @@
       var el = document.querySelector('.stub[data-stub="' + id + '"]');
       if (el) el.classList.add("on");
     });
+  }
+
+  function clearTwilioHighlight() {
+    if (twilioInRow) twilioInRow.classList.remove("sel");
+    if (twilioOutRow) twilioOutRow.classList.remove("on");
+    if (twilioBodyIn) twilioBodyIn.style.display = "block";
+    if (twilioBodyOut) twilioBodyOut.style.display = "none";
   }
 
   function applyCrm(c) {
@@ -377,11 +706,19 @@
     lineEl.textContent = b.say;
     setScene(b.scene);
     if (b.nodes) lightNodes(b.nodes);
+    else if (b.scene !== 1) clearNodes();
     if (b.crm) applyCrm(b.crm);
     if (b.stubs) lightStubs(b.stubs);
+    clearTwilioHighlight();
+    if (b.highlightIn && twilioInRow) twilioInRow.classList.add("sel");
     if (b.showOut) {
       smsOut.style.display = "block";
       requestAnimationFrame(function () { smsOut.style.opacity = "1"; });
+    }
+    if (b.highlightOut) {
+      if (twilioOutRow) twilioOutRow.classList.add("on");
+      if (twilioBodyIn) twilioBodyIn.style.display = "none";
+      if (twilioBodyOut) twilioBodyOut.style.display = "block";
     }
     logLine(b.log);
     prog.style.width = ((idx + 1) / beats.length * 100).toFixed(1) + "%";
@@ -430,6 +767,8 @@
     termOut.innerHTML = "";
     clearNodes();
     clearStubs();
+    clearTwilioHighlight();
+    if (twilioInRow) twilioInRow.classList.add("sel");
     smsOut.style.display = "none";
     smsOut.style.opacity = "0";
     document.getElementById("crm-intent").textContent = "—";
@@ -439,7 +778,7 @@
     setScene(0);
     prog.style.width = "0%";
     whoEl.textContent = "Play-by-play";
-    lineEl.textContent = "Press Play to walk lead SMS → n8n → CRM classify → follow-up. Client-side simulation only.";
+    lineEl.textContent = "Press Play to walk lead SMS → n8n → HubSpot CRM → side-effect stubs → outbound ack. Client-side simulation only.";
     btnPlay.disabled = false;
     btnPlay.textContent = "Play";
     btnPause.disabled = true;

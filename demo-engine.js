@@ -1846,9 +1846,49 @@
       subtitle: "Logged kills — zero executed in preview",
     },
     "trace-webhook": {
-      src: "assets/proofs/webhook.svg",
-      title: "SMS webhook intake",
-      subtitle: "Twilio inbound proof line",
+      src: "assets/proofs/twilio-console.svg",
+      title: "Twilio Console · Messaging Logs",
+      subtitle: "Inbound SMS row · scrubbed MessageSid",
+    },
+    "trace-n8n": {
+      src: "assets/proofs/n8n-canvas.svg",
+      title: "n8n · lead_sms_crm_v1",
+      subtitle: "Webhook → normalize → CRM → classify → SMS",
+    },
+    "trace-crm": {
+      src: "assets/proofs/hubspot-contact.svg",
+      title: "HubSpot-style CRM contact",
+      subtitle: "lead_demo_8841 upsert · gate PASS",
+    },
+    "trace-classify": {
+      src: "assets/proofs/hubspot-contact.svg",
+      title: "Classify + confidence gate",
+      subtitle: "quote_request · conf 0.91 · PASS",
+    },
+    "trace-stubs": {
+      src: "assets/proofs/gmail-compose.svg",
+      title: "Gmail draft stub (+ Notion / Shopify)",
+      subtitle: "Side-effect stubs · no live writes",
+    },
+    "trace-outbound": {
+      src: "assets/proofs/twilio-outbound.svg",
+      title: "Twilio Console · outbound SMS",
+      subtitle: "ack_quote template · STOP wired",
+    },
+    "trace-notion": {
+      src: "assets/proofs/notion-page.svg",
+      title: "Notion page draft",
+      subtitle: "Inbound quote — week of demo",
+    },
+    "trace-shopify": {
+      src: "assets/proofs/shopify-admin.svg",
+      title: "Shopify Admin · customer note",
+      subtitle: "Timeline note stub · no live write",
+    },
+    "trace-gmail": {
+      src: "assets/proofs/gmail-compose.svg",
+      title: "Gmail compose draft",
+      subtitle: "ops@example.invalid · review lane",
     },
     "trace-rag": {
       src: "assets/proofs/rag.svg",
@@ -3200,7 +3240,7 @@
           role: "narrator",
           label: "Play-by-play",
           say:
-            "Exact stack buyers ask for on Upwork: Twilio webhook into n8n, CRM upsert, intent classify, then follow-up SMS. Simulation only — no live keys.",
+            "Exact stack buyers ask for on Upwork: Twilio webhook into n8n, CRM upsert, intent classify, then follow-up SMS. Watch product-faithful panels — Twilio Console, n8n canvas, HubSpot, Notion, Shopify, Gmail. Simulation only — no live keys.",
           pipeline: "intake",
         },
         {
@@ -3217,13 +3257,24 @@
           role: "arche",
           label: "ArchE · n8n",
           say:
-            "Webhook fires workflow lead_sms_crm_v1. Normalize From and Body, hash the phone for CRM identity, then HTTP upsert.",
+            "Webhook fires workflow lead_sms_crm_v1 on the n8n canvas. Normalize From and Body, hash the phone for CRM identity.",
           pipeline: "plan",
           terminalParallel: [
             termEntry(runLog("N8N       trigger=twilio_webhook  workflow=lead_sms_crm_v1", 1), "trace-n8n"),
-            termEntry(runLog("CRM       upsert contact_id=lead_demo_8841  action=create", 2), "trace-crm"),
           ],
           termDelay: 260,
+          tools: ["workflow", "research"],
+        },
+        {
+          role: "arche",
+          label: "ArchE · CRM",
+          say:
+            "HTTP upsert creates HubSpot-style contact lead_demo_8841. Same phone hash merges later texts into one record.",
+          pipeline: "tools",
+          terminalParallel: [
+            termEntry(runLog("CRM       upsert contact_id=lead_demo_8841  action=create", 2), "trace-crm"),
+          ],
+          termDelay: 240,
           tools: ["workflow", "research"],
         },
         {
@@ -3236,7 +3287,6 @@
           },
           terminal: [
             termEntry(runLog("CLASSIFY  intent=quote_request  conf=0.91  gate=PASS", 3), "trace-classify"),
-            termEntry(runLog("STUB      notion.page_draft  shopify.note  gmail.draft", 4), "trace-stubs"),
           ],
           termDelay: 260,
           pipeline: "tools",
@@ -3244,9 +3294,24 @@
         },
         {
           role: "arche",
+          label: "ArchE · stubs",
+          say:
+            "Optional side effects light up as real product UIs: Notion page draft, Shopify customer note, Gmail compose to ops — all stubs, no live writes.",
+          pipeline: "tools",
+          terminal: [
+            termEntry(runLog("STUB      notion.page_draft  shopify.note  gmail.draft", 4), "trace-stubs"),
+            termEntry(runLog("STUB      notion preview", 4), "trace-notion"),
+            termEntry(runLog("STUB      shopify preview", 4), "trace-shopify"),
+            termEntry(runLog("STUB      gmail preview", 4), "trace-gmail"),
+          ],
+          termDelay: 220,
+          tools: ["workflow"],
+        },
+        {
+          role: "arche",
           label: "ArchE · Twilio out",
           say:
-            "Outbound ack: Thanks — we got your request. A specialist will follow up shortly. Reply STOP to opt out. Low confidence would have branched to human review instead.",
+            "Outbound ack in Twilio Console: Thanks — we got your request. A specialist will follow up shortly. Reply STOP to opt out. Low confidence would have branched to human review instead.",
           pipeline: "answer",
           terminal: [
             termEntry(runLog("OUTBOUND  twilio_reply template=ack_quote  segments=1", 5), "trace-outbound"),
@@ -3256,24 +3321,27 @@
         {
           role: "decision_ops",
           label: "Ops buyer",
-          say: "Show me the proof this is not a slide deck — webhook, CRM create, classify, outbound.",
+          say: "Show me the proof this is not a slide deck — Twilio, n8n, HubSpot, Gmail — the real product look.",
           pipeline: "answer",
         },
         {
           role: "arche",
           label: "ArchE",
           say:
-            "Jump the sources below for the orchestration trace. Full cinema walkthrough is demos/n8n_crm_twilio_cinema.html — case study zero seven.",
+            "Jump the sources below — each opens a product-faithful proof panel. Full cinema: demos/n8n_crm_twilio_cinema.html — case study zero seven.",
           pipeline: "answer",
           sources: [
-            { label: "Jump to Twilio webhook", traceAnchor: "trace-webhook" },
-            { label: "Jump to n8n + CRM upsert", traceAnchor: "trace-crm" },
-            { label: "Jump to classify gate", traceAnchor: "trace-classify" },
-            { label: "Jump to outbound SMS", traceAnchor: "trace-outbound" },
+            { label: "Twilio Console inbound", traceAnchor: "trace-webhook" },
+            { label: "n8n canvas", traceAnchor: "trace-n8n" },
+            { label: "HubSpot CRM", traceAnchor: "trace-crm" },
+            { label: "Gmail draft stub", traceAnchor: "trace-gmail" },
+            { label: "Notion page stub", traceAnchor: "trace-notion" },
+            { label: "Shopify note stub", traceAnchor: "trace-shopify" },
+            { label: "Twilio outbound", traceAnchor: "trace-outbound" },
           ],
         },
         {
-          timeline: "T+0 webhook  ·  T+1s CRM upsert  ·  T+2s classify  ·  T+3s outbound ack",
+          timeline: "T+0 Twilio  ·  T+1s n8n  ·  T+2s HubSpot  ·  T+3s stubs  ·  T+4s outbound",
           pipeline: "answer",
         },
         {

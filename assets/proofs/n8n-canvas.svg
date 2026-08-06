@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="n8n workflow editor">
+  <defs>
+    <pattern id="dots" width="16" height="16" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="1" fill="#2b2b40"/>
+    </pattern>
+  </defs>
+  <rect width="640" height="360" fill="#101330"/>
+  <rect width="640" height="360" fill="url(#dots)"/>
+  <rect width="640" height="40" fill="#1d1d33"/>
+  <text x="16" y="26" fill="#ea4b71" font-family="Helvetica,Arial,sans-serif" font-size="14" font-weight="700">n8n</text>
+  <text x="52" y="26" fill="#c7c7d9" font-family="Helvetica,Arial,sans-serif" font-size="12">lead_sms_crm_v1</text>
+  <rect x="480" y="10" width="64" height="22" rx="4" fill="#ea4b71"/>
+  <text x="512" y="25" text-anchor="middle" fill="#fff" font-family="Helvetica,Arial,sans-serif" font-size="10" font-weight="600">Execute</text>
+  <line x1="70" y1="180" x2="570" y2="180" stroke="#4a4a6a" stroke-width="2"/>
+  <rect x="40" y="140" width="100" height="80" rx="8" fill="#1e1e36" stroke="#ea4b71" stroke-width="2"/>
+  <rect x="40" y="140" width="8" height="80" rx="2" fill="#ff6d5a"/>
+  <text x="56" y="168" fill="#9ca3af" font-family="Helvetica,Arial,sans-serif" font-size="9">TRIGGER</text>
+  <text x="56" y="188" fill="#fff" font-family="Helvetica,Arial,sans-serif" font-size="11" font-weight="600">Twilio</text>
+  <text x="56" y="204" fill="#c7c7d9" font-family="Helvetica,Arial,sans-serif" font-size="10">Webhook</text>
+  <rect x="170" y="140" width="100" height="80" rx="8" fill="#1e1e36" stroke="#5b6abf" stroke-width="2"/>
+  <rect x="170" y="140" width="8" height="80" rx="2" fill="#5b6abf"/>
+  <text x="186" y="168" fill="#9ca3af" font-family="Helvetica,Arial,sans-serif" font-size="9">CODE</text>
+  <text x="186" y="188" fill="#fff" font-family="Helvetica,Arial,sans-serif" font-size="11" font-weight="600">Normalize</text>
+  <text x="186" y="204" fill="#c7c7d9" font-family="Helvetica,Arial,sans-serif" font-size="10">From / Body</text>
+  <rect x="300" y="140" width="100" height="80" rx="8" fill="#1e1e36" stroke="#38bdf8" stroke-width="2"/>
+  <rect x="300" y="140" width="8" height="80" rx="2" fill="#38bdf8"/>
+  <text x="316" y="168" fill="#9ca3af" font-family="Helvetica,Arial,sans-serif" font-size="9">HTTP</text>
+  <text x="316" y="188" fill="#fff" font-family="Helvetica,Arial,sans-serif" font-size="11" font-weight="600">CRM Upsert</text>
+  <text x="316" y="204" fill="#c7c7d9" font-family="Helvetica,Arial,sans-serif" font-size="10">HubSpot</text>
+  <rect x="430" y="140" width="100" height="80" rx="8" fill="#1e1e36" stroke="#a78bfa" stroke-width="2"/>
+  <rect x="430" y="140" width="8" height="80" rx="2" fill="#a78bfa"/>
+  <text x="446" y="168" fill="#9ca3af" font-family="Helvetica,Arial,sans-serif" font-size="9">AI</text>
+  <text x="446" y="188" fill="#fff" font-family="Helvetica,Arial,sans-serif" font-size="11" font-weight="600">Classify</text>
+  <text x="446" y="204" fill="#c7c7d9" font-family="Helvetica,Arial,sans-serif" font-size="10">conf e 0.8</text>
+  <rect x="540" y="140" width="80" height="80" rx="8" fill="#1e1e36" stroke="#4ade80" stroke-width="2"/>
+  <rect x="540" y="140" width="8" height="80" rx="2" fill="#4ade80"/>
+  <text x="556" y="168" fill="#9ca3af" font-family="Helvetica,Arial,sans-serif" font-size="9">TWILIO</text>
+  <text x="556" y="188" fill="#fff" font-family="Helvetica,Arial,sans-serif" font-size="11" font-weight="600">SMS Out</text>
+  <text x="556" y="204" fill="#c7c7d9" font-family="Helvetica,Arial,sans-serif" font-size="10">ack_quote</text>
+  <text x="16" y="340" fill="#6b7280" font-family="Helvetica,Arial,sans-serif" font-size="10">Client-side simulation · looks like n8n editor · no live cloud</text>
+</svg>

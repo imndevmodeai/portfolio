@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Notion page draft">
+  <rect width="640" height="360" fill="#ffffff"/>
+  <rect width="160" height="360" fill="#f7f6f3" stroke="#e9e9e7"/>
+  <text x="20" y="36" fill="#37352f" font-family="ui-sans-serif,Helvetica,Arial,sans-serif" font-size="13" font-weight="600">Workspace</text>
+  <text x="20" y="68" fill="#9b9a97" font-family="ui-sans-serif,Helvetica,Arial,sans-serif" font-size="11">Inbox</text>
+  <text x="20" y="92" fill="#37352f" font-family="ui-sans-serif,Helvetica,Arial,sans-serif" font-size="12" font-weight="600">Lead intake</text>
+  <text x="200" y="48" fill="#37352f" font-family="ui-sans-serif,Helvetica,Arial,sans-serif" font-size="28">=Ä</text>
+  <text x="200" y="92" fill="#37352f" font-family="ui-sans-serif,Helvetica,Arial,sans-serif" font-size="22" font-weight="700">Inbound quote  week of demo</text>
+  <text x="200" y="128" fill="#9b9a97" font-family="ui-sans-serif,Helvetica,Arial,sans-serif" font-size="12">Created by n8n stub · today</text>
+  <line x1="200" y1="148" x2="600" y2="148" stroke="#e9e9e7"/>
+  <text x="200" y="180" fill="#37352f" font-family="ui-sans-serif,Helvetica,Arial,sans-serif" font-size="14">" Phone hash: lead_demo_8841</text>
+  <text x="200" y="208" fill="#37352f" font-family="ui-sans-serif,Helvetica,Arial,sans-serif" font-size="14">" Intent: quote_request (0.91)</text>
+  <text x="200" y="236" fill="#37352f" font-family="ui-sans-serif,Helvetica,Arial,sans-serif" font-size="14">" Channel: Twilio SMS inbound</text>
+  <text x="200" y="264" fill="#37352f" font-family="ui-sans-serif,Helvetica,Arial,sans-serif" font-size="14">" Status: ops follow-up queued</text>
+  <rect x="200" y="290" width="200" height="28" rx="4" fill="#f1f1ef"/>
+  <text x="212" y="308" fill="#787774" font-family="ui-sans-serif,Helvetica,Arial,sans-serif" font-size="11">Draft page · no live Notion write</text>
+</svg>
