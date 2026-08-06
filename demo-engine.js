@@ -1845,6 +1845,11 @@
       title: "Shadow kill log",
       subtitle: "Logged kills — zero executed in preview",
     },
+    "trace-flowmap": {
+      src: "assets/proofs/process-flow-map.svg",
+      title: "Process flow map — what we build",
+      subtitle: "Lead SMS → Twilio → n8n → CRM → gate → outbound + stubs",
+    },
     "trace-webhook": {
       src: "assets/proofs/twilio-console.svg",
       title: "Twilio Console · Messaging Logs",
@@ -3240,6 +3245,17 @@
           role: "narrator",
           label: "Play-by-play",
           say:
+            "Here is the process we build for you. Open the process flow map — Lead SMS through Twilio, n8n, CRM classify, confidence gate, outbound ack, optional Notion Shopify Gmail stubs. Then we walk each product UI.",
+          pipeline: "intake",
+          terminalParallel: [
+            termEntry(runLog("MAP       process=lead_sms_crm_v1  lanes=twilio|n8n|crm|stubs", 0), "trace-flowmap"),
+          ],
+          termDelay: 200,
+        },
+        {
+          role: "narrator",
+          label: "Play-by-play",
+          say:
             "Exact stack buyers ask for on Upwork: Twilio webhook into n8n, CRM upsert, intent classify, then follow-up SMS. Watch product-faithful panels — Twilio Console, n8n canvas, HubSpot, Notion, Shopify, Gmail. Simulation only — no live keys.",
           pipeline: "intake",
         },
@@ -3331,6 +3347,7 @@
             "Jump the sources below — each opens a product-faithful proof panel. Full cinema: demos/n8n_crm_twilio_cinema.html — case study zero seven.",
           pipeline: "answer",
           sources: [
+            { label: "Process flow map", traceAnchor: "trace-flowmap" },
             { label: "Twilio Console inbound", traceAnchor: "trace-webhook" },
             { label: "n8n canvas", traceAnchor: "trace-n8n" },
             { label: "HubSpot CRM", traceAnchor: "trace-crm" },

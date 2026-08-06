@@ -63,7 +63,8 @@ flowchart LR
 
 | Surface | How to open |
 |---------|-------------|
-| **Cinema walkthrough** (preferred) | [demos/n8n_crm_twilio_cinema.html](../demos/n8n_crm_twilio_cinema.html) — narrated beats, mock Twilio / n8n / CRM panels |
+| **Process flow map** (architecture) | [demos/n8n_crm_twilio_process_map.html](../demos/n8n_crm_twilio_process_map.html) — clickable nodes + Tour · static [process-flow-map.svg](../assets/proofs/process-flow-map.svg) |
+| **Cinema walkthrough** (preferred) | [demos/n8n_crm_twilio_cinema.html](../demos/n8n_crm_twilio_cinema.html) — narrated beats, product UIs + flow map scene |
 | **Portfolio theater scenario N** | [index.html](../index.html) — click demo card **N. n8n + Twilio + CRM** |
 
 Local serve (from this portfolio folder):

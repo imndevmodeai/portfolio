@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Process flow map — n8n + Twilio + CRM</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0b1220; --panel: #121a2b; --line: #243049; --text: #e8eef9; --muted: #94a3b8;
+      --accent: #38bdf8; --twilio: #f22f46; --n8n: #ea4b71; --hubspot: #ff7a59; --ok: #4ade80; --warn: #fbbf24;
+      --sans: "IBM Plex Sans", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { min-height: 100vh; background: var(--bg); color: var(--text); font-family: var(--sans); }
+    header {
+      display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;
+      padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--line); background: #0f172a;
+    }
+    header h1 { font-size: 1.05rem; flex: 1; min-width: 14rem; }
+    header .tag { font-size: 0.68rem; color: #fde68a; background: #422006; border: 1px solid #713f12; padding: 0.2rem 0.5rem; border-radius: 4px; }
+    header a { color: var(--accent); font-size: 0.8rem; }
+    .layout { display: grid; grid-template-columns: 1fr min(340px, 36vw); min-height: calc(100vh - 64px); }
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+    .map-wrap { padding: 1rem; overflow: auto; }
+    .map {
+      position: relative; min-height: 520px; border: 1px solid var(--line); border-radius: 12px;
+      background: radial-gradient(circle at 20% 20%, #152038, #0a101c 55%);
+      padding: 1.25rem 1rem 1.5rem;
+    }
+    .map h2 { font-size: 0.95rem; margin-bottom: 0.35rem; }
+    .map .sub { font-size: 0.75rem; color: var(--muted); margin-bottom: 1.25rem; }
+    .lanes { display: grid; gap: 1.1rem; }
+    .lane { display: flex; flex-wrap: wrap; align-items: center; gap: 0.55rem; }
+    .lane-label {
+      width: 4.5rem; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; flex-shrink: 0;
+    }
+    .lane-label.tw { color: var(--twilio); }
+    .lane-label.n8 { color: var(--n8n); }
+    .lane-label.crm { color: var(--hubspot); }
+    .lane-label.stub { color: var(--muted); }
+    .node {
+      min-width: 7.5rem; padding: 0.55rem 0.7rem; border-radius: 10px; cursor: pointer;
+      border: 1px solid #334155; background: #121a2b; transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+      text-align: left;
+    }
+    .node:hover, .node:focus-visible { border-color: var(--accent); transform: translateY(-1px); outline: none; }
+    .node.on {
+      border-color: var(--accent); box-shadow: 0 0 0 2px rgba(56,189,248,0.28);
+    }
+    .node .k { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .node .t { font-size: 0.78rem; font-weight: 600; margin-top: 0.15rem; }
+    .arrow { color: #64748b; font-size: 1rem; user-select: none; }
+    .diamond {
+      min-width: 5.5rem; padding: 0.55rem 0.5rem; border-radius: 4px;
+      border: 1px solid var(--ok); background: #12201a; transform: rotate(0deg);
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      width: 5.8rem; height: 5.8rem; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; cursor: pointer;
+    }
+    .diamond .k { font-size: 0.55rem; }
+    .diamond .t { font-size: 0.7rem; }
+    .branch { font-size: 0.65rem; color: var(--warn); margin-left: 0.25rem; }
+    .legend { margin-top: 1.25rem; display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 0.68rem; color: var(--muted); }
+    .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 0.35rem; vertical-align: middle; }
+    .legend .pass::before { background: var(--ok); }
+    .legend .review::before { background: var(--warn); }
+    .legend .stub::before { background: #64748b; border: 1px dashed #94a3b8; }
+    aside {
+      border-left: 1px solid var(--line); background: #0a0f1a; padding: 1rem;
+      display: flex; flex-direction: column; gap: 0.75rem;
+    }
+    aside h3 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+    #detail-title { font-size: 1rem; font-weight: 600; }
+    #detail-body { font-size: 0.88rem; line-height: 1.45; color: #cbd5e1; }
+    #detail-deliver { font-size: 0.78rem; color: var(--muted); font-family: var(--mono); line-height: 1.5; }
+    .btns { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; }
+    .btns button {
+      font: inherit; font-size: 0.75rem; padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer;
+      border: 1px solid #334155; background: #1e293b; color: var(--text);
+    }
+    .btns button.primary { background: var(--accent); color: #0f172a; border-color: transparent; font-weight: 600; }
+    footer { padding: 0.5rem 1.25rem; font-size: 0.72rem; color: var(--muted); border-top: 1px solid var(--line); }
+    footer a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Process we build for you — lead SMS automation</h1>
+    <span class="tag">Interactive map · simulation</span>
+    <a href="n8n_crm_twilio_cinema.html">Cinema walkthrough</a>
+    <a href="../index.html">Portfolio · scenario N</a>
+  </header>
+  <div class="layout">
+    <div class="map-wrap">
+      <div class="map" id="map">
+        <h2>End-to-end delivery shape</h2>
+        <p class="sub">Click any node. This is the process ArchE implements on your Twilio + n8n + CRM stack (HubSpot / Close / GHL — your pick).</p>
+        <div class="lanes">
+          <div class="lane">
+            <div class="lane-label tw">Twilio</div>
+            <button type="button" class="node" data-id="lead" aria-pressed="false"><div class="k">Inbound</div><div class="t">Lead SMS</div></button>
+            <span class="arrow">→</span>
+            <button type="button" class="node" data-id="webhook" aria-pressed="false"><div class="k">Console</div><div class="t">Twilio webhook</div></button>
+          </div>
+          <div class="lane">
+            <div class="lane-label n8">n8n</div>
+            <button type="button" class="node" data-id="trigger" aria-pressed="false"><div class="k">Trigger</div><div class="t">Webhook in</div></button>
+            <span class="arrow">→</span>
+            <button type="button" class="node" data-id="normalize" aria-pressed="false"><div class="k">Code</div><div class="t">Normalize</div></button>
+            <span class="arrow">→</span>
+            <button type="button" class="node" data-id="crm" aria-pressed="false"><div class="k">HTTP</div><div class="t">CRM upsert</div></button>
+            <span class="arrow">→</span>
+            <button type="button" class="node" data-id="classify" aria-pressed="false"><div class="k">AI / rules</div><div class="t">Classify</div></button>
+            <span class="arrow">→</span>
+            <button type="button" class="node diamond" data-id="gate" aria-pressed="false"><div class="k">IF</div><div class="t">Gate</div></button>
+            <span class="branch">fail → review</span>
+          </div>
+          <div class="lane">
+            <div class="lane-label crm">CRM</div>
+            <button type="button" class="node" data-id="record" aria-pressed="false"><div class="k">System of record</div><div class="t">Contact / lead</div></button>
+            <span class="arrow">→</span>
+            <button type="button" class="node" data-id="outbound" aria-pressed="false"><div class="k">Twilio out</div><div class="t">Ack SMS + STOP</div></button>
+            <span class="arrow">·</span>
+            <button type="button" class="node" data-id="review" aria-pressed="false"><div class="k">Low conf</div><div class="t">Human review</div></button>
+          </div>
+          <div class="lane">
+            <div class="lane-label stub">Stubs</div>
+            <button type="button" class="node" data-id="notion" aria-pressed="false"><div class="k">Optional</div><div class="t">Notion draft</div></button>
+            <button type="button" class="node" data-id="shopify" aria-pressed="false"><div class="k">Optional</div><div class="t">Shopify note</div></button>
+            <button type="button" class="node" data-id="gmail" aria-pressed="false"><div class="k">Optional</div><div class="t">Gmail draft</div></button>
+          </div>
+        </div>
+        <div class="legend">
+          <span class="pass">Gate PASS → auto outbound</span>
+          <span class="review">Gate FAIL → human queue</span>
+          <span class="stub">Dashed stubs = optional side effects</span>
+        </div>
+      </div>
+    </div>
+    <aside>
+      <h3>Node detail</h3>
+      <div id="detail-title">Select a step</div>
+      <p id="detail-body">Click any node on the map to see what we build, what you provide, and the acceptance check.</p>
+      <pre id="detail-deliver"></pre>
+      <div class="btns">
+        <button type="button" class="primary" id="btn-tour">Tour the path</button>
+        <button type="button" id="btn-cinema">Open cinema</button>
+      </div>
+    </aside>
+  </div>
+  <footer>
+    Case <a href="../case-studies/07-n8n-crm-twilio-automation-stack.md">07 — n8n CRM Twilio</a>
+    · Static image: <a href="../assets/proofs/process-flow-map.svg">process-flow-map.svg</a>
+    · No live APIs · no client PII
+  </footer>
+  <script>
+(function () {
+  var details = {
+    lead: {
+      title: "Lead SMS",
+      body: "Buyer texts your Twilio number (or form-to-SMS). This is the start of every run — we never invent leads.",
+      deliver: "You provide: Twilio number + Messaging Service\nWe deliver: inbound path documented + test script"
+    },
+    webhook: {
+      title: "Twilio webhook",
+      body: "Twilio POSTs the inbound message to your n8n webhook URL. Signature validation stub in demo; live validation at cutover.",
+      deliver: "You provide: Twilio Auth Token (Keyholder gate)\nWe deliver: webhook URL + MessageSid logging"
+    },
+    trigger: {
+      title: "n8n webhook trigger",
+      body: "Workflow lead_sms_crm_v1 starts. One execution id per inbound SMS for audit.",
+      deliver: "We deliver: n8n workflow export + execution naming convention"
+    },
+    normalize: {
+      title: "Normalize",
+      body: "From / Body / MessageSid scrubbed into a stable lead key (phone+source hash) so retries do not duplicate contacts.",
+      deliver: "We deliver: idempotent lead key + unit tests for duplicates"
+    },
+    crm: {
+      title: "CRM upsert",
+      body: "Create or merge contact in HubSpot, Close, GHL, Notion, or Sheets — your CRM of record.",
+      deliver: "You provide: CRM API key (Keyholder gate)\nWe deliver: upsert + audit row on every write"
+    },
+    classify: {
+      title: "Classify intent",
+      body: "Rules plus optional model assist: quote_request, support, spam, VIP. Confidence score drives the gate.",
+      deliver: "We deliver: label taxonomy + confidence threshold you approve"
+    },
+    gate: {
+      title: "Confidence gate",
+      body: "If confidence ≥ threshold → outbound ack. If low → human review queue. VIP keywords can force review.",
+      deliver: "You approve: threshold (demo uses 0.80)\nWe deliver: branch coverage in acceptance tests"
+    },
+    record: {
+      title: "Contact of record",
+      body: "Ops sees intent, confidence, source, last touch, and next action on the CRM card — not a spreadsheet dump.",
+      deliver: "We deliver: field map + sample scrubbed contact"
+    },
+    outbound: {
+      title: "Ack SMS + STOP",
+      body: "Templated Twilio outbound only after gate PASS. STOP / opt-out, quiet hours, and human-pause honored.",
+      deliver: "We deliver: ack_quote template + STOP handling + retry backoff"
+    },
+    review: {
+      title: "Human review",
+      body: "Low-confidence or VIP path lands in a review queue before any auto SMS. Dignity over silent bad writes.",
+      deliver: "We deliver: review queue SOP + handoff checklist"
+    },
+    notion: {
+      title: "Notion stub (optional)",
+      body: "Draft page for ops visibility. Optional — only if you want Notion as a side board.",
+      deliver: "Optional connector · no live write in demo"
+    },
+    shopify: {
+      title: "Shopify stub (optional)",
+      body: "Customer timeline note for storefront ops. Optional side effect.",
+      deliver: "Optional connector · no live write in demo"
+    },
+    gmail: {
+      title: "Gmail stub (optional)",
+      body: "Ops draft email for human send. Never auto-sends from the stub path.",
+      deliver: "Optional draft · Auth Gate before any Send"
+    }
+  };
+
+  var order = ["lead", "webhook", "trigger", "normalize", "crm", "classify", "gate", "record", "outbound", "notion", "shopify", "gmail"];
+  var titleEl = document.getElementById("detail-title");
+  var bodyEl = document.getElementById("detail-body");
+  var deliverEl = document.getElementById("detail-deliver");
+  var tourTimer = null;
+  var tourIdx = -1;
+
+  function select(id) {
+    document.querySelectorAll(".node").forEach(function (n) {
+      var on = n.getAttribute("data-id") === id;
+      n.classList.toggle("on", on);
+      n.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    var d = details[id];
+    if (!d) return;
+    titleEl.textContent = d.title;
+    bodyEl.textContent = d.body;
+    deliverEl.textContent = d.deliver;
+  }
+
+  document.querySelectorAll(".node").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      stopTour();
+      select(btn.getAttribute("data-id"));
+    });
+  });
+
+  function stopTour() {
+    if (tourTimer) { clearTimeout(tourTimer); tourTimer = null; }
+    tourIdx = -1;
+  }
+
+  function tourStep() {
+    tourIdx += 1;
+    if (tourIdx >= order.length) {
+      stopTour();
+      return;
+    }
+    select(order[tourIdx]);
+    tourTimer = setTimeout(tourStep, 1600);
+  }
+
+  document.getElementById("btn-tour").addEventListener("click", function () {
+    stopTour();
+    tourIdx = -1;
+    tourStep();
+  });
+  document.getElementById("btn-cinema").addEventListener("click", function () {
+    window.location.href = "n8n_crm_twilio_cinema.html";
+  });
+
+  select("lead");
+})();
+  </script>
+</body>
+</html>

@@ -304,6 +304,42 @@
       display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;
     }
     #footer a { color: var(--accent); }
+
+    /* ── Process flow map (Scene 4) ── */
+    .flow-scene {
+      display: flex; flex-direction: column; height: 100%; min-height: 0;
+      background: radial-gradient(circle at 15% 10%, #152038, #0a101c 60%);
+    }
+    .flow-head {
+      display: flex; align-items: baseline; gap: 0.75rem; flex-wrap: wrap;
+      padding: 0.65rem 0.9rem; border-bottom: 1px solid var(--line);
+    }
+    .flow-head h2 { font-size: 0.9rem; font-weight: 600; }
+    .flow-head a { font-size: 0.72rem; color: var(--accent); }
+    .flow-body { flex: 1; overflow: auto; padding: 0.85rem 0.9rem 1rem; }
+    .flow-img {
+      width: 100%; max-height: min(52vh, 420px); object-fit: contain;
+      border-radius: 10px; border: 1px solid var(--line); background: #0b1220;
+      display: block; margin-bottom: 0.85rem;
+    }
+    .flow-interactive { display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center; }
+    .flow-chip {
+      font: inherit; font-size: 0.68rem; padding: 0.4rem 0.65rem; border-radius: 999px;
+      border: 1px solid #334155; background: #121a2b; color: var(--text); cursor: pointer;
+    }
+    .flow-chip.on {
+      border-color: var(--accent); box-shadow: 0 0 0 2px rgba(56,189,248,0.25); color: #e0f2fe;
+    }
+    .flow-chip[data-flow="twilio"] { border-color: #7f1d1d; }
+    .flow-chip[data-flow="n8n"] { border-color: #9d174d; }
+    .flow-chip[data-flow="crm"] { border-color: #9a3412; }
+    .flow-chip[data-flow="gate"] { border-color: #166534; }
+    .flow-chip[data-flow="stub"] { border-color: #475569; border-style: dashed; }
+    .flow-detail {
+      margin-top: 0.75rem; padding: 0.65rem 0.75rem; border-radius: 8px;
+      background: #0f172a; border: 1px solid var(--line); font-size: 0.78rem; line-height: 1.4; color: #cbd5e1;
+      min-height: 3.2rem;
+    }
   </style>
 </head>
 <body>
@@ -322,7 +358,7 @@
     <div id="main">
       <div id="stage-wrap">
         <!-- Scene 0: Twilio Console -->
-        <section class="scene active" data-scene="0" aria-label="Twilio Console">
+        <section class="scene" data-scene="0" aria-label="Twilio Console">
           <div class="twilio-app">
             <nav class="twilio-nav" aria-hidden="true">
               <div class="twilio-t" title="Twilio">t</div>
@@ -515,6 +551,29 @@
             </div>
           </div>
         </section>
+
+        <!-- Scene 4: Process flow map -->
+        <section class="scene active" data-scene="4" aria-label="Process flow map">
+          <div class="flow-scene">
+            <div class="flow-head">
+              <h2>Process we build for you</h2>
+              <a href="n8n_crm_twilio_process_map.html" target="_blank" rel="noopener">Open interactive map ↗</a>
+              <a href="../assets/proofs/process-flow-map.svg" target="_blank" rel="noopener">Static SVG ↗</a>
+            </div>
+            <div class="flow-body">
+              <img class="flow-img" src="../assets/proofs/process-flow-map.svg" alt="Process flow map: Lead SMS to Twilio to n8n to CRM classify to follow-up with optional stubs" />
+              <div class="flow-interactive" id="flow-chips" role="group" aria-label="Highlight process steps">
+                <button type="button" class="flow-chip" data-flow="twilio">1 · Twilio inbound</button>
+                <button type="button" class="flow-chip" data-flow="n8n">2 · n8n orchestrate</button>
+                <button type="button" class="flow-chip" data-flow="crm">3 · CRM upsert</button>
+                <button type="button" class="flow-chip" data-flow="gate">4 · Classify + gate</button>
+                <button type="button" class="flow-chip" data-flow="out">5 · Outbound SMS</button>
+                <button type="button" class="flow-chip" data-flow="stub">6 · Optional stubs</button>
+              </div>
+              <div class="flow-detail" id="flow-detail">Click a step — or press Play — to see what we implement on your stack.</div>
+            </div>
+          </div>
+        </section>
       </div>
 
       <aside id="rail">
@@ -531,6 +590,7 @@
 
     <footer id="footer">
       <span>Case study · <a href="../case-studies/07-n8n-crm-twilio-automation-stack.md">07 — n8n CRM Twilio</a></span>
+      <span>Process map · <a href="n8n_crm_twilio_process_map.html">interactive</a> · <a href="../assets/proofs/process-flow-map.svg">SVG</a></span>
       <span>Portfolio · <a href="../index.html">index.html</a> · scenario <strong>N</strong></span>
       <span>Simulation · no live APIs · no PII · stubs only</span>
     </footer>
@@ -538,12 +598,36 @@
 
   <script>
 (function () {
+  var flowCopy = {
+    twilio: "Twilio inbound — lead SMS hits your Messaging Service; webhook posts scrubbed From / Body / MessageSid into n8n.",
+    n8n: "n8n orchestrates — webhook trigger, normalize, CRM HTTP, classify, confidence IF gate, then Twilio out.",
+    crm: "CRM upsert — create or merge the contact of record (HubSpot, Close, GHL, or your CRM) with audit on every write.",
+    gate: "Classify + gate — quote_request at high confidence auto-continues; low confidence or VIP → human review.",
+    out: "Outbound ack SMS — templated reply with STOP / opt-out; quiet hours and human-pause wired.",
+    stub: "Optional stubs — Notion draft, Shopify note, Gmail ops draft. Side effects only if you want them."
+  };
+
   var beats = [
+    {
+      who: "Play-by-play",
+      say: "Here is the process we build for you — end to end. Click steps on the map, or keep watching as we walk Twilio, n8n, CRM, and follow-up.",
+      scene: 4,
+      flow: "twilio",
+      pause: 3600
+    },
+    {
+      who: "Process map",
+      say: "Lead SMS to Twilio webhook to n8n graph to CRM classify to outbound ack — with a human review branch when confidence is low.",
+      scene: 4,
+      flow: "n8n",
+      log: { cls: "hi", text: "MAP       process=lead_sms_crm_v1  lanes=twilio|n8n|crm|stubs" },
+      pause: 3400
+    },
     {
       who: "Play-by-play",
       say: "Buyer problem: a lead texts for a quote. Ops needs Twilio capture, n8n orchestration, CRM classify, and a safe follow-up — without copy-paste.",
       scene: 0,
-      pause: 3400
+      pause: 3200
     },
     {
       who: "Twilio · Messaging Logs",
@@ -613,11 +697,12 @@
     },
     {
       who: "Play-by-play",
-      say: "That is the exact stack buyers ask for: Twilio webhook, n8n nodes, HubSpot classify, follow-up. Open case study zero seven for architecture notes.",
-      scene: 2,
+      say: "That is the exact stack buyers ask for. The process map above is what we implement — open the interactive map or case study zero seven for architecture notes.",
+      scene: 4,
+      flow: "out",
       crm: { intent: "quote_request", conf: "0.91", statusOk: true, next: "ack SMS sent · ops notified" },
       log: { cls: "ok", text: "SESSION   complete  mode=n8n_crm_twilio_cinema  conf=0.91" },
-      pause: 3800
+      pause: 4000
     }
   ];
 
@@ -635,6 +720,23 @@
   var twilioOutRow = document.getElementById("twilio-out-row");
   var twilioBodyIn = document.getElementById("twilio-body-in");
   var twilioBodyOut = document.getElementById("twilio-body-out");
+  var flowDetail = document.getElementById("flow-detail");
+
+  function setFlow(id) {
+    document.querySelectorAll(".flow-chip").forEach(function (c) {
+      c.classList.toggle("on", c.getAttribute("data-flow") === id);
+    });
+    if (flowDetail && flowCopy[id]) flowDetail.textContent = flowCopy[id];
+  }
+
+  document.querySelectorAll(".flow-chip").forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      setFlow(chip.getAttribute("data-flow"));
+      setScene(4);
+      whoEl.textContent = "Process map";
+      lineEl.textContent = flowCopy[chip.getAttribute("data-flow")] || "";
+    });
+  });
 
   function setScene(n) {
     document.querySelectorAll(".scene").forEach(function (el) {
@@ -720,6 +822,7 @@
       if (twilioBodyIn) twilioBodyIn.style.display = "none";
       if (twilioBodyOut) twilioBodyOut.style.display = "block";
     }
+    if (b.flow) setFlow(b.flow);
     logLine(b.log);
     prog.style.width = ((idx + 1) / beats.length * 100).toFixed(1) + "%";
   }
@@ -775,10 +878,11 @@
     document.getElementById("crm-conf").textContent = "—";
     document.getElementById("crm-status").innerHTML = '<span class="pill warn">pending classify</span>';
     document.getElementById("crm-next").textContent = "—";
-    setScene(0);
+    setScene(4);
+    setFlow("twilio");
     prog.style.width = "0%";
     whoEl.textContent = "Play-by-play";
-    lineEl.textContent = "Press Play to walk lead SMS → n8n → HubSpot CRM → side-effect stubs → outbound ack. Client-side simulation only.";
+    lineEl.textContent = "Press Play to walk the process map, then Twilio → n8n → HubSpot → stubs → outbound. Client-side simulation only.";
     btnPlay.disabled = false;
     btnPlay.textContent = "Play";
     btnPause.disabled = true;
@@ -793,6 +897,8 @@
   btnPlay.addEventListener("click", play);
   btnPause.addEventListener("click", pause);
   document.getElementById("btn-restart").addEventListener("click", function () { restart(false); });
+  setFlow("twilio");
+  setScene(4);
 })();
   </script>
 </body>
