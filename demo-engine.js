@@ -1605,12 +1605,12 @@
   }
 
   /** Portrait shown while a role is speaking (photoreal business attire — not cartoon SVGs). */
-  var SPEAKER_ASSET_V = "suit-20260731a";
+  var SPEAKER_ASSET_V = "callsign-cinematic-20260803a";
   var SPEAKER_VISUALS = {
     arche: {
-      src: "assets/arche-phi-shell.png",
+      src: "assets/arche-callsign-cinematic.png?v=" + SPEAKER_ASSET_V,
       title: "ArchE",
-      subtitle: "Live orchestration · scrubbed demo",
+      subtitle: "φ-shell presence · live orchestration",
       arche: true,
     },
     decision_jim: {
@@ -3191,6 +3191,102 @@
     },
   ];
 
+  /** Scenario N — n8n + Twilio + CRM lead SMS stack (client-side simulation). */
+  function buildScenarioN() {
+    return {
+      title: "n8n + Twilio + CRM — lead SMS → classify → follow-up",
+      beats: [
+        {
+          role: "narrator",
+          label: "Play-by-play",
+          say:
+            "Exact stack buyers ask for on Upwork: Twilio webhook into n8n, CRM upsert, intent classify, then follow-up SMS. Simulation only — no live keys.",
+          pipeline: "intake",
+        },
+        {
+          role: "decision_lead",
+          label: "Lead (SMS)",
+          say: "Hi — saw your listing. Can I get a quote for next week? Prefer text.",
+          pipeline: "intake",
+          terminalParallel: [
+            termEntry(runLog("WEBHOOK   twilio inbound  MessageSid=SM_demo_***  From=+1***", 0), "trace-webhook"),
+          ],
+          termDelay: 240,
+        },
+        {
+          role: "arche",
+          label: "ArchE · n8n",
+          say:
+            "Webhook fires workflow lead_sms_crm_v1. Normalize From and Body, hash the phone for CRM identity, then HTTP upsert.",
+          pipeline: "plan",
+          terminalParallel: [
+            termEntry(runLog("N8N       trigger=twilio_webhook  workflow=lead_sms_crm_v1", 1), "trace-n8n"),
+            termEntry(runLog("CRM       upsert contact_id=lead_demo_8841  action=create", 2), "trace-crm"),
+          ],
+          termDelay: 260,
+          tools: ["workflow", "research"],
+        },
+        {
+          toolFocus: {
+            tool: "workflow",
+            doing: "Classify intent with rules plus model assist; confidence gate before outbound.",
+            tie: "Tagged trace-classify — quote_request at 0.91 passes the gate.",
+            also: ["llm", "vetting"],
+            forecast: "Auto-ack SMS template ack_quote; stubs for Notion / Shopify / Gmail.",
+          },
+          terminal: [
+            termEntry(runLog("CLASSIFY  intent=quote_request  conf=0.91  gate=PASS", 3), "trace-classify"),
+            termEntry(runLog("STUB      notion.page_draft  shopify.note  gmail.draft", 4), "trace-stubs"),
+          ],
+          termDelay: 260,
+          pipeline: "tools",
+          tools: ["workflow", "llm", "vetting"],
+        },
+        {
+          role: "arche",
+          label: "ArchE · Twilio out",
+          say:
+            "Outbound ack: Thanks — we got your request. A specialist will follow up shortly. Reply STOP to opt out. Low confidence would have branched to human review instead.",
+          pipeline: "answer",
+          terminal: [
+            termEntry(runLog("OUTBOUND  twilio_reply template=ack_quote  segments=1", 5), "trace-outbound"),
+          ],
+          termDelay: 220,
+        },
+        {
+          role: "decision_ops",
+          label: "Ops buyer",
+          say: "Show me the proof this is not a slide deck — webhook, CRM create, classify, outbound.",
+          pipeline: "answer",
+        },
+        {
+          role: "arche",
+          label: "ArchE",
+          say:
+            "Jump the sources below for the orchestration trace. Full cinema walkthrough is demos/n8n_crm_twilio_cinema.html — case study zero seven.",
+          pipeline: "answer",
+          sources: [
+            { label: "Jump to Twilio webhook", traceAnchor: "trace-webhook" },
+            { label: "Jump to n8n + CRM upsert", traceAnchor: "trace-crm" },
+            { label: "Jump to classify gate", traceAnchor: "trace-classify" },
+            { label: "Jump to outbound SMS", traceAnchor: "trace-outbound" },
+          ],
+        },
+        {
+          timeline: "T+0 webhook  ·  T+1s CRM upsert  ·  T+2s classify  ·  T+3s outbound ack",
+          pipeline: "answer",
+        },
+        {
+          terminal: [
+            termEntry(runLog("SESSION", "complete  mode=n8n_crm_twilio_demo  conf=0.9", 6)),
+          ],
+          termDelay: 200,
+          pipeline: "answer",
+        },
+      ],
+    };
+  }
+
   function buildScenarioE(userQuery) {
     var seeker = "Jordan · job seeker (SMS)";
     var archeLabel = "ArchE → Coach";
@@ -3323,6 +3419,8 @@
     /* Scenario R — reputation before/after for layperson buyers */
     r: null,
     e: null,
+    /* Scenario N — n8n + Twilio + CRM lead SMS stack */
+    n: null,
     c: {
       title: "Ops playbook — queryable in minutes",
       beats: [
@@ -3433,6 +3531,8 @@
     if (/churn|dashboard|disagree|metric/.test(t)) return "a";
     if (/policy|simulate|18|remote|retention/.test(t)) return "b";
     if (/playbook|rag|doc|compress/.test(t)) return "c";
+    if (/n8n|crm upsert|lead.?sms|classify intent|hubspot|close\.io|follow-?up sms/.test(t))
+      return "n";
     if (/sms|twilio|job search coach|job seeker|vault|resume bullet|linkedin headline|referral message|interview practice|accountability/.test(t))
       return "e";
     return "custom";
@@ -4761,7 +4861,9 @@
               ? buildScenarioE()
               : key === "r"
                 ? buildScenarioR()
-                : JSON.parse(JSON.stringify(SCENARIOS[key]));
+                : key === "n"
+                  ? buildScenarioN()
+                  : JSON.parse(JSON.stringify(SCENARIOS[key]));
     runWithScenario(activeScenario);
   }
 
