@@ -3,17 +3,26 @@
 <title>Dutch Settlement — Hunt coach</title>
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
 </head><body style="font-family:system-ui,sans-serif;background:#101a13;color:#e8efe4;padding:1.5rem">
 <p id="msg">Opening the hunt coach map&hellip;</p>
 <script>
-var ORIGIN = "https://reasoning-cotton-sur-css.trycloudflare.com";
+var FALLBACK_ORIGIN = "https://reasoning-cotton-sur-css.trycloudflare.com";
+var UPDATED = "2026-11-19T20:08:48Z";
 var q = location.search || "";
-if (q.indexOf("token=") >= 0) { location.replace(ORIGIN + "/" + q); }
-else {
-  document.getElementById("msg").innerHTML =
-    "This link needs the share token BJ sent. Open it as "
-    + "<code>dutch-settlement.html?token=YOUR_TOKEN</code> — the token survives when the tunnel underneath changes.";
+function go(origin) {
+  if (q.indexOf("token=") >= 0) { location.replace(origin.replace(/\/$/, "") + "/" + q); }
+  else {
+    document.getElementById("msg").innerHTML =
+      "This link needs the share token BJ sent. Open it as "
+      + "<code>dutch-settlement.html?token=YOUR_TOKEN</code>.";
+  }
 }
+// Prefer live target JSON (cache-busted) so a sticky CDN copy of this HTML cannot keep a dead tunnel.
+fetch("dutch-settlement-target.json?cb=" + Date.now(), { cache: "no-store" })
+  .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+  .then(function (j) { go((j && j.public_url) || FALLBACK_ORIGIN); })
+  .catch(function () { go(FALLBACK_ORIGIN); });
 </script>
-<!-- permanent-link redirect; target regenerated 2026-11-19T20:07:15Z by hunt_coach_permanent_links.py; token never stored here -->
+<!-- permanent-link redirect; target regenerated 2026-11-19T20:08:48Z by hunt_coach_permanent_links.py; token never stored here -->
 </body></html>
