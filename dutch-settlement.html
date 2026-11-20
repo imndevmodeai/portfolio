@@ -8,10 +8,10 @@
 <p id="msg">Opening the hunt coach map&hellip;</p>
 <script>
 var FALLBACK_ORIGIN = "https://reasoning-cotton-sur-css.trycloudflare.com";
-var UPDATED = "2026-11-19T20:08:48Z";
+var UPDATED = "2026-11-20T12:11:09Z";
 var q = location.search || "";
 function go(origin) {
-  if (q.indexOf("token=") >= 0) { location.replace(origin.replace(/\/$/, "") + "/" + q); }
+  if (q.indexOf("token=") >= 0) { var o = String(origin); if (o.slice(-1) === '/') o = o.slice(0, -1); location.replace(o + "/" + q); }
   else {
     document.getElementById("msg").innerHTML =
       "This link needs the share token BJ sent. Open it as "
@@ -24,5 +24,5 @@ fetch("dutch-settlement-target.json?cb=" + Date.now(), { cache: "no-store" })
   .then(function (j) { go((j && j.public_url) || FALLBACK_ORIGIN); })
   .catch(function () { go(FALLBACK_ORIGIN); });
 </script>
-<!-- permanent-link redirect; target regenerated 2026-11-19T20:08:48Z by hunt_coach_permanent_links.py; token never stored here -->
+<!-- permanent-link redirect; target regenerated 2026-11-20T12:11:09Z by hunt_coach_permanent_links.py; token never stored here -->
 </body></html>
