@@ -1,8 +1,9 @@
 {
-  "brief_api": "https://province-chubby-parameters-queries.trycloudflare.com/api/portfolio/brief",
-  "health_api": "https://province-chubby-parameters-queries.trycloudflare.com/api/portfolio/health",
-  "public_url": "https://province-chubby-parameters-queries.trycloudflare.com/",
+  "brief_api": "https://anytime-boulevard-gasoline-cole.trycloudflare.com/api/portfolio/brief",
+  "health_api": "https://anytime-boulevard-gasoline-cole.trycloudflare.com/api/portfolio/health",
+  "public_url": "https://anytime-boulevard-gasoline-cole.trycloudflare.com/",
   "embed_evidence": false,
   "note": "Evidence iframes stay on static SVG when API is cross-origin tunnel; custom brief uses fetch. GitHub Pages loads this file as live-api.json.",
-  "updated_utc": "2026-08-04T02:56:03Z"
+  "updated_utc": "2026-11-24T14:33:12Z",
+  "source": "github_doors_post_reboot_audit"
 }
