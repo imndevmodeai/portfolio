@@ -1,9 +1,12 @@
 {
-  "brief_api": "https://anytime-boulevard-gasoline-cole.trycloudflare.com/api/portfolio/brief",
-  "health_api": "https://anytime-boulevard-gasoline-cole.trycloudflare.com/api/portfolio/health",
-  "public_url": "https://anytime-boulevard-gasoline-cole.trycloudflare.com/",
+  "brief_api": "https://temple-running-calculations-sailing.trycloudflare.com/api/portfolio/brief",
+  "health_api": "https://temple-running-calculations-sailing.trycloudflare.com/api/portfolio/health",
+  "public_url": "https://temple-running-calculations-sailing.trycloudflare.com/",
   "embed_evidence": false,
   "note": "Evidence iframes stay on static SVG when API is cross-origin tunnel; custom brief uses fetch. GitHub Pages loads this file as live-api.json.",
-  "updated_utc": "2026-11-24T14:33:12Z",
-  "source": "github_doors_post_reboot_audit"
+  "updated_utc": "2026-11-24T14:38:47Z",
+  "source": "portfolio_live_permanent_links.py",
+  "tunnel_kind": "cloudflared_quick",
+  "unit": "resonantia-portfolio-live-tunnel.service",
+  "local_url": "http://127.0.0.1:17890/"
 }
